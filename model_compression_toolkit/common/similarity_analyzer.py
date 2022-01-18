@@ -46,7 +46,7 @@ def tensor_norm(x: np.ndarray, p: float = 2.0) -> np.float:
     Returns:
         Lp norm of x.
     """
-    return np.power(np.power(np.abs(x.flatten()), p).sum(), 1.0/p)
+    return np.power(np.power(np.abs(x.flatten()), p).sum(), 1.0 / p)
 
 
 #########################
@@ -147,6 +147,40 @@ def compute_cs(float_tensor: np.ndarray, fxp_tensor: np.ndarray, eps: float = 1e
 
     # Return a non-negative float (smaller value -> more similarity)
     return (1.0 - cs) / 2.0
+
+
+def compute_acs(float_tensor: np.ndarray, fxp_tensor: np.ndarray, eps: float = 1e-8, axis: int = -1) -> float:
+    """
+    Compute the similarity between two tensor using avergae cosine similarity.
+    The cosine similarity is computed per axis (by default -1) and the average
+    of these similarities is returned.
+    The returned values is between 0 to 1: the smaller returned value,
+    the greater similarity there is between the two tensors.
+
+    Args:
+        float_tensor: First tensor to compare.
+        fxp_tensor: Second tensor to compare.
+        eps: Small value to avoid zero division.
+        axis: Axis to compute the cosine-similarity along. The returned value
+        is the average of the similarities.
+
+    Returns:
+        The averaged cosine similarity between two tensors.
+    """
+
+    validate_before_compute_similarity(float_tensor, fxp_tensor)
+    if np.all(fxp_tensor == 0) and np.all(float_tensor == 0):
+        return 1.0
+
+    # compute the L2 norm per axis.
+    float_norm = np.linalg.norm(float_tensor, axis=axis, ord=2)
+    fxp_norm = np.linalg.norm(fxp_tensor, axis=axis, ord=2)
+
+    # -1 <= cs <= 1
+    cs = np.sum(float_tensor * fxp_tensor, axis=-1) / ((float_norm * fxp_norm) + eps)
+
+    # Return a non-negative float (smaller value -> more similarity)
+    return (1.0 - cs.mean()) / 2.0
 
 
 def compute_lp_norm(float_tensor: np.ndarray, fxp_tensor: np.ndarray, p: int) -> float:
