@@ -178,3 +178,7 @@ def set_log_folder(folder: str, level: int = logging.INFO):
     """
     Logger.set_log_file(folder)
     Logger.set_logger_level(level)
+
+
+def disable_logger():
+    Logger.LOG_PATH = None
