@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 
-from typing import Callable
+from typing import Callable, Tuple
 from typing import Dict, List
 
 from model_compression_toolkit.common.graph.base_graph import Graph
@@ -45,10 +45,14 @@ class MixedPrecisionSearchManager(object):
         self.graph = graph
         self.qc = qc
         self.fw_info = fw_info
-        self.get_sensitivity_evaluation = get_sensitivity_evaluation
+
+
         self.metrics_weights = self.qc.distance_weighting_method
         self.layer_to_bitwidth_mapping = self.get_search_space()
-        self.compute_metric_fn = self.get_sensitivity_metric()
+        self.compute_metric_fn, self.build_distance_matrix = get_sensitivity_evaluation(self.graph,
+                                                        self.qc,
+                                                        self.metrics_weights)
+
 
     def get_search_space(self) -> Dict[int, List[int]]:
         """
@@ -78,7 +82,7 @@ class MixedPrecisionSearchManager(object):
         """
         # Get from the framework an evaluation function on how a MP configuration,
         # affects the expected loss.
-        compute_metric_fn = self.get_sensitivity_evaluation(self.graph,
+        compute_metric_fn = self.compute_metric(self.graph,
                                                             self.qc,
                                                             self.metrics_weights)
         return compute_metric_fn

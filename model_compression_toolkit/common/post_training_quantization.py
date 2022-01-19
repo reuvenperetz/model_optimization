@@ -68,7 +68,8 @@ def post_training_quantization(in_model: Any,
                                network_editor: List[EditRule] = [],
                                gptq_config: GradientPTQConfig = None,
                                analyze_similarity: bool = False,
-                               target_kpi: KPI = None):
+                               target_kpi: KPI = None,
+                               mixed_precision_configuration=None):
     """
     Quantize a trained model using post-training quantization. The model is quantized using a
     symmetric constraint quantization thresholds (power of two).
@@ -116,13 +117,17 @@ def post_training_quantization(in_model: Any,
     ######################################
     if target_kpi is not None:
         assert isinstance(quant_config, MixedPrecisionQuantizationConfig)
-        bit_widths_config = search_bit_width(tg,
-                                             quant_config,
-                                             fw_info,
-                                             target_kpi,
-                                             partial(fw_impl.get_sensitivity_evaluation_fn,
-                                                     representative_data_gen=representative_data_gen,
-                                                     fw_info=fw_info))
+        if mixed_precision_configuration is None:
+            bit_widths_config = search_bit_width(tg,
+                                                 quant_config,
+                                                 fw_info,
+                                                 target_kpi,
+                                                 partial(fw_impl.get_sensitivity_evaluation_fn,
+                                                         representative_data_gen=representative_data_gen,
+                                                         fw_info=fw_info))
+        else:
+            print(f'Using manual configuration: {mixed_precision_configuration}')
+            bit_widths_config = mixed_precision_configuration
     else:
         bit_widths_config = None
 

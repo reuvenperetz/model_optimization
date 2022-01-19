@@ -234,9 +234,9 @@ class KerasImplementation(FrameworkImplementation):
     def get_sensitivity_evaluation_fn(self,
                                       graph: Graph,
                                       quant_config: MixedPrecisionQuantizationConfig,
-                                      metrics_weights: np.ndarray,
+                                      metrics_weights: Callable,
                                       representative_data_gen: Callable,
-                                      fw_info: FrameworkInfo) -> Callable:
+                                      fw_info: FrameworkInfo) -> Tuple[Callable,Callable]:
         """
         Create and return a function to compute a sensitivity metric for a mixed-precision
         configuration (comparing to the float Keras model).
@@ -244,7 +244,7 @@ class KerasImplementation(FrameworkImplementation):
         Args:
             graph: Graph to build it's float and mixed-precision Keras models.
             quant_config: QuantizationConfig of how the model should be quantized.
-            metrics_weights: Array of weights to weight the sensitivity among different layers.
+            metrics_weights: Function to call to get a Numpy array with weights for weighting layers in the sensitivity metric computation.
             representative_data_gen: Dataset to use for retrieving images for the models inputs.
             fw_info: FrameworkInfo object with information about the specific framework's model.
 

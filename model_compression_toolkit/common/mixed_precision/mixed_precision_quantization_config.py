@@ -28,7 +28,8 @@ class MixedPrecisionQuantizationConfig(QuantizationConfig):
                  weights_n_bits: List[int] = None,
                  compute_distance_fn: Callable = compute_mse,
                  distance_weighting_method: Callable = get_average_weights,
-                 num_of_images: int = 32):
+                 num_of_images: int = 256,
+                 search_iterations: int = 5):
 
         """
         Class to wrap all different parameters the library quantize the input model according to.
@@ -40,7 +41,7 @@ class MixedPrecisionQuantizationConfig(QuantizationConfig):
             weights_n_bits (List[int]): List of possible number of bits to quantize the coefficients.
             compute_distance_fn (Callable): Function to compute a distance between two tensors.
             distance_weighting_method (Callable): Function to use when weighting the distances among different layers when computing the sensitivity metric.
-            num_of_images (int): Number of images to use to evaluate the sensitivity of a mixed-precision model comparing to the float model.
+            num_of_images (int): Maximum number of images to use to evaluate the sensitivity of a mixed-precision model comparing to the float model.
 
         """
 
@@ -49,6 +50,7 @@ class MixedPrecisionQuantizationConfig(QuantizationConfig):
         self.compute_distance_fn = compute_distance_fn
         self.distance_weighting_method = distance_weighting_method
         self.num_of_images = num_of_images
+        self.search_iterations = search_iterations
 
 
 # Default quantization configuration the library use.

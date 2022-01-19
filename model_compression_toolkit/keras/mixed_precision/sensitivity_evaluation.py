@@ -12,12 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
+from math import ceil
 
 from tensorflow.python.layers.base import Layer
 from tensorflow import Tensor
 from tensorflow.keras.models import Model
 from tensorflow_model_optimization.python.core.quantization.keras.quantize_wrapper import QuantizeWrapper
-from typing import Callable, List, Any
+from typing import Callable, List, Any, Tuple
 
 from model_compression_toolkit.common.framework_info import FrameworkInfo
 from model_compression_toolkit.common import BaseNode
@@ -35,7 +36,7 @@ def get_sensitivity_evaluation(graph: Graph,
                                quant_config: MixedPrecisionQuantizationConfig,
                                metrics_weights_fn: Callable,
                                representative_data_gen: Callable,
-                               fw_info: FrameworkInfo) -> Callable:
+                               fw_info: FrameworkInfo) -> Tuple[Callable,Callable]:
     """
     Create a function to compute the sensitivity metric of an MP model (the sensitivity
     is computed based on the similarity of the interest points' outputs between the MP model
@@ -76,7 +77,8 @@ def get_sensitivity_evaluation(graph: Graph,
 
 
     def _compute_metric(mp_model_configuration: List[int],
-                        node_idx: List[int] = None) -> float:
+                        node_idx: List[int] = None,
+                        distance_matrix: np.ndarray = None) -> float:
         """
         Compute the sensitivity metric of the MP model for a given configuration (the sensitivity
         is computed based on the similarity of the interest points' outputs between the MP model
@@ -85,6 +87,34 @@ def get_sensitivity_evaluation(graph: Graph,
         Args:
             mp_model_configuration: Bitwidth configuration to use to configure the MP model.
             node_idx: A list of nodes' indices to configure (instead of using the entire mp_mp_model_configuration).
+            tau:
+
+        Returns:
+            The sensitivity metric of the MP model for a given configuration.
+        """
+        if distance_matrix is None:  # Build distance matrix
+            distance_matrix = _build_distance_matrix(mp_model_configuration,
+                                                     node_idx)
+
+        # Compute the distance between the baseline model's outputs and the MP model's outputs.
+        # The distance is the mean of distances over all images in the batch that was inferred.
+        mean_distance_per_layer = distance_matrix.mean(axis=1)
+        # Use weights such that every layer's distance is weighted differently (possibly).
+        return np.average(mean_distance_per_layer, weights=metrics_weights_fn(distance_matrix))
+
+
+
+    def _build_distance_matrix(mp_model_configuration: List[int],
+                                node_idx: List[int] = None) -> float:
+        """
+        Compute the sensitivity metric of the MP model for a given configuration (the sensitivity
+        is computed based on the similarity of the interest points' outputs between the MP model
+        and the float model).
+
+        Args:
+            mp_model_configuration: Bitwidth configuration to use to configure the MP model.
+            node_idx: A list of nodes' indices to configure (instead of using the entire mp_mp_model_configuration).
+            tau:
 
         Returns:
             The sensitivity metric of the MP model for a given configuration.
@@ -111,9 +141,9 @@ def get_sensitivity_evaluation(graph: Graph,
             # If we sampled more images than we should use in the distance matrix,
             # we take only a subset of these images and use only them for computing the distance matrix.
             if batch_size > quant_config.num_of_images-samples_count:
-                inference_batch_input = [x[:quant_config.num_of_images-samples_count] for x in inference_batch_input]
-                assert quant_config.num_of_images-samples_count == inference_batch_input[0].shape[0]
-                batch_size = quant_config.num_of_images-samples_count
+                inference_batch_input = [x[:quant_config.num_of_images - samples_count] for x in inference_batch_input]
+                assert quant_config.num_of_images - samples_count == inference_batch_input[0].shape[0]
+                batch_size = quant_config.num_of_images - samples_count
 
             samples_count += batch_size
             # If the model contains only one output we save it a list. If it's a list already, we keep it as a list.
@@ -124,7 +154,7 @@ def get_sensitivity_evaluation(graph: Graph,
 
             # Build distance matrix: similarity between the baseline model to the float model
             # in every interest point for every image in the batch.
-            distance_matrices.append(_build_distance_matrix(baseline_tensors,
+            distance_matrices.append(_build_distance_matrix_from_tensors(baseline_tensors,
                                                             mp_tensors,
                                                             quant_config.compute_distance_fn))
 
@@ -132,7 +162,8 @@ def get_sensitivity_evaluation(graph: Graph,
         distance_matrix = np.concatenate(distance_matrices, axis=1)
 
         # Assert we used a correct number of images for computing the distance matrix
-        assert distance_matrix.shape[1] == quant_config.num_of_images
+        assert distance_matrix.shape[1] <= quant_config.num_of_images
+        # print(f'samples_in_distance_matrix: {samples_in_distance_matrix}, distance_matrix.shape[1]: {distance_matrix.shape[1]}')
 
         # Configure MP model back to the same configuration as the baseline model
         baseline_mp_configuration = [0] * len(mp_model_configuration)
@@ -140,14 +171,10 @@ def get_sensitivity_evaluation(graph: Graph,
                                          sorted_configurable_nodes_names,
                                          baseline_mp_configuration,
                                          node_idx)
+        return distance_matrix
 
-        # Compute the distance between the baseline model's outputs and the MP model's outputs.
-        # The distance is the mean of distances over all images in the batch that was inferred.
-        mean_distance_per_layer = distance_matrix.mean(axis=1)
-        # Use weights such that every layer's distance is weighted differently (possibly).
-        return np.average(mean_distance_per_layer, weights=metrics_weights_fn(distance_matrix))
 
-    return _compute_metric
+    return _compute_metric, _build_distance_matrix
 
 
 def _configure_bitwidths_keras_model(model_mp: Model,
@@ -180,7 +207,7 @@ def _configure_bitwidths_keras_model(model_mp: Model,
             _set_layer_to_bitwidth(current_layer, mp_model_configuration[node_idx_to_configure])
 
 
-def _build_distance_matrix(baseline_tensors: List[Tensor],
+def _build_distance_matrix_from_tensors(baseline_tensors: List[Tensor],
                            mp_tensors: List[Tensor],
                            compute_distance_fn: Callable):
     """

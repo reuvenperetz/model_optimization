@@ -88,6 +88,9 @@ def search_bit_width(graph_to_search_cfg: Graph,
     result_bit_cfg = search_method_fn(search_manager.layer_to_bitwidth_mapping,
                                       search_manager.compute_metric_fn,
                                       search_manager.get_kpi_metric(),
-                                      target_kpi)
+                                      target_kpi,
+                                      search_manager.qc.search_iterations,
+                                      search_manager.qc.num_of_images,
+                                      search_manager.build_distance_matrix)
 
     return result_bit_cfg

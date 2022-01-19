@@ -151,7 +151,8 @@ if importlib.util.find_spec("tensorflow") is not None\
                                                          network_editor: List[EditRule] = [],
                                                          gptq_config: GradientPTQConfig = None,
                                                          analyze_similarity: bool = False,
-                                                         target_kpi: KPI = None):
+                                                         target_kpi: KPI = None,
+                                                         mixed_precision_configuration = None):
         """
          Quantize a trained Keras model using post-training quantization. The model is quantized using a
          symmetric constraint quantization thresholds (power of two).
@@ -242,7 +243,8 @@ if importlib.util.find_spec("tensorflow") is not None\
                                           network_editor,
                                           gptq_config,
                                           analyze_similarity,
-                                          target_kpi)
+                                          target_kpi,
+                                          mixed_precision_configuration)
 
 else:
     # If tensorflow or tensorflow_model_optimization are not installed,

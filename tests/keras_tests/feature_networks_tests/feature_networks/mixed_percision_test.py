@@ -45,7 +45,9 @@ class MixedPercisionBaseTest(BaseKerasFeatureNetworkTest):
                                     relu_unbound_correction=True,
                                     input_scaling=True)
 
-        return MixedPrecisionQuantizationConfig(qc, weights_n_bits=[2, 8, 4], num_of_images=1)
+        return MixedPrecisionQuantizationConfig(qc, weights_n_bits=[2, 8, 4],
+                                                num_of_images=256,
+                                                search_iterations=50)
 
     def get_bit_widths_config(self):
         return None

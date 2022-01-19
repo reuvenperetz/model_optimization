@@ -22,10 +22,24 @@ from model_compression_toolkit.common import Logger
 from model_compression_toolkit.common.mixed_precision.kpi import KPI
 
 
+def _set_warmstart_solution(layer_to_indicator_vars_mapping, warmstart_solution):
+    print('warmstart')
+    for l, bit2var in layer_to_indicator_vars_mapping.items():
+        s = warmstart_solution[l]
+        for bit, var in bit2var.items():
+            if bit == s:
+                var.setInitialValue(1.0)
+            else:
+                var.setInitialValue(0.0)
+
+
 def mp_integer_programming_search(layer_to_bitwidth_mapping: Dict[int, List[int]],
                                   compute_metric_fn: Callable,
                                   compute_kpi_fn: Callable,
-                                  target_kpi: KPI = None) -> List[int]:
+                                  target_kpi: KPI = None,
+                                  maximum_search_iterations: int = None,
+                                  max_num_of_images: int = None,
+                                  build_distance_matrix_fn: Callable = None) -> List[int]:
     """
     Searching and returning a mixed-precision configuration using an ILP optimization solution.
     It first builds a mapping from each layer's index (in the model) to a dictionary that maps the
@@ -37,6 +51,7 @@ def mp_integer_programming_search(layer_to_bitwidth_mapping: Dict[int, List[int]
     If a solution could not be found, exception is thrown.
 
     Args:
+        maximum_search_iterations:
         layer_to_bitwidth_mapping: Search space (mapping from each node's index to its possible bitwidth
         indices).
         compute_metric_fn: Function to compute a metric for a mixed-precision model configuration.
@@ -48,43 +63,70 @@ def mp_integer_programming_search(layer_to_bitwidth_mapping: Dict[int, List[int]
         The mixed-precision configuration (list of indices. Each indicates the bitwidth index of a node).
 
     """
+    best_distance = np.inf
+    best_configuration = None
+    warmstart_solution = None
+
+    num_of_images_for_search = np.flip(np.round(np.logspace(0.0, np.log2(max_num_of_images), num=maximum_search_iterations + 1, base=2.0)))[:maximum_search_iterations]
+    ascending_order_num_of_images = np.flip(num_of_images_for_search).astype(np.int32)
+
 
     # Build a mapping from each layer's index (in the model) to a dictionary that maps the
     # bitwidth index to the observed sensitivity of the model when using that bitwidth for that layer.
-    layer_to_metrics_mapping = _build_layer_to_metrics_mapping(layer_to_bitwidth_mapping,
-                                                               compute_metric_fn)
+    layer_to_metrics_mapping_per_samples = _build_layer_to_metrics_mapping(layer_to_bitwidth_mapping,
+                                                               compute_metric_fn,
+                                                               ascending_order_num_of_images,
+                                                               build_distance_matrix_fn)
 
-    # Init variables to find their values when solving the lp problem.
-    layer_to_indicator_vars_mapping, layer_to_objective_vars_mapping = _init_problem_vars(layer_to_metrics_mapping)
+    # assert len(layer_to_metrics_mapping_per_samples)==maximum_search_iterations
+    print(f'ascending_order_num_of_images: {ascending_order_num_of_images}')
+    for layer_to_metrics_mapping in layer_to_metrics_mapping_per_samples:
+        # Init variables to find their values when solving the lp problem.
+        layer_to_indicator_vars_mapping, layer_to_objective_vars_mapping = _init_problem_vars(layer_to_metrics_mapping)
 
-    # Build a mapping from each node's index (in the graph) to a dictionary
-    # that maps the bitwidth index to the contribution of configuring this node with this
-    # bitwidth to the minimal possible KPI of the model.
-    layer_to_kpi_mapping, minimal_kpi = _compute_kpis(layer_to_bitwidth_mapping,
-                                                      compute_kpi_fn)
+        if warmstart_solution is not None:
+            _set_warmstart_solution(layer_to_indicator_vars_mapping, warmstart_solution)
 
-    assert minimal_kpi.weights_memory <= target_kpi.weights_memory, f'Minimal KPI cannot be greater than target KPI. Minimal KPI:{minimal_kpi}, Target KPI:{target_kpi}'
-    # Add all equations and inequalities that define the problem.
-    lp_problem = _formalize_problem(layer_to_indicator_vars_mapping,
-                                    layer_to_metrics_mapping,
-                                    layer_to_objective_vars_mapping,
-                                    target_kpi,
-                                    layer_to_kpi_mapping,
-                                    minimal_kpi)
+        # Build a mapping from each node's index (in the graph) to a dictionary
+        # that maps the bitwidth index to the contribution of configuring this node with this
+        # bitwidth to the minimal possible KPI of the model.
+        layer_to_kpi_mapping, minimal_kpi = _compute_kpis(layer_to_bitwidth_mapping,
+                                                          compute_kpi_fn)
 
-    lp_problem.solve()  # Try to solve the problem.
-    assert lp_problem.status == LpStatusOptimal, Logger.critical(
-        "No solution was found during solving the LP problem")
-    Logger.info(LpStatus[lp_problem.status])
+        assert minimal_kpi.weights_memory <= target_kpi.weights_memory, f'Minimal KPI cannot be greater than target KPI. Minimal KPI:{minimal_kpi}, Target KPI:{target_kpi}'
+        # Add all equations and inequalities that define the problem.
+        lp_problem = _formalize_problem(layer_to_indicator_vars_mapping,
+                                        layer_to_metrics_mapping,
+                                        layer_to_objective_vars_mapping,
+                                        target_kpi,
+                                        layer_to_kpi_mapping,
+                                        minimal_kpi)
 
-    # Take the bitwidth index only if its corresponding indicator is one.
-    config = np.asarray(
-        [[nbits for nbits, indicator in nbits_to_indicator.items() if indicator.varValue == 1.0] for
-         nbits_to_indicator
-         in layer_to_indicator_vars_mapping.values()]
-    ).flatten()
+        lp_problem.solve()  # Try to solve the problem.
+        assert lp_problem.status == LpStatusOptimal, Logger.critical(
+            "No solution was found during solving the LP problem")
+        Logger.info(LpStatus[lp_problem.status])
 
-    return config
+        # Take the bitwidth index only if its corresponding indicator is one.
+        config = np.asarray(
+            [[nbits for nbits, indicator in nbits_to_indicator.items() if indicator.varValue == 1.0] for
+             nbits_to_indicator
+             in layer_to_indicator_vars_mapping.values()]
+        ).flatten()
+
+        distance = lp_problem.objective.value()
+        print(f'Objective value: {distance}, cfg: {config}')
+        if distance < best_distance:
+            print(f'Found smaller distance. New config: {config}')
+            best_distance = distance
+            best_configuration = config
+            warmstart_solution = config
+        else:
+            warmstart_solution = None  # Fresh start
+
+    print(f'Best config: {best_configuration}')
+    return best_configuration
+    # return config
 
 
 def _init_problem_vars(layer_to_metrics_mapping: Dict[int, Dict[int, float]]) -> Tuple[
@@ -175,7 +217,9 @@ def _formalize_problem(layer_to_indicator_vars_mapping: Dict[int, Dict[int, LpVa
 
 
 def _build_layer_to_metrics_mapping(node_to_bitwidth_indices: Dict[int, List[int]],
-                                    compute_metric_fn: Callable) -> Dict[int, Dict[int, float]]:
+                                    compute_metric_fn: Callable,
+                                    ascending_order_num_of_images,
+                                    build_dm) -> Dict[int, Dict[int, float]]:
     """
     This function measures the sensitivity of a change in a bitwidth of a layer on the entire model.
     It builds a mapping from a node's index, to its bitwidht's effect on the model sensitivity.
@@ -187,6 +231,7 @@ def _build_layer_to_metrics_mapping(node_to_bitwidth_indices: Dict[int, List[int
     Args:
         node_to_bitwidth_indices: Possible bitwidth indices for the different nodes.
         compute_metric_fn: Function to measure a sensitivity metric.
+        tau:
 
     Returns:
         Mapping from each node's index in a graph, to a dictionary from the bitwidth index (of this node) to
@@ -195,22 +240,41 @@ def _build_layer_to_metrics_mapping(node_to_bitwidth_indices: Dict[int, List[int
     """
 
     Logger.info('Starting to evaluate metrics')
-    layer_to_metrics_mapping = {}
+    # layer_to_metrics_mapping = {}
+    dim_to_metrics = {}
 
     for node_idx, layer_possible_bitwidths_indices in tqdm(node_to_bitwidth_indices.items(),
                                                            total=len(node_to_bitwidth_indices)):
-        layer_to_metrics_mapping[node_idx] = {}
+        # layer_to_metrics_mapping[node_idx] = {}
 
         for bitwidth_idx in layer_possible_bitwidths_indices:
             # Create a configuration that differs at one layer only from the baseline model
             mp_model_configuration = [0] * len(node_to_bitwidth_indices)
             mp_model_configuration[node_idx] = bitwidth_idx
 
-            # Build a distance matrix using the function we got from the framework implementation.
-            layer_to_metrics_mapping[node_idx][bitwidth_idx] = compute_metric_fn(mp_model_configuration,
-                                                                                 [node_idx])
+            dm = build_dm(mp_model_configuration, [node_idx])
+            for idx, num_imgs in enumerate(ascending_order_num_of_images):
+                if idx in dim_to_metrics:
+                    metrics_to_fill, start_index = dim_to_metrics[idx]
+                    if node_idx not in metrics_to_fill:
+                        metrics_to_fill[node_idx] = {}
+                else:
+                    metrics_to_fill = {}
+                    metrics_to_fill[node_idx]={}
+                    start_index = np.random.randint(0, high=dm.shape[1]-num_imgs+1)
+                    dim_to_metrics.update({idx: (metrics_to_fill, start_index)})
 
-    return layer_to_metrics_mapping
+                # start_index = np.random.randint(0, high=dm.shape[1]-num_imgs+1)
+                # start_index=0
+                end_index = start_index + num_imgs
+                tiny_dm = dm[:,start_index:end_index]
+
+                # Build a distance matrix using the function we got from the framework implementation.
+                metrics_to_fill[node_idx][bitwidth_idx] = compute_metric_fn(mp_model_configuration,
+                                                                                     [node_idx],
+                                                                                     tiny_dm)
+
+    return [v[0] for v in dim_to_metrics.values()]
 
 
 def _compute_kpis(node_to_bitwidth_indices: Dict[int, List[int]],
