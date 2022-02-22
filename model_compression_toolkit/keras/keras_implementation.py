@@ -4,14 +4,15 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.keras.models import Model
 
-from model_compression_toolkit import QuantizationConfig, FrameworkInfo, common, GradientPTQConfig, \
-    MixedPrecisionQuantizationConfig
+from model_compression_toolkit import OptimizationParams, FrameworkInfo, common, GradientPTQConfig, \
+    MixedPrecisionOptimizationParams
 from model_compression_toolkit.common import Graph, BaseNode
 from model_compression_toolkit.common.collectors.statistics_collector import BaseStatsCollector
 from model_compression_toolkit.common.framework_implementation import FrameworkImplementation
 from model_compression_toolkit.common.model_builder_mode import ModelBuilderMode
 from model_compression_toolkit.common.node_prior_info import NodePriorInfo
 from model_compression_toolkit.common.user_info import UserInformation
+from model_compression_toolkit.keras.back2framework.instance_builder import node_builder
 from model_compression_toolkit.keras.back2framework.model_builder import model_builder
 from model_compression_toolkit.keras.default_framework_info import DEFAULT_KERAS_INFO
 from model_compression_toolkit.keras.gradient_ptq.training_wrapper import gptq_training_wrapper
@@ -21,7 +22,6 @@ from model_compression_toolkit.keras.graph_substitutions.substitutions.batchnorm
     keras_batchnorm_folding
 from model_compression_toolkit.keras.graph_substitutions.substitutions.input_scaling import InputScaling, \
     InputScalingWithPad
-from model_compression_toolkit.keras.graph_substitutions.substitutions.mark_activation import MarkActivation
 from model_compression_toolkit.keras.graph_substitutions.substitutions.relu_bound_correction import \
     ReLUBoundCorrection
 from model_compression_toolkit.keras.graph_substitutions.substitutions.remove_relu_upper_bound import \
@@ -134,7 +134,7 @@ class KerasImplementation(FrameworkImplementation):
 
     def shift_negative_correction(self,
                                   graph: Graph,
-                                  qc: QuantizationConfig,
+                                  qc: OptimizationParams,
                                   fw_info: FrameworkInfo) -> Graph:
         """
         Apply shift negative correction (SNC) on a graph.
@@ -168,15 +168,6 @@ class KerasImplementation(FrameworkImplementation):
         return create_stats_collector_for_node(node,
                                                output_channel_index=output_channel_index)
 
-    def get_substitutions_marking(self) -> List[common.BaseSubstitution]:
-        """
-
-        Returns: A list of the framework substitutions used for marking
-        points we fuse.
-
-        """
-        return [MarkActivation()]
-
     def get_substitutions_pre_statistics_collection(self) -> List[common.BaseSubstitution]:
         """
 
@@ -187,7 +178,7 @@ class KerasImplementation(FrameworkImplementation):
                 ActivationDecomposition(),
                 keras_batchnorm_folding()]
 
-    def get_substitutions_post_statistics_collection(self, quant_config: QuantizationConfig) -> List[
+    def get_substitutions_post_statistics_collection(self, quant_config: OptimizationParams) -> List[
         common.BaseSubstitution]:
         """
         Return a list of the framework substitutions used after we collect statistics.
@@ -208,7 +199,7 @@ class KerasImplementation(FrameworkImplementation):
         return substitutions_list
 
     def get_substitutions_channel_equalization(self,
-                                               quant_config: QuantizationConfig,
+                                               quant_config: OptimizationParams,
                                                fw_info: FrameworkInfo) -> List[common.BaseSubstitution]:
         """
         Return a list of the framework substitutions used for channel equalization.
@@ -266,7 +257,7 @@ class KerasImplementation(FrameworkImplementation):
 
     def get_sensitivity_evaluation_fn(self,
                                       graph: Graph,
-                                      quant_config: MixedPrecisionQuantizationConfig,
+                                      quant_config: MixedPrecisionOptimizationParams,
                                       metrics_weights: np.ndarray,
                                       representative_data_gen: Callable,
                                       fw_info: FrameworkInfo) -> Callable:
@@ -307,3 +298,6 @@ class KerasImplementation(FrameworkImplementation):
 
         return create_node_prior_info(node=node,
                                       fw_info=fw_info)
+
+    def node_builder(self, n: common.BaseNode):
+        return node_builder(n)

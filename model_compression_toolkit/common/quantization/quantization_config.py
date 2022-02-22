@@ -43,43 +43,14 @@ class QuantizationErrorMethod(Enum):
     LP = 5
 
 
-class QuantizationMethod(Enum):
-    """
-    Method for quantization function selection:
-
-    POWER_OF_TWO - Symmetric, uniform, threshold is power of two quantization.
-
-    KMEANS - k-means quantization.
-
-    LUT_QUANTIZER - quantization using a look up table.
-
-    SYMMETRIC - Symmetric, uniform, quantization.
-
-    UNIFORM - uniform quantization,
-
-    """
-    POWER_OF_TWO = 0
-    KMEANS = 1
-    LUT_QUANTIZER = 2
-    SYMMETRIC = 3
-    UNIFORM = 4
-
-
-class QuantizationConfig(object):
+class OptimizationParams(object):
 
     def __init__(self,
                  activation_error_method: QuantizationErrorMethod = QuantizationErrorMethod.MSE,
                  weights_error_method: QuantizationErrorMethod = QuantizationErrorMethod.MSE,
-                 activation_quantization_method: QuantizationMethod = QuantizationMethod.POWER_OF_TWO,
-                 weights_quantization_method: QuantizationMethod = QuantizationMethod.POWER_OF_TWO,
-                 activation_n_bits: int = 8,
-                 weights_n_bits: int = 8,
                  relu_unbound_correction: bool = False,
                  weights_bias_correction: bool = True,
-                 weights_per_channel_threshold: bool = True,
                  input_scaling: bool = False,
-                 enable_weights_quantization: bool = True,
-                 enable_activation_quantization: bool = True,
                  shift_negative_activation_correction: bool = False,
                  activation_channel_equalization: bool = False,
                  z_threshold: float = math.inf,
@@ -91,10 +62,14 @@ class QuantizationConfig(object):
         Class to wrap all different parameters the library quantize the input model according to.
 
         Args:
-            activation_error_method (QuantizationErrorMethod): Which method to use from QuantizationErrorMethod for activation quantization threshold selection.
-            weights_error_method (QuantizationErrorMethod): Which method to use from QuantizationErrorMethod for activation quantization threshold selection.
-            activation_quantization_method (QuantizationMethod): Which method to use from QuantizationMethod for activation quantization.
-            weights_quantization_method (QuantizationMethod): Which method to use from QuantizationMethod for weights quantization.
+            activation_error_method (QuantizationErrorMethod): Which method to use from QuantizationErrorMethod for
+            activation quantization threshold selection.
+            weights_error_method (QuantizationErrorMethod): Which method to use from QuantizationErrorMethod for
+            activation quantization threshold selection.
+            activation_quantization_method (model_compression_toolkit.QuantizationMethod): Which method to use from
+            QuantizationMethod for activation quantization.
+            weights_quantization_method (model_compression_toolkit.QuantizationMethod): Which method to use from
+            QuantizationMethod for weights quantization.
             activation_n_bits (int): Number of bits to quantize the activations.
             weights_n_bits (int): Number of bits to quantize the coefficients.
             relu_unbound_correction (bool): Whether to use relu unbound scaling correction or not.
@@ -108,8 +83,10 @@ class QuantizationConfig(object):
             z_threshold (float): Value of z score for outliers removal.
             min_threshold (float): Minimum threshold to use during thresholds selection.
             l_p_value (int): The p value of L_p norm threshold selection.
-            shift_negative_ratio (float): Value for the ratio between the minimal negative value of a non-linearity output to its activation threshold, which above it - shifting negative activation should occur if enabled.
-            shift_negative_threshold_recalculation (bool): Whether or not to recompute the threshold after shifting negative activation.
+            shift_negative_ratio (float): Value for the ratio between the minimal negative value of a non-linearity
+            output to its activation threshold, which above it - shifting negative activation should occur if enabled.
+            shift_negative_threshold_recalculation (bool): Whether or not to recompute the threshold after shifting
+            negative activation.
 
         Examples:
             One may create a quantization configuration to quantize a model according to.
@@ -119,7 +96,11 @@ class QuantizationConfig(object):
             enabling relu_unbound_correction, weights_bias_correction, and quantizing the weights per-channel,
             one can instantiate a quantization configuration:
 
-            >>> qc = QuantizationConfig(activation_error_method=QuantizationErrorMethod.NOCLIPPING,weights_error_method=QuantizationErrorMethod.MSE,activation_quantization_method=QuantizationMethod.POWER_OF_TWO,weights_quantization_method=QuantizationMethod.POWER_OF_TWO,activation_n_bits=6,weights_n_bits=7,relu_unbound_correction=True,weights_bias_correction=True,weights_per_channel_threshold=True)
+            >>> qc = OptimizationParams(activation_error_method=QuantizationErrorMethod.NOCLIPPING,
+            weights_error_method=QuantizationErrorMethod.MSE,
+            activation_quantization_method=QuantizationMethod.POWER_OF_TWO,
+            weights_quantization_method=QuantizationMethod.POWER_OF_TWO,activation_n_bits=6,weights_n_bits=7,
+            relu_unbound_correction=True,weights_bias_correction=True,weights_per_channel_threshold=True)
 
             The QuantizationConfig instanse can then be passed to
             :func:`~model_compression_toolkit.keras_post_training_quantization`
@@ -127,21 +108,14 @@ class QuantizationConfig(object):
             In order to use a different quantization method (than power-of-two that is used by default),
             one may pass a desired QuantizationMethod when instantiating a QuantizationConfig. For example:
 
-            >>> qc = QuantizationConfig(activation_quantization_method=QuantizationMethod.LUT_QUANTIZER)
+            >>> qc = OptimizationParams(activation_quantization_method=QuantizationMethod.LUT_QUANTIZER)
 
         """
 
         self.activation_error_method = activation_error_method
         self.weights_error_method = weights_error_method
-        self.activation_quantization_method = activation_quantization_method
-        self.weights_quantization_method = weights_quantization_method
-        self.activation_n_bits = activation_n_bits
-        self.weights_n_bits = weights_n_bits
         self.relu_unbound_correction = relu_unbound_correction
         self.weights_bias_correction = weights_bias_correction
-        self.weights_per_channel_threshold = weights_per_channel_threshold
-        self.enable_weights_quantization = enable_weights_quantization
-        self.enable_activation_quantization = enable_activation_quantization
         self.activation_channel_equalization = activation_channel_equalization
         self.input_scaling = input_scaling
         self.min_threshold = min_threshold
@@ -156,10 +130,10 @@ class QuantizationConfig(object):
 
 
 # Default quantization configuration the library use.
-DEFAULTCONFIG = QuantizationConfig(QuantizationErrorMethod.MSE, QuantizationErrorMethod.MSE,
-                                   QuantizationMethod.POWER_OF_TWO, QuantizationMethod.POWER_OF_TWO,
-                                   activation_n_bits=8, weights_n_bits=8, relu_unbound_correction=False,
-                                   weights_bias_correction=True, weights_per_channel_threshold=True,
+DEFAULTCONFIG = OptimizationParams(QuantizationErrorMethod.MSE,
+                                   QuantizationErrorMethod.MSE,
+                                   relu_unbound_correction=False,
+                                   weights_bias_correction=True,
                                    input_scaling=False)
 
 

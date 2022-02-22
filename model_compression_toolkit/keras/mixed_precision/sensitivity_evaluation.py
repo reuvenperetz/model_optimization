@@ -23,7 +23,7 @@ from model_compression_toolkit.common.framework_info import FrameworkInfo
 from model_compression_toolkit.common import BaseNode
 from model_compression_toolkit.common.graph.base_graph import Graph
 from model_compression_toolkit.common.mixed_precision.mixed_precision_quantization_config import \
-    MixedPrecisionQuantizationConfig
+    MixedPrecisionOptimizationParams
 from model_compression_toolkit.keras.back2framework.model_builder import model_builder
 from model_compression_toolkit.common.model_builder_mode import ModelBuilderMode
 from model_compression_toolkit.keras.quantizer.mixed_precision.selective_weights_quantize_config import \
@@ -32,7 +32,7 @@ import numpy as np
 
 
 def get_sensitivity_evaluation(graph: Graph,
-                               quant_config: MixedPrecisionQuantizationConfig,
+                               quant_config: MixedPrecisionOptimizationParams,
                                metrics_weights_fn: Callable,
                                representative_data_gen: Callable,
                                fw_info: FrameworkInfo) -> Callable:

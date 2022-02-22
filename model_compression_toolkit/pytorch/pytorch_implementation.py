@@ -17,8 +17,8 @@ import numpy as np
 import torch
 from torch.nn import Module
 
-from model_compression_toolkit import QuantizationConfig, FrameworkInfo, common, GradientPTQConfig, \
-    MixedPrecisionQuantizationConfig
+from model_compression_toolkit import OptimizationParams, FrameworkInfo, common, GradientPTQConfig, \
+    MixedPrecisionOptimizationParams
 from model_compression_toolkit.common import Graph, BaseNode
 from model_compression_toolkit.common.collectors.statistics_collector import BaseStatsCollector
 from model_compression_toolkit.common.collectors.statistics_collector_generator import create_stats_collector_for_node
@@ -26,6 +26,7 @@ from model_compression_toolkit.common.framework_implementation import FrameworkI
 from model_compression_toolkit.common.model_builder_mode import ModelBuilderMode
 from model_compression_toolkit.common.node_prior_info import NodePriorInfo
 from model_compression_toolkit.common.user_info import UserInformation
+from model_compression_toolkit.pytorch.back2framework.instance_builder import node_builder
 from model_compression_toolkit.pytorch.back2framework.model_builder import model_builder
 from model_compression_toolkit.pytorch.default_framework_info import DEFAULT_PYTORCH_INFO
 from model_compression_toolkit.pytorch.graph_substitutions.substitutions.batchnorm_folding import \
@@ -55,6 +56,11 @@ class PytorchImplementation(FrameworkImplementation):
 
         """
         return pytorch_constants
+
+    def node_builder(self, n: common.BaseNode):
+        return node_builder(n)
+
+
 
     def to_numpy(self,
                  tensor: torch.Tensor) -> np.ndarray:
@@ -134,7 +140,7 @@ class PytorchImplementation(FrameworkImplementation):
 
     def shift_negative_correction(self,
                                   graph: Graph,
-                                  qc: QuantizationConfig,
+                                  qc: OptimizationParams,
                                   fw_info: FrameworkInfo) -> Graph:
         """
         Apply shift negative correction (SNC) on a graph.
@@ -186,7 +192,7 @@ class PytorchImplementation(FrameworkImplementation):
         return [pytorch_batchnorm_folding()]
 
     def get_substitutions_post_statistics_collection(self,
-                                                     quant_config: QuantizationConfig) -> List[common.BaseSubstitution]:
+                                                     quant_config: OptimizationParams) -> List[common.BaseSubstitution]:
         """
         Return a list of the framework substitutions used after we collect statistics.
 
@@ -205,7 +211,7 @@ class PytorchImplementation(FrameworkImplementation):
         return substitutions_list
 
     def get_substitutions_channel_equalization(self,
-                                               quant_config: QuantizationConfig,
+                                               quant_config: OptimizationParams,
                                                fw_info: FrameworkInfo) -> List[common.BaseSubstitution]:
         """
         Return a list of the framework substitutions used for channel equalization.
@@ -252,7 +258,7 @@ class PytorchImplementation(FrameworkImplementation):
 
     def get_sensitivity_evaluation_fn(self,
                                       graph: Graph,
-                                      quant_config: MixedPrecisionQuantizationConfig,
+                                      quant_config: MixedPrecisionOptimizationParams,
                                       metrics_weights: np.ndarray,
                                       representative_data_gen: Callable,
                                       fw_info: FrameworkInfo) -> Callable:

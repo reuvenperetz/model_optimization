@@ -27,7 +27,7 @@ from model_compression_toolkit.common.defaultdict import DefaultDict
 from model_compression_toolkit.common.framework_info import FrameworkInfo
 from model_compression_toolkit.common.graph.graph_matchers import NodeOperationMatcher, WalkMatcher, \
     NodeFrameworkAttrMatcher
-from model_compression_toolkit.common.quantization.quantization_config import QuantizationConfig
+from model_compression_toolkit.common.quantization.quantization_config import OptimizationParams
 from model_compression_toolkit.keras.constants import KERNEL, BIAS, LINEAR, ACTIVATION, RELU_MAX_VALUE
 from model_compression_toolkit.keras.constants import RELU
 
@@ -85,7 +85,7 @@ def scale_reshaping(scale: np.ndarray,
 
 
 def update_linear_nodes(graph:Graph,
-                        qc: QuantizationConfig,
+                        qc: OptimizationParams,
                         fw_info: FrameworkInfo,
                         first_op2d_node: BaseNode,
                         second_op2d_node: BaseNode,
@@ -170,7 +170,7 @@ def calculate_scale_correction(graph: Graph,
 
 
 def scale_equalization_lnl(graph: Graph,
-                           qc: QuantizationConfig,
+                           qc: OptimizationParams,
                            fw_info: FrameworkInfo,
                            first_op2d_node: BaseNode,
                            n_node: BaseNode,
@@ -214,7 +214,7 @@ class BaseScaleEqualization(common.BaseSubstitution):
     """
 
     def __init__(self,
-                 quant_config: QuantizationConfig,
+                 quant_config: OptimizationParams,
                  fw_info: FrameworkInfo,
                  matcher_instance,
                  nl_index: int = 0):
@@ -267,7 +267,7 @@ class ScaleEqualization(BaseScaleEqualization):
     """
 
     def __init__(self,
-                 quant_config: QuantizationConfig,
+                 quant_config: OptimizationParams,
                  fw_info: FrameworkInfo):
         """
         Initialize a ScaleEqualization object.
@@ -286,7 +286,7 @@ class ScaleEqualizationWithPad(BaseScaleEqualization):
     """
 
     def __init__(self,
-                 quant_config: QuantizationConfig,
+                 quant_config: OptimizationParams,
                  fw_info: FrameworkInfo):
         """
         Initialize a ScaleEqualization object.
@@ -305,7 +305,7 @@ class ScaleEqualizationMidActivation(BaseScaleEqualization):
     """
 
     def __init__(self,
-                 quant_config: QuantizationConfig,
+                 quant_config: OptimizationParams,
                  fw_info: FrameworkInfo):
         """
         Init a ScaleEqualizationMidActivation object.
@@ -329,7 +329,7 @@ class ScaleEqualizationMidActivationWithPad(BaseScaleEqualization):
     """
 
     def __init__(self,
-                 quant_config: QuantizationConfig,
+                 quant_config: OptimizationParams,
                  fw_info: FrameworkInfo):
         """
         Init a ScaleEqualizationMidActivation object.

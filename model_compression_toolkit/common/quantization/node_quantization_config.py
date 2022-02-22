@@ -18,7 +18,10 @@ from typing import Callable, Any
 
 import numpy as np
 
-from model_compression_toolkit.common.quantization.quantization_config import QuantizationConfig
+from model_compression_toolkit.common.hardware_model.quantization_config \
+    import \
+    OpQuantizationConfig
+from model_compression_toolkit.common.quantization.quantization_config import OptimizationParams
 
 
 ##########################################
@@ -54,13 +57,33 @@ class BaseNodeNodeQuantizationConfig(object):
             repr_str += f'{k}: {v}\n'
         return repr_str
 
+    def __eq__(self, other):
+        if not isinstance(other, type(self)):
+            return False
+        x = self.__dict__
+        y = other.__dict__
+        return len({k: x[k] for k in x if k in y and x[k] == y[k]})==len(x)
+
+    def __key(self):
+        s = []
+        for v in self.__dict__.values():
+            if isinstance(v, dict):
+                s.append(frozenset(v.values()))
+            else:
+                s.append(v)
+        return tuple(s)
+
+    def __hash__(self):
+        return hash(self.__key())
+
 
 class NodeActivationQuantizationConfig(BaseNodeNodeQuantizationConfig):
     """
     Attributes for configuring the quantization of the activations of a node.
     """
     def __init__(self,
-                 qc: QuantizationConfig,
+                 qc: OptimizationParams,
+                 op_cfg: OpQuantizationConfig,
                  activation_quantization_fn: Callable,
                  activation_quantization_params_fn: Callable
                  ):
@@ -76,10 +99,7 @@ class NodeActivationQuantizationConfig(BaseNodeNodeQuantizationConfig):
         self.activation_quantization_params_fn = activation_quantization_params_fn
         self.activation_quantization_params = {}
         self.activation_error_method = qc.activation_error_method
-        self.activation_quantization_method = qc.activation_quantization_method
-        self.activation_n_bits = qc.activation_n_bits
         self.relu_unbound_correction = qc.relu_unbound_correction
-        self.enable_activation_quantization = qc.enable_activation_quantization
         self.activation_channel_equalization = qc.activation_channel_equalization
         self.input_scaling = qc.input_scaling
         self.min_threshold = qc.min_threshold
@@ -88,6 +108,13 @@ class NodeActivationQuantizationConfig(BaseNodeNodeQuantizationConfig):
         self.z_threshold = qc.z_threshold
         self.shift_negative_ratio = qc.shift_negative_ratio
         self.shift_negative_threshold_recalculation = qc.shift_negative_threshold_recalculation
+        self.activation_quantization_method = op_cfg.activation_quantization_method
+        self.activation_n_bits = op_cfg.activation_n_bits
+        self.enable_activation_quantization = op_cfg.enable_activation_quantization
+        self.quantization_preserving = op_cfg.quantization_preserving
+        self.fixed_scale = op_cfg.fixed_scale
+        self.fixed_zero_point = op_cfg.fixed_zero_point
+
 
     def quantize_node_output(self,
                              tensors: Any) -> Any:
@@ -160,7 +187,8 @@ class NodeWeightsQuantizationConfig(BaseNodeNodeQuantizationConfig):
     Attributes for configuring the quantization of the weights of a node.
     """
     def __init__(self,
-                 qc: QuantizationConfig,
+                 qc: OptimizationParams,
+                 op_cfg: OpQuantizationConfig,
                  weights_quantization_fn: Callable,
                  weights_quantization_params_fn: Callable,
                  weights_channels_axis: int):
@@ -178,13 +206,16 @@ class NodeWeightsQuantizationConfig(BaseNodeNodeQuantizationConfig):
         self.weights_channels_axis = weights_channels_axis
         self.weights_quantization_params = {}
         self.weights_error_method = qc.weights_error_method
-        self.weights_quantization_method = qc.weights_quantization_method
-        self.weights_n_bits = qc.weights_n_bits
         self.weights_bias_correction = qc.weights_bias_correction
-        self.weights_per_channel_threshold = qc.weights_per_channel_threshold
-        self.enable_weights_quantization = qc.enable_weights_quantization
         self.min_threshold = qc.min_threshold
         self.l_p_value = qc.l_p_value
+        self.weights_quantization_method = op_cfg.weights_quantization_method
+        self.weights_n_bits = op_cfg.weights_n_bits
+        self.weights_per_channel_threshold = op_cfg.weights_per_channel_threshold
+        self.enable_weights_quantization = op_cfg.enable_weights_quantization
+        self.weights_multiplier_nbits = op_cfg.weights_multiplier_nbits  #TODO: default to 8
+
+
 
     def set_weights_quantization_fn(self, weights_quantization_fn: Callable):
         """

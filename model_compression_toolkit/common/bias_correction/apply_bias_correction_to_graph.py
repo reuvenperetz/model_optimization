@@ -36,11 +36,11 @@ def apply_bias_correction_to_graph(graph_to_apply_bias_correction: Graph,
 
     graph = copy.deepcopy(graph_to_apply_bias_correction)
     for n in graph.nodes:
-        if fw_info.in_kernel_ops(n) and n.final_weights_quantization_cfg.enable_weights_quantization:
+        has_kernel = n.get_weights_by_keys(fw_impl.constants.KERNEL) is not None  # TODO: take from model context
+        if n.is_weights_quantization_enabled() and has_kernel and n.final_weights_quantization_cfg.weights_bias_correction:
             # If a kernel was quantized and weights bias correction is enabled in n.quantization_cfg,
             # a bias correction term was calculated during model preparation, and is used now in the node's bias term.
-            if n.final_weights_quantization_cfg.weights_bias_correction:
-                _apply_bias_correction_to_node(n, fw_impl)
+            _apply_bias_correction_to_node(n, fw_impl)
     return graph
 
 

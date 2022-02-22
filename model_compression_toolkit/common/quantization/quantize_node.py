@@ -55,7 +55,7 @@ def get_quantized_kernel_by_weights_qc(fw_info:FrameworkInfo,
                                                                   n.type)
 
     Logger.debug(f'quantizing {n.name} with {weights_qc.weights_n_bits} bits')
-    quantized_kernel = weights_qc.weights_quantization_fn(n.get_weights_by_keys(fw_impl.constants.KERNEL),
+    quantized_kernel = weights_qc.weights_quantization_fn(n.get_weights_by_keys(fw_impl.constants.KERNEL), #TODO: take from model context
                                                           n_bits=weights_qc.weights_n_bits,
                                                           signed=True,
                                                           quantization_params=weights_qc.weights_quantization_params,

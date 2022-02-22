@@ -27,7 +27,8 @@ import operator
 
 from model_compression_toolkit.common.defaultdict import DefaultDict
 from model_compression_toolkit.common.framework_info import FrameworkInfo, ChannelAxis
-from model_compression_toolkit.common.quantization.quantization_config import QuantizationMethod
+# from model_compression_toolkit import QuantizationMethod
+from model_compression_toolkit.common.hardware_model.quantization_config import QuantizationMethod
 from model_compression_toolkit.common.quantization.quantizers.kmeans_quantizer import kmeans_quantizer
 from model_compression_toolkit.common.quantization.quantizers.lut_kmeans_quantizer import lut_kmeans_quantizer
 from model_compression_toolkit.common.quantization.quantizers.uniform_quantizers import power_of_two_quantizer, \
@@ -98,7 +99,6 @@ LAYER2MINMAX = {Softmax: (0, 1),
                 relu: (0, None),
                 ReLU6: (0, None),
                 relu6: (0, None)}
-
 """
 Mapping from a QuantizationMethod to an activation quantizer function.
 """
@@ -120,9 +120,10 @@ Output channel index of the model's layers
 """
 OUTPUT_CHANNEL_INDEX = ChannelAxis.NCHW
 
-DEFAULT_PYTORCH_INFO = FrameworkInfo(KERNEL_OPS,
-                                     ACTIVATION,
-                                     NO_QUANTIZATION,
+DEFAULT_PYTORCH_INFO = FrameworkInfo(
+    # KERNEL_OPS,
+    #                                  ACTIVATION,
+    #                                  NO_QUANTIZATION,
                                      ACTIVATION_QUANTIZER_MAPPING,
                                      WEIGHTS_QUANTIZER_MAPPING,
                                      DEFAULT_CHANNEL_AXIS_DICT,

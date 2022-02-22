@@ -17,15 +17,15 @@ import copy
 
 from typing import Any, List
 
-from model_compression_toolkit.common.quantization.quantization_config import QuantizationConfig
+from model_compression_toolkit.common.quantization.quantization_config import OptimizationParams
 from model_compression_toolkit.common import Graph, BaseNode
 from model_compression_toolkit.common.framework_info import FrameworkInfo
 from model_compression_toolkit.common.logger import Logger
 from model_compression_toolkit.common.mixed_precision.mixed_precision_quantization_config import \
-    MixedPrecisionQuantizationConfig
+    MixedPrecisionOptimizationParams
 
 
-def set_bit_widths(quant_config: QuantizationConfig,
+def set_bit_widths(quant_config: OptimizationParams,
                    graph_to_set_bit_widths: Graph,
                    fw_info: FrameworkInfo = None,
                    bit_widths_config: List[int] = None) -> Graph:
@@ -44,40 +44,35 @@ def set_bit_widths(quant_config: QuantizationConfig,
     """
     graph = copy.deepcopy(graph_to_set_bit_widths)
 
-    if isinstance(quant_config, MixedPrecisionQuantizationConfig):
-        if len(quant_config.weights_n_bits) == 0:
-            Logger.critical(
-                f'Quantization configuration nbits has to contain at least one bit width. Length is: '
-                f'{len(quant_config.weights_n_bits)}')
-
+    if not bit_widths_config is None:
         # When working in mixed-precision mode, and there's only one bitwidth, we simply set the
         # only candidate of the node as its final weight quantization configuration.
-        if len(quant_config.weights_n_bits) == 1:
-            for n in graph.nodes:
-                if n.name in graph.get_configurable_sorted_nodes_names():
-                    assert len(n.candidates_weights_quantization_cfg) == 1
-                    n.final_weights_quantization_cfg = n.candidates_weights_quantization_cfg[0]
+        # if len(quant_config.weights_n_bits) == 1:
+        #     for n in graph.nodes:
+        #         if n.name in graph.get_configurable_sorted_nodes_names():
+        #             assert len(n.candidates_weights_quantization_cfg) == 1
+        #             n.final_weights_quantization_cfg = n.candidates_weights_quantization_cfg[0]
+        #
+        # else:
+        Logger.info(f'Set bit widths from configuration: {bit_widths_config}')
+        # Get a list of nodes' names we need to finalize (that they have at least one weight qc candidate).
+        sorted_nodes_names = graph.get_configurable_sorted_nodes_names()
+        for node in graph.nodes:  # set a specific node qc for each node final weights qc
+            # If it's reused, take the configuration that the base node has
+            node_name = node.name if not node.reuse else '_'.join(node.name.split('_')[:-2])
+            if node_name in sorted_nodes_names:  # only configurable nodes are in this list
+                node_index_in_graph = sorted_nodes_names.index(node_name)
+                _set_node_qc(bit_widths_config,
+                             fw_info,
+                             node,
+                             node_index_in_graph)
 
-        else:
-            Logger.info(f'Set bit widths from configuration: {bit_widths_config}')
-            # Get a list of nodes' names we need to finalize (that they have at least one weight qc candidate).
-            sorted_nodes_names = graph.get_configurable_sorted_nodes_names()
-            for node in graph.nodes:  # set a specific node qc for each node final weights qc
-                # If it's reused, take the configuration that the base node has
-                node_name = node.name if not node.reuse else '_'.join(node.name.split('_')[:-2])
-                if node_name in sorted_nodes_names:  # only configurable nodes are in this list
-                    node_index_in_graph = sorted_nodes_names.index(node_name)
-                    _set_node_qc(bit_widths_config,
-                                 fw_info,
-                                 node,
-                                 node_index_in_graph)
-
-    # When working in non-mixed-precision mode, there's only one bitwidth, and we simply set the
+    # When working in non-mixed-precision mode, there should be only one bitwidth, and we should set the
     # only candidate of the node as its final weight quantization configuration.
     else:
         for n in graph.nodes:
-            if fw_info.in_kernel_ops(n):
-                assert len(n.candidates_weights_quantization_cfg) == 1
+            if n.is_weights_quantization_enabled():
+                # assert len(n.candidates_weights_quantization_cfg) == 1
                 n.final_weights_quantization_cfg = n.candidates_weights_quantization_cfg[0]
 
     return graph
@@ -125,10 +120,10 @@ def _set_node_qc(bit_width_cfg: List[int],
         node_index_in_graph: Index of the node in the bit_width_cfg.
 
     """
-    if fw_info.in_kernel_ops(node):
-        node_qc = _get_node_qc_by_bit_widths(node, bit_width_cfg, node_index_in_graph)
-        if node_qc is None:
-            Logger.critical(f'Node {node.name} quantization configuration from configuration file'
-                            f' was not found in candidates configurations.')
-        else:
-            node.final_weights_quantization_cfg = node_qc
+    # if fw_info.in_kernel_ops(node):
+    node_qc = _get_node_qc_by_bit_widths(node, bit_width_cfg, node_index_in_graph)
+    if node_qc is None:
+        Logger.critical(f'Node {node.name} quantization configuration from configuration file'
+                        f' was not found in candidates configurations.')
+    else:
+        node.final_weights_quantization_cfg = node_qc

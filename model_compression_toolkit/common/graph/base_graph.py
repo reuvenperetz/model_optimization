@@ -22,6 +22,9 @@ import numpy as np
 
 from networkx.algorithms.dag import topological_sort
 
+from model_compression_toolkit.common.hardware_model.framework_hardware_model import \
+    FrameworkHardwareModel
+# from model_compression_toolkit.common.framework_implementation import FrameworkImplementation
 from model_compression_toolkit.common.framework_info import FrameworkInfo
 from model_compression_toolkit.common.graph.edge import EDGE_SINK_INDEX, EDGE_SOURCE_INDEX
 from model_compression_toolkit.common.graph.edge import Edge, convert_to_edge
@@ -47,6 +50,7 @@ class Graph(nx.MultiDiGraph, GraphSearches):
                  output_nodes: List[OutTensor],
                  edge_list: List[Edge],
                  fw_info: FrameworkInfo = None,
+                 fw_hw_model: FrameworkHardwareModel = None,
                  **attr):
         """
         Args:
@@ -70,6 +74,7 @@ class Graph(nx.MultiDiGraph, GraphSearches):
                           **e.get_attributes())
         self.user_info = UserInformation()
         self.fw_info = fw_info
+        self.fw_hw_model = fw_hw_model
 
     def set_fw_info(self,
                    fw_info: FrameworkInfo):
@@ -80,6 +85,12 @@ class Graph(nx.MultiDiGraph, GraphSearches):
         """
 
         self.fw_info = fw_info
+
+    def set_fw_impl(self, fw_impl):
+        self.fw_impl = fw_impl
+
+    def set_fw_hw_model(self, fw_hw_model: FrameworkHardwareModel):
+        self.fw_hw_model = fw_hw_model
 
 
     def get_topo_sorted_nodes(self):

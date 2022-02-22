@@ -17,15 +17,14 @@ from enum import Enum
 from typing import List, Callable
 
 from model_compression_toolkit.common.mixed_precision.distance_weighting import get_average_weights
-from model_compression_toolkit.common.quantization.quantization_config import QuantizationConfig, DEFAULTCONFIG
+from model_compression_toolkit.common.quantization.quantization_config import OptimizationParams, DEFAULTCONFIG
 from model_compression_toolkit.common.similarity_analyzer import compute_mse
 
 
-class MixedPrecisionQuantizationConfig(QuantizationConfig):
+class MixedPrecisionOptimizationParams(OptimizationParams):
 
     def __init__(self,
-                 qc: QuantizationConfig = DEFAULTCONFIG,
-                 weights_n_bits: List[int] = None,
+                 qc: OptimizationParams = DEFAULTCONFIG,
                  compute_distance_fn: Callable = compute_mse,
                  distance_weighting_method: Callable = get_average_weights,
                  num_of_images: int = 32,
@@ -36,17 +35,20 @@ class MixedPrecisionQuantizationConfig(QuantizationConfig):
         support mixed-precision model quantization.
 
         Args:
-            qc (QuantizationConfig): QuantizationConfig object containing parameters of how the model should be quantized.
+            qc (OptimizationParams): QuantizationConfig object containing parameters of how the model should be
+            quantized.
             weights_n_bits (List[int]): List of possible number of bits to quantize the coefficients.
             compute_distance_fn (Callable): Function to compute a distance between two tensors.
-            distance_weighting_method (Callable): Function to use when weighting the distances among different layers when computing the sensitivity metric.
-            num_of_images (int): Number of images to use to evaluate the sensitivity of a mixed-precision model comparing to the float model.
-            configuration_overwrite (List[int]): A list of integers that enables overwrite of mixed precision with a predefined one.
+            distance_weighting_method (Callable): Function to use when weighting the distances among different layers
+            when computing the sensitivity metric.
+            num_of_images (int): Number of images to use to evaluate the sensitivity of a mixed-precision model
+            comparing to the float model.
+            configuration_overwrite (List[int]): A list of integers that enables overwrite of mixed precision with a
+            predefined one.
 
         """
 
         super().__init__(**qc.__dict__)
-        self.weights_n_bits = weights_n_bits if weights_n_bits is not None else [qc.weights_n_bits]
         self.compute_distance_fn = compute_distance_fn
         self.distance_weighting_method = distance_weighting_method
         self.num_of_images = num_of_images
@@ -54,7 +56,6 @@ class MixedPrecisionQuantizationConfig(QuantizationConfig):
 
 
 # Default quantization configuration the library use.
-DEFAULT_MIXEDPRECISION_CONFIG = MixedPrecisionQuantizationConfig(DEFAULTCONFIG,
-                                                                 [2, 4, 8],
+DEFAULT_MIXEDPRECISION_CONFIG = MixedPrecisionOptimizationParams(DEFAULTCONFIG,
                                                                  compute_mse,
                                                                  get_average_weights)

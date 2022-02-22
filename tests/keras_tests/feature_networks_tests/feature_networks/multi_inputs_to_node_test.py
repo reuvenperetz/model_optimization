@@ -12,10 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
+from tests.keras_tests.keras_hw_models import get_keras_float_model
 
-
-from tests.common_tests.base_feature_test import BaseFeatureNetworkTest
-import model_compression_toolkit as mct
 import tensorflow as tf
 from tests.keras_tests.feature_networks_tests.base_keras_feature_test import BaseKerasFeatureNetworkTest
 import numpy as np
@@ -29,13 +27,9 @@ class MultiInputsToNodeTest(BaseKerasFeatureNetworkTest):
     def __init__(self, unit_test):
         super().__init__(unit_test)
 
-    def get_quantization_config(self):
-        return mct.QuantizationConfig(mct.QuantizationErrorMethod.MSE, mct.QuantizationErrorMethod.MSE,
-                                      mct.QuantizationMethod.POWER_OF_TWO, mct.QuantizationMethod.POWER_OF_TWO, 16, 16,
-                                      True, True, True, input_scaling=True)
+    def get_fw_hw_model(self):
+        return get_keras_float_model()
 
-    def get_input_shapes(self):
-        return [[self.val_batch_size, 224, 224, 3]]
 
     def create_networks(self):
         inputs = layers.Input(shape=self.get_input_shapes()[0][1:])

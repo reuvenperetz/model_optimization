@@ -13,6 +13,8 @@
 # limitations under the License.
 # ==============================================================================
 import tensorflow as tf
+
+import model_compression_toolkit.common.hardware_model.quantization_config
 from tests.keras_tests.feature_networks_tests.base_keras_feature_test import BaseKerasFeatureNetworkTest
 
 if tf.__version__ < "2.6":
@@ -20,7 +22,6 @@ if tf.__version__ < "2.6":
 else:
     from keras.layers.core import SlicingOpLambda
 
-from tests.common_tests.base_feature_test import BaseFeatureNetworkTest
 import model_compression_toolkit as mct
 
 import numpy as np
@@ -35,8 +36,11 @@ class SlicingOpLambdaTest(BaseKerasFeatureNetworkTest):
         super().__init__(unit_test, val_batch_size=1)
 
     def get_quantization_config(self):
-        return mct.QuantizationConfig(mct.QuantizationErrorMethod.MSE, mct.QuantizationErrorMethod.MSE,
-                                      mct.QuantizationMethod.POWER_OF_TWO, mct.QuantizationMethod.POWER_OF_TWO, 16, 16,
+        return mct.OptimizationParams(mct.QuantizationErrorMethod.MSE, mct.QuantizationErrorMethod.MSE,
+                                      model_compression_toolkit.common.framework_hardware_spec.hardware_definition
+                                      .quantization.quantization_config.QuantizationMethod.POWER_OF_TWO,
+                                      model_compression_toolkit.common.framework_hardware_spec.hardware_definition
+                                      .quantization.quantization_config.QuantizationMethod.POWER_OF_TWO, 16, 16,
                                       False, False, True)
 
 

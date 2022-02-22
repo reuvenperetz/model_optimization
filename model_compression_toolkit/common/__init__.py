@@ -18,7 +18,7 @@ from model_compression_toolkit.common.framework_info import FrameworkInfo
 from model_compression_toolkit.common.graph.base_graph import Graph
 from model_compression_toolkit.common.graph.base_node import BaseNode
 from model_compression_toolkit.common.logger import Logger
-from model_compression_toolkit.common.quantization.quantization_config import QuantizationConfig, DEFAULTCONFIG
+from model_compression_toolkit.common.quantization.quantization_config import OptimizationParams, DEFAULTCONFIG
 from model_compression_toolkit.common.quantization.quantizers.quantizers_helpers import power_of_two_constraint
 from model_compression_toolkit.common.collectors.statistics_collector import StatsCollector, NoStatsCollector
 

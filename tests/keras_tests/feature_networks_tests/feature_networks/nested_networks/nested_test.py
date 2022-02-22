@@ -14,6 +14,10 @@
 # ==============================================================================
 
 import tensorflow as tf
+
+from tests.keras_tests.keras_hw_models import get_keras_float_model
+
+
 if tf.__version__ < "2.6":
     from tensorflow.python.keras.engine.functional import Functional
     from tensorflow.python.keras.engine.sequential import Sequential
@@ -37,8 +41,8 @@ class NestedTest(BaseKerasFeatureNetworkTest):
         super().__init__(unit_test,
                          input_shape=(16,16,3))
 
-    def get_quantization_config(self):
-        return mct.QuantizationConfig(enable_weights_quantization=False, enable_activation_quantization=False)
+    def get_fw_hw_model(self):
+        return get_keras_float_model()
 
     # Dummy model to test reader's recursively model parsing
     def dummy_model(self, input_shape):

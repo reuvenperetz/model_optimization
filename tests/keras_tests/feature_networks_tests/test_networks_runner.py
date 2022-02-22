@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
+import model_compression_toolkit.common.hardware_model.quantization_config
 import model_compression_toolkit.common.gptq.gptq_config
 from model_compression_toolkit.keras.default_framework_info import DEFAULT_KERAS_INFO
 import tensorflow as tf
@@ -19,6 +20,7 @@ import numpy as np
 import unittest
 import model_compression_toolkit as mct
 from model_compression_toolkit.keras.gradient_ptq.gptq_loss import multiple_tensors_mse_loss
+from tests.common_tests.helpers.fw_hw_models import get_2bits_fw_hw_model, get_8bits_fw_hw_model, get_float_fw_hw_model
 from tests.common_tests.helpers.tensors_compare import cosine_similarity
 from enum import Enum
 import random
@@ -26,26 +28,55 @@ import random
 keras = tf.keras
 layers = keras.layers
 
-TWO_BIT_QUANTIZATION = mct.QuantizationConfig(activation_error_method=mct.QuantizationErrorMethod.MSE,
+
+
+OPTIMIZATION_PARAMS = mct.OptimizationParams(activation_error_method=mct.QuantizationErrorMethod.MSE,
                                               weights_error_method=mct.QuantizationErrorMethod.MSE,
-                                              activation_quantization_method=mct.QuantizationMethod.POWER_OF_TWO,
-                                              weights_quantization_method=mct.QuantizationMethod.POWER_OF_TWO,
-                                              activation_n_bits=2, weights_n_bits=2, relu_unbound_correction=False,
-                                              weights_bias_correction=False, weights_per_channel_threshold=True)
+                                              # activation_quantization_method=model_compression_toolkit.QuantizationMethod.POWER_OF_TWO,
+                                              # weights_quantization_method=model_compression_toolkit.QuantizationMethod.POWER_OF_TWO,
+                                              # activation_n_bits=2,
+                                              # weights_n_bits=2,
+                                              relu_unbound_correction=False,
+                                              weights_bias_correction=False,
+                                              # weights_per_channel_threshold=True
+                                              )
 
-EIGHT_BIT_QUANTIZATION = mct.QuantizationConfig(activation_error_method=mct.QuantizationErrorMethod.MSE,
-                                                weights_error_method=mct.QuantizationErrorMethod.MSE,
-                                                activation_quantization_method=mct.QuantizationMethod.POWER_OF_TWO,
-                                                weights_quantization_method=mct.QuantizationMethod.POWER_OF_TWO,
-                                                activation_n_bits=8, weights_n_bits=8, relu_unbound_correction=False,
-                                                weights_bias_correction=False, weights_per_channel_threshold=True)
+# TWO_BIT_QUANTIZATION = mct.OptimizationParams(activation_error_method=mct.QuantizationErrorMethod.MSE,
+#                                               weights_error_method=mct.QuantizationErrorMethod.MSE,
+#                                               # activation_quantization_method=model_compression_toolkit.QuantizationMethod.POWER_OF_TWO,
+#                                               # weights_quantization_method=model_compression_toolkit.QuantizationMethod.POWER_OF_TWO,
+#                                               # activation_n_bits=2,
+#                                               # weights_n_bits=2,
+#                                               relu_unbound_correction=False,
+#                                               weights_bias_correction=False,
+#                                               # weights_per_channel_threshold=True
+#                                               )
+TWO_BIT_QUANTIZATION = get_2bits_fw_hw_model()
 
-FLOAT_QUANTIZATION = mct.QuantizationConfig(activation_error_method=mct.QuantizationErrorMethod.MSE,
-                                            weights_error_method=mct.QuantizationErrorMethod.MSE,
-                                            activation_quantization_method=mct.QuantizationMethod.POWER_OF_TWO,
-                                            weights_quantization_method=mct.QuantizationMethod.POWER_OF_TWO,
-                                            activation_n_bits=16, weights_n_bits=16, relu_unbound_correction=False,
-                                            weights_bias_correction=False, weights_per_channel_threshold=True)
+# EIGHT_BIT_QUANTIZATION = mct.OptimizationParams(activation_error_method=mct.QuantizationErrorMethod.MSE,
+#                                                 weights_error_method=mct.QuantizationErrorMethod.MSE,
+#                                                 # activation_quantization_method=model_compression_toolkit.QuantizationMethod.POWER_OF_TWO,
+#                                                 # weights_quantization_method=model_compression_toolkit.QuantizationMethod.POWER_OF_TWO,
+#                                                 # activation_n_bits=8,
+#                                                 # weights_n_bits=8,
+#                                                 relu_unbound_correction=False,
+#                                                 weights_bias_correction=False,
+#                                                 # weights_per_channel_threshold=True
+#                                                 )
+EIGHT_BIT_QUANTIZATION = get_8bits_fw_hw_model()
+
+# FLOAT_QUANTIZATION = mct.OptimizationParams(activation_error_method=mct.QuantizationErrorMethod.MSE,
+#                                             weights_error_method=mct.QuantizationErrorMethod.MSE,
+#                                             # activation_quantization_method=model_compression_toolkit.QuantizationMethod.POWER_OF_TWO,
+#                                             # weights_quantization_method=model_compression_toolkit.QuantizationMethod.POWER_OF_TWO,
+#                                             # activation_n_bits=16,
+#                                             # weights_n_bits=16,
+#                                             relu_unbound_correction=False,
+#                                             weights_bias_correction=False,
+#                                             # weights_per_channel_threshold=True
+#                                             )
+
+FLOAT_QUANTIZATION = get_float_fw_hw_model()
 
 
 class RunMode(Enum):
@@ -71,21 +102,21 @@ class NetworkTest(object):
         self.num_calibration_iter = num_calibration_iter
         self.gptq = gptq
 
-    def compare(self, inputs_list, quantized_model, qc):
+    def compare(self, inputs_list, quantized_model, fw_hw_model):
         output_q = quantized_model.predict(inputs_list)
         output_f = self.model_float.predict(inputs_list)
         if isinstance(output_f, list):
             cs = np.mean([cosine_similarity(oq, of) for oq, of, in zip(output_q, output_f)])
         else:
             cs = cosine_similarity(output_f, output_q)
-        if run_mode(qc) == RunMode.FLOAT:
+        if run_mode(fw_hw_model) == RunMode.FLOAT:
             self.unit_test.assertTrue(np.isclose(cs, 1, 0.001), msg=f'fail cosine similarity check: {cs}')
-        elif run_mode(qc) == RunMode.EIGHT:
+        elif run_mode(fw_hw_model) == RunMode.EIGHT:
             pass  # remove the cs check for 8 bit quantizaiton at this stage
             # self.unit_test.assertTrue(np.isclose(cs, 1, atol=0.6), msg=f'fail cosine similarity check:{cs}')
-        elif run_mode(qc) == RunMode.TWO:
+        elif run_mode(fw_hw_model) == RunMode.TWO:
             self.unit_test.assertTrue(np.isclose(cs, 0, atol=0.5), msg=f'fail cosine similarity check:{cs}')
-        if run_mode(qc) == RunMode.EIGHT:
+        if run_mode(fw_hw_model) == RunMode.EIGHT:
             # TFLite Converter only support eight bit quantization
             try:
                 converter = tf.lite.TFLiteConverter.from_keras_model(quantized_model)
@@ -94,7 +125,7 @@ class NetworkTest(object):
                 error_msg = e.message if hasattr(e, 'message') else str(e)
                 self.unit_test.assertTrue(False, f'fail TFLite convertion with the following error: {error_msg}')
 
-    def run_network(self, inputs_list, qc):
+    def run_network(self, inputs_list, fw_hw_model):
         def representative_data_gen():
             return inputs_list
 
@@ -105,17 +136,19 @@ class NetworkTest(object):
 
             ptq_model, quantization_info = mct.keras_post_training_quantization(self.model_float,
                                                                                 representative_data_gen,
-                                                                                quant_config=qc,
+                                                                                quant_config=OPTIMIZATION_PARAMS,
                                                                                 fw_info=DEFAULT_KERAS_INFO,
                                                                                 n_iter=self.num_calibration_iter,
-                                                                                gptq_config=arc)
+                                                                                gptq_config=arc,
+                                                                                fw_hw_model=fw_hw_model)
         else:
             ptq_model, quantization_info = mct.keras_post_training_quantization(self.model_float,
                                                                                 representative_data_gen,
-                                                                                quant_config=qc,
+                                                                                quant_config=OPTIMIZATION_PARAMS,
                                                                                 fw_info=DEFAULT_KERAS_INFO,
-                                                                                n_iter=self.num_calibration_iter)
-        self.compare(inputs_list, ptq_model, qc)
+                                                                                n_iter=self.num_calibration_iter,
+                                                                                fw_hw_model=fw_hw_model)
+        self.compare(inputs_list, ptq_model, fw_hw_model)
 
 
 def set_seed():

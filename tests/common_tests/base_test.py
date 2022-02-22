@@ -48,6 +48,9 @@ class BaseTest:
     def get_ptq_facade(self):
         raise NotImplementedError(f'{self.__class__} did not implement get_ptq_facade')
 
+    def get_fw_hw_model(self):
+        raise NotImplementedError(f'{self.__class__} did not implement get_fw_hw_model')
+
     def get_mixed_precision_ptq_facade(self):
         raise NotImplementedError(f'{self.__class__} did not implement get_mixed_precision_ptq_facade')
 

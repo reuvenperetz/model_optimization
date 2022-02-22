@@ -13,8 +13,11 @@
 # limitations under the License.
 # ==============================================================================
 
-import model_compression_toolkit as mct
 import tensorflow as tf
+
+from tests.keras_tests.keras_hw_models import get_keras_float_model
+
+
 if tf.__version__ < "2.6":
     from tensorflow.python.keras.engine.functional import Functional
     from tensorflow.python.keras.engine.sequential import Sequential
@@ -34,10 +37,8 @@ class NestedModelMultipleInputsTest(BaseKerasFeatureNetworkTest):
     def __init__(self, unit_test):
         super().__init__(unit_test)
 
-    def get_quantization_config(self):
-        return mct.QuantizationConfig(mct.QuantizationErrorMethod.MSE, mct.QuantizationErrorMethod.MSE,
-                                      mct.QuantizationMethod.POWER_OF_TWO, mct.QuantizationMethod.POWER_OF_TWO, 16, 16,
-                                      True, True, True)
+    def get_fw_hw_model(self):
+        return get_keras_float_model()
 
     def get_input_shapes(self):
         return [[self.val_batch_size, 236, 236, 3]]
@@ -69,7 +70,7 @@ class NestedModelMultipleInputsTest(BaseKerasFeatureNetworkTest):
             else:
                 self.unit_test.assertFalse(isinstance(l, Functional) or isinstance(l, Sequential))
         num_layers = 8
-        num_fq_layers = 6
+        num_fq_layers = 0
         self.unit_test.assertTrue(len(quantized_model.layers) == (num_layers+num_fq_layers))
         y = float_model.predict(input_x)
         y_hat = quantized_model.predict(input_x)

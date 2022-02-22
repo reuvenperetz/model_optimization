@@ -13,14 +13,12 @@
 # limitations under the License.
 # ==============================================================================
 
-
-from tests.common_tests.base_feature_test import BaseFeatureNetworkTest
 import model_compression_toolkit as mct
 import tensorflow as tf
 from tests.keras_tests.feature_networks_tests.base_keras_feature_test import BaseKerasFeatureNetworkTest
 import numpy as np
 from model_compression_toolkit.keras.back2framework.model_builder import is_layer_fake_quant
-from tests.common_tests.helpers.tensors_compare import cosine_similarity
+from tests.keras_tests.keras_hw_models import get_keras_16bits_model
 
 keras = tf.keras
 layers = keras.layers
@@ -30,9 +28,13 @@ class BaseInputScalingTest(BaseKerasFeatureNetworkTest):
     def __init__(self, unit_test):
         super().__init__(unit_test)
 
+
+    def get_fw_hw_model(self):
+        return get_keras_16bits_model()
+
     def get_quantization_config(self):
-        return mct.QuantizationConfig(mct.QuantizationErrorMethod.NOCLIPPING, mct.QuantizationErrorMethod.NOCLIPPING,
-                                      mct.QuantizationMethod.POWER_OF_TWO, mct.QuantizationMethod.POWER_OF_TWO, 16, 16,
+        return mct.OptimizationParams(mct.QuantizationErrorMethod.NOCLIPPING,
+                                      mct.QuantizationErrorMethod.NOCLIPPING,
                                       input_scaling=True)
 
 

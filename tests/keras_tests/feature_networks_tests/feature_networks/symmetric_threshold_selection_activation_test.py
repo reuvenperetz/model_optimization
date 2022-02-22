@@ -16,8 +16,12 @@
 
 import tensorflow as tf
 import numpy as np
+
+import model_compression_toolkit.common.hardware_model.quantization_config
+from model_compression_toolkit.common.hardware_model import HardwareModel
+from model_compression_toolkit.common.hardware_model.framework_hardware_model import FrameworkHardwareModel
 from tests.keras_tests.feature_networks_tests.base_keras_feature_test import BaseKerasFeatureNetworkTest
-import model_compression_toolkit as cmo
+import model_compression_toolkit as mct
 
 keras = tf.keras
 layers = keras.layers
@@ -32,9 +36,22 @@ class SymmetricThresholdSelectionActivationTest(BaseKerasFeatureNetworkTest):
         return [np.random.uniform(low=-7, high=7, size=in_shape) for in_shape in self.get_input_shapes()]
 
     def get_quantization_config(self):
-        return cmo.QuantizationConfig(activation_error_method=self.activation_threshold_method,
-                                      activation_quantization_method=cmo.QuantizationMethod.SYMMETRIC,
-                                      activation_n_bits=8)
+        return mct.OptimizationParams(activation_error_method=self.activation_threshold_method)
+
+    def get_fw_hw_model(self):
+        eight_bits = mct.OpQuantizationConfig(
+            activation_quantization_method=mct.QuantizationMethod.SYMMETRIC,
+            weights_quantization_method=mct.QuantizationMethod.POWER_OF_TWO,
+            activation_n_bits=8,
+            weights_n_bits=8,
+            weights_per_channel_threshold=True,
+            enable_weights_quantization=True,
+            enable_activation_quantization=True
+        )
+        default_configuration_options = model_compression_toolkit.QuantizationConfigOptions([eight_bits])
+        hw_model = HardwareModel(default_configuration_options, name='test')
+        return FrameworkHardwareModel(hw_model, "fwhw_test")
+
 
     def create_networks(self):
         inputs = layers.Input(shape=self.get_input_shapes()[0][1:])

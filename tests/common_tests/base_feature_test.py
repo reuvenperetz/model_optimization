@@ -17,7 +17,7 @@ from typing import List
 import numpy as np
 
 from model_compression_toolkit.common.mixed_precision.mixed_precision_quantization_config import \
-    MixedPrecisionQuantizationConfig
+    MixedPrecisionOptimizationParams
 from model_compression_toolkit.common.user_info import UserInformation
 from tests.common_tests.base_test import BaseTest
 from tests.common_tests.base_layer_test import LayerTestMode
@@ -51,7 +51,7 @@ class BaseFeatureNetworkTest(BaseTest):
         feature_networks = feature_networks if isinstance(feature_networks, list) else [feature_networks]
         for model_float in feature_networks:
             qc = self.get_quantization_config()
-            if isinstance(qc, MixedPrecisionQuantizationConfig):
+            if isinstance(qc, MixedPrecisionOptimizationParams):
                 ptq_model, quantization_info = self.get_mixed_precision_ptq_facade()(model_float,
                                                                                      self.representative_data_gen,
                                                                                      n_iter=self.num_calibration_iter,
@@ -59,7 +59,8 @@ class BaseFeatureNetworkTest(BaseTest):
                                                                                      fw_info=self.get_fw_info(),
                                                                                      network_editor=self.get_network_editor(),
                                                                                      gptq_config=self.get_gptq_config(),
-                                                                                     target_kpi=self.get_kpi())
+                                                                                     target_kpi=self.get_kpi(),
+                                                                                     fw_hw_model=self.get_fw_hw_model())
             else:
                 ptq_model, quantization_info = self.get_ptq_facade()(model_float,
                                                                      self.representative_data_gen,
@@ -67,7 +68,8 @@ class BaseFeatureNetworkTest(BaseTest):
                                                                      quant_config=qc,
                                                                      fw_info=self.get_fw_info(),
                                                                      network_editor=self.get_network_editor(),
-                                                                     gptq_config=self.get_gptq_config())
+                                                                     gptq_config=self.get_gptq_config(),
+                                                                     fw_hw_model=self.get_fw_hw_model())
 
             self.compare(ptq_model,
                          model_float,

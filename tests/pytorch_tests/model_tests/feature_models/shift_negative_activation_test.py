@@ -14,6 +14,7 @@
 # ==============================================================================
 import torch
 
+import model_compression_toolkit.common.hardware_model.quantization_config
 from model_compression_toolkit.pytorch.utils import to_torch_tensor
 from tests.pytorch_tests.model_tests.base_pytorch_test import BasePytorchTest
 import model_compression_toolkit as mct
@@ -53,10 +54,12 @@ class ShiftNegaviteActivationNetTest(BasePytorchTest):
 
     def get_quantization_configs(self):
         return {
-            'all_8bit': mct.QuantizationConfig(mct.QuantizationErrorMethod.NOCLIPPING,
+            'all_8bit': mct.OptimizationParams(mct.QuantizationErrorMethod.NOCLIPPING,
                                                mct.QuantizationErrorMethod.NOCLIPPING,
-                                               mct.QuantizationMethod.POWER_OF_TWO,
-                                               mct.QuantizationMethod.POWER_OF_TWO,
+                                               model_compression_toolkit.common.framework_hardware_spec
+                                               .hardware_definition.quantization.quantization_config.QuantizationMethod.POWER_OF_TWO,
+
+                                               model_compression_toolkit.common.framework_hardware_spec.hardware_definition.quantization.quantization_config.QuantizationMethod.POWER_OF_TWO,
                                                8, 8,
                                                enable_weights_quantization=True,
                                                enable_activation_quantization=True,

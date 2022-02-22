@@ -98,25 +98,38 @@ class BaseKerasLayerTest(BaseLayerTest):
 
     def __compare_8bits_quantization_mode(self, float_model, quantized_model):
         fw_info = self.get_fw_info()
+        fw_hw_model = self.get_fw_hw_model()
         for layer in quantized_model.layers:
             op = layer.function if isinstance(layer, TFOpLambda) else type(layer)
-            if op in fw_info.kernel_ops:
+            qco = fw_hw_model.get_qco_by_layer(op, layer)
+            assert len(qco.quantization_config_list) == 1
+            op_qc = qco.quantization_config_list[0]
+            if op_qc.enable_weights_quantization:
                 for attr in fw_info.get_kernel_op_attributes(type(layer)):
-                    self.unit_test.assertTrue(np.sum(np.abs(
-                        getattr(layer, attr) - getattr(float_model.get_layer(layer.name), attr))) > 0.0)
+                    if attr is not None:
+                        self.unit_test.assertTrue(np.sum(np.abs(getattr(layer, attr) - getattr(float_model.get_layer(layer.name), attr))) > 0.0)
+            else:
+                for qw, fw in layer.weights, float_model.get_layer(layer.name).weights:
+                    self.unit_test.assertTrue(np.sum(np.abs(qw.numpy()-fw.numpy())) == 0.0)
+
+            if op_qc.enable_activation_quantization and not is_layer_fake_quant(layer):
                 for next_layer in [node.layer for node in layer.outbound_nodes]:
                     self.unit_test.assertTrue(is_layer_fake_quant(next_layer))
-
-            elif op in fw_info.activation_ops:
-                for next_layer in [node.layer for node in layer.outbound_nodes]:
-                    self.unit_test.assertTrue(is_layer_fake_quant(next_layer))
-
-            elif op in fw_info.no_quantization_ops:
+            else:
                 for next_layer in [node.layer for node in layer.outbound_nodes]:
                     self.unit_test.assertFalse(is_layer_fake_quant(next_layer))
 
-            else:
-                raise Exception('Layer is not in framework info')
+
+            # elif op in fw_info.activation_ops:
+            # for next_layer in [node.layer for node in layer.outbound_nodes]:
+            #     self.unit_test.assertTrue(is_layer_fake_quant(next_layer))
+
+            # elif op in fw_info.no_quantization_ops:
+            # for next_layer in [node.layer for node in layer.outbound_nodes]:
+            #     self.unit_test.assertFalse(is_layer_fake_quant(next_layer))
+
+            # else:
+            #     raise Exception('Layer is not in framework info')
 
     def __compare_float_mode(self, float_model, quantized_model):
         for layer_index, layer in enumerate(quantized_model.layers):

@@ -13,15 +13,17 @@
 # limitations under the License.
 # ==============================================================================
 import random
-import unittest
 from torch.fx import symbolic_trace
+
+import model_compression_toolkit.common.hardware_model.quantization_config
 from model_compression_toolkit.pytorch.default_framework_info import DEFAULT_PYTORCH_INFO
-from model_compression_toolkit.pytorch.utils import get_working_device, set_model, to_torch_tensor, \
+from model_compression_toolkit.pytorch.utils import set_model, to_torch_tensor, \
     torch_tensor_to_numpy
 import model_compression_toolkit as mct
 import torch
 import numpy as np
 from tests.common_tests.base_feature_test import BaseFeatureNetworkTest
+from tests.common_tests.helpers.fw_hw_models import get_float_fw_hw_model, get_32bits_fw_hw_model, get_4bits_fw_hw_model
 
 """
 The base test class for the feature networks
@@ -31,30 +33,14 @@ class BasePytorchTest(BaseFeatureNetworkTest):
         super().__init__(unit_test)
         self.float_reconstruction_error = float_reconstruction_error
 
-    def get_quantization_configs(self):
-        return {
-            'no_quantization': mct.QuantizationConfig(mct.QuantizationErrorMethod.NOCLIPPING,
-                                                      mct.QuantizationErrorMethod.NOCLIPPING,
-                                                      mct.QuantizationMethod.POWER_OF_TWO,
-                                                      mct.QuantizationMethod.POWER_OF_TWO,
-                                                      32, 32, False, True, True,
-                                                      enable_weights_quantization=False,
-                                                      enable_activation_quantization=False),
-            'all_32bit': mct.QuantizationConfig(mct.QuantizationErrorMethod.NOCLIPPING,
-                                                mct.QuantizationErrorMethod.NOCLIPPING,
-                                                mct.QuantizationMethod.POWER_OF_TWO,
-                                                mct.QuantizationMethod.POWER_OF_TWO,
-                                                32, 32, False, True, True,
-                                                enable_weights_quantization=True,
-                                                enable_activation_quantization=True),
-            'all_4bit': mct.QuantizationConfig(mct.QuantizationErrorMethod.NOCLIPPING,
-                                               mct.QuantizationErrorMethod.NOCLIPPING,
-                                               mct.QuantizationMethod.POWER_OF_TWO,
-                                               mct.QuantizationMethod.POWER_OF_TWO,
-                                               4, 4, False, False, True,
-                                               enable_weights_quantization=True,
-                                               enable_activation_quantization=True),
-        }
+    def get_fw_hw_models(self):
+        return {'no_quantization': get_float_fw_hw_model(),
+                'all_32bit': get_32bits_fw_hw_model(),
+                'all_4bit': get_4bits_fw_hw_model()}
+
+    def get_quantization_config(self):
+        return mct.OptimizationParams(mct.QuantizationErrorMethod.NOCLIPPING,
+                               mct.QuantizationErrorMethod.NOCLIPPING)
 
     def create_inputs_shape(self):
         return [[self.val_batch_size, 3, 32, 32]]
@@ -108,12 +94,13 @@ class BasePytorchTest(BaseFeatureNetworkTest):
 
         ptq_models = {}
         model_float = self.create_feature_network(input_shapes)
-        for model_name, quant_config in self.get_quantization_configs().items():
+        for model_name, fw_hw_model in self.get_fw_hw_models().items():
             ptq_model, quantization_info = mct.pytorch_post_training_quantization(model_float,
                                                                                   representative_data_gen,
                                                                                   n_iter=1,
-                                                                                  quant_config=quant_config,
+                                                                                  quant_config=self.get_quantization_config(),
                                                                                   fw_info=DEFAULT_PYTORCH_INFO,
-                                                                                  network_editor=self.get_network_editor())
+                                                                                  network_editor=self.get_network_editor(),
+                                                                                  fw_hw_model=fw_hw_model)
             ptq_models.update({model_name: ptq_model})
         self.compare(ptq_models, model_float, input_x=x, quantization_info=quantization_info)

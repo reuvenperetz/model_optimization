@@ -72,6 +72,9 @@ class BaseNode:
         """
         return self.layer_class
 
+    def has_weights(self):
+        return len(self.weights) > 0
+
     def is_activation_quantization_enabled(self) -> bool:
         """
 
@@ -88,7 +91,7 @@ class BaseNode:
         """
         for qc in self.candidates_weights_quantization_cfg:
             assert self.candidates_weights_quantization_cfg[0].enable_weights_quantization == qc.enable_weights_quantization
-        return self.candidates_weights_quantization_cfg[0].enable_weights_quantization
+        return self.candidates_weights_quantization_cfg[0].enable_weights_quantization and self.has_weights()
 
     def __repr__(self):
         """
