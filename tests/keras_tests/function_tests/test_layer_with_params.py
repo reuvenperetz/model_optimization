@@ -6,7 +6,7 @@ from keras.layers import Conv2D, Conv2DTranspose, ReLU
 # from keras_modeling.keras_layer_filter_params import KerasLayerFilterParams
 
 from model_compression_toolkit.common.hardware_model.attribute_filter import GreaterEq, Smaller, Greater, Eq
-from model_compression_toolkit.keras.keras_layer_filter_params import KerasLayerFilterParams
+from model_compression_toolkit.keras.hardware_model.keras_layer_filter_params import KerasLayerFilterParams
 
 
 class LayerWithParamsTest(unittest.TestCase):

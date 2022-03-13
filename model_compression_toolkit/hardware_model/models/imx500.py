@@ -1,9 +1,9 @@
 from model_compression_toolkit.common.hardware_model.quantization_config import QuantizationMethod
 from model_compression_toolkit.common.hardware_model import OpQuantizationConfig, QuantizationConfigOptions
 from model_compression_toolkit.common.hardware_model.fusing import Fusing
-from model_compression_toolkit.common.hardware_model.hardware_model import \
+from model_compression_toolkit.hardware_model.hardware_model import \
     HardwareModel, get_default_quantization_config_options
-from model_compression_toolkit.common.hardware_model.operators import OperatorsSet, OperatorSetConcat
+from model_compression_toolkit.hardware_model.operators import OperatorsSet, OperatorSetConcat
 
 
 def get_imx500_model():

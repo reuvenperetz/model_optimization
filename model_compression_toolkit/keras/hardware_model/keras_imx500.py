@@ -9,12 +9,12 @@ from keras.layers import Conv2D, Dense, Reshape, Flatten, Cropping2D, ZeroPaddin
 # from keras_modeling.keras_layer_filter_params import KerasLayerFilterParams
 # from tensorflow.python.keras.engine.base_layer import TensorFlowOpLayer
 
-from model_compression_toolkit.models.imx500 import get_imx500_model
+from model_compression_toolkit.hardware_model.models import get_imx500_model
 from model_compression_toolkit.common.hardware_model.framework_hardware_model import \
     FrameworkHardwareModel
 from model_compression_toolkit.common.hardware_model.operations_to_layers import \
     OperationsSetToLayers
-from model_compression_toolkit.keras.keras_layer_filter_params import KerasLayerFilterParams
+from model_compression_toolkit.keras.hardware_model.keras_layer_filter_params import KerasLayerFilterParams
 
 
 def get_imx500_keras():

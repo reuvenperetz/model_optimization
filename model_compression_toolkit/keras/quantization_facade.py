@@ -31,7 +31,7 @@ from model_compression_toolkit.common.quantization.quantization_config import DE
 
 import importlib
 
-from model_compression_toolkit.keras.hardware_model.models.keras_imx500 import DEFAULT_KERAS_IMX500_MODEL
+from model_compression_toolkit.keras.hardware_model.keras_imx500 import DEFAULT_KERAS_IMX500_MODEL
 
 if importlib.util.find_spec("tensorflow") is not None\
         and importlib.util.find_spec("tensorflow_model_optimization") is not None:

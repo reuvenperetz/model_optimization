@@ -5,7 +5,7 @@ from model_compression_toolkit.common.hardware_model.current_framework_hardware_
     _current_framework_hardware_model
 from model_compression_toolkit.common.hardware_model.framework_hardware_model_component import \
     FrameworkHardwareModelComponent
-from model_compression_toolkit.common.hardware_model.operators import OperatorsSet, OperatorSetConcat
+from model_compression_toolkit.hardware_model.operators import OperatorsSet, OperatorSetConcat
 
 
 class OperationsToLayers:

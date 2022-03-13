@@ -3,10 +3,10 @@ import pprint
 
 # from hardware_modeling import HardwareModel
 # from hardware_modeling.immutable import ImmutableClass
-from model_compression_toolkit.common.hardware_model.operators import OperatorsSet
+from model_compression_toolkit.hardware_model.operators import OperatorsSet
 
 
-from model_compression_toolkit.common.hardware_model.hardware_model import \
+from model_compression_toolkit.hardware_model.hardware_model import \
     HardwareModel
 from model_compression_toolkit.common.hardware_model.current_framework_hardware_model import _current_framework_hardware_model
 

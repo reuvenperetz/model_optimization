@@ -1,7 +1,7 @@
 import pprint
 
 from model_compression_toolkit.common.hardware_model.global_config import GlobalConfig
-from model_compression_toolkit.common.hardware_model.operators import OperatorsSetBase
+from model_compression_toolkit.hardware_model.operators import OperatorsSetBase
 from model_compression_toolkit.common.hardware_model.quantization_config import OpQuantizationConfig, \
     QuantizationConfigOptions
 from model_compression_toolkit.common.hardware_model.fusing import Fusing

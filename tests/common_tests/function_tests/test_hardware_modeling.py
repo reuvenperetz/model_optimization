@@ -1,12 +1,12 @@
 import unittest
 
 from model_compression_toolkit import QuantizationMethod
-from model_compression_toolkit.common.hardware_model.hardware_model import \
+from model_compression_toolkit.hardware_model.hardware_model import \
     HardwareModel, get_default_quantization_config_options
 from model_compression_toolkit.common.hardware_model.quantization_config \
     import \
     QuantizationConfigOptions, OpQuantizationConfig
-from model_compression_toolkit.models.imx500 import get_imx500_model
+from model_compression_toolkit.hardware_model.models import get_imx500_model
 
 
 default_qc = OpQuantizationConfig(enable_activation_quantization=True,

@@ -25,7 +25,7 @@ from model_compression_toolkit.keras.back2framework.model_builder import model_b
 from model_compression_toolkit.common.model_builder_mode import ModelBuilderMode
 from model_compression_toolkit.common.substitutions.apply_substitutions import substitute
 from model_compression_toolkit.keras.default_framework_info import DEFAULT_KERAS_INFO
-from model_compression_toolkit.keras.hardware_model.models.keras_imx500 import DEFAULT_KERAS_IMX500_MODEL
+from model_compression_toolkit.keras.hardware_model.keras_imx500 import DEFAULT_KERAS_IMX500_MODEL
 from model_compression_toolkit.keras.keras_implementation import KerasImplementation
 from model_compression_toolkit.keras.reader.reader import model_reader
 from tests.common_tests.helpers.tensors_compare import cosine_similarity

@@ -3,7 +3,7 @@ from keras.applications.mobilenet_v2 import MobileNetV2
 import numpy as np
 
 from model_compression_toolkit import keras_post_training_quantization
-from model_compression_toolkit.keras.hardware_model.models.keras_imx500 import get_imx500_keras
+from model_compression_toolkit.keras.hardware_model.keras_imx500 import get_imx500_keras
 
 
 class KerasHWModelTest(unittest.TestCase):

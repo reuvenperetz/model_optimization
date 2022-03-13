@@ -1,8 +1,8 @@
 from enum import Enum
 
-from model_compression_toolkit.models.imx500 import get_imx500_model
-from model_compression_toolkit.models import get_qnnpack_model
-from model_compression_toolkit.models.tflite import get_tflite_hw_model
+from model_compression_toolkit.hardware_model.models import get_imx500_model
+from model_compression_toolkit.hardware_model.models import get_qnnpack_model
+from model_compression_toolkit.hardware_model.models import get_tflite_hw_model
 
 
 class HWModelCfg(Enum):

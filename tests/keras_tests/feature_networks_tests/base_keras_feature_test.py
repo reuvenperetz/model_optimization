@@ -12,14 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-from typing import List
 
 
 from model_compression_toolkit.common.framework_implementation import FrameworkImplementation
 from model_compression_toolkit.keras.default_framework_info import DEFAULT_KERAS_INFO
 from model_compression_toolkit import keras_post_training_quantization, \
     keras_post_training_quantization_mixed_precision, FrameworkInfo
-from model_compression_toolkit.keras.hardware_model.models.keras_imx500 import get_imx500_keras
+from model_compression_toolkit.keras.hardware_model.keras_imx500 import get_imx500_keras
 from model_compression_toolkit.keras.keras_implementation import KerasImplementation
 from tests.common_tests.base_feature_test import BaseFeatureNetworkTest
 

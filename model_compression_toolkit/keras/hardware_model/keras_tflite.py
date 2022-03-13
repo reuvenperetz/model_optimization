@@ -12,7 +12,7 @@ from model_compression_toolkit.common.hardware_model.framework_hardware_model im
 from model_compression_toolkit.common.hardware_model.operations_to_layers import OperationsSetToLayers
 
 from model_compression_toolkit.common.hardware_model.models_dictionary import hw_models_dict, HWModelCfg
-from model_compression_toolkit.keras.keras_layer_filter_params import KerasLayerFilterParams
+from model_compression_toolkit.keras.hardware_model.keras_layer_filter_params import KerasLayerFilterParams
 
 
 def get_keras_hardware_model_tflite():
