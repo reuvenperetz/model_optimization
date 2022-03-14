@@ -12,8 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-
-
+import model_compression_toolkit.common.hardware_model.quantization_config
 from model_compression_toolkit.keras.default_framework_info import DEFAULT_KERAS_INFO
 import unittest
 import numpy as np
@@ -37,9 +36,13 @@ class TestQuantizationConfigurations(unittest.TestCase):
         def representative_data_gen():
             return [x]
 
-        quantizer_methods = [mct.QuantizationMethod.POWER_OF_TWO,
-                             mct.QuantizationMethod.SYMMETRIC,
-                             mct.QuantizationMethod.UNIFORM]
+        quantizer_methods = [
+            model_compression_toolkit.common.framework_hardware_spec.hardware_definition.quantization
+                .quantization_config.QuantizationMethod.POWER_OF_TWO,
+            model_compression_toolkit.common.framework_hardware_spec.hardware_definition.quantization
+                .quantization_config.QuantizationMethod.SYMMETRIC,
+            model_compression_toolkit.common.framework_hardware_spec.hardware_definition.quantization
+                .quantization_config.QuantizationMethod.UNIFORM]
         quantization_error_methods = [mct.QuantizationErrorMethod.MSE,
                                     mct.QuantizationErrorMethod.NOCLIPPING,
                                     mct.QuantizationErrorMethod.MAE,
@@ -61,9 +64,10 @@ class TestQuantizationConfigurations(unittest.TestCase):
 
         model = model_gen()
         for quantize_method, error_method, bias_correction, per_channel, input_scaling in weights_test_combinations:
-            qc = mct.QuantizationConfig(activation_error_method=mct.QuantizationErrorMethod.NOCLIPPING,
+            qc = mct.OptimizationParams(activation_error_method=mct.QuantizationErrorMethod.NOCLIPPING,
                                         weights_error_method=error_method,
-                                        activation_quantization_method=mct.QuantizationMethod.POWER_OF_TWO,
+                                        activation_quantization_method=model_compression_toolkit.common
+                                        .framework_hardware_spec.hardware_definition.quantization.quantization_config.QuantizationMethod.POWER_OF_TWO,
                                         weights_quantization_method=quantize_method,
                                         activation_n_bits=8,
                                         weights_n_bits=16,
@@ -80,10 +84,11 @@ class TestQuantizationConfigurations(unittest.TestCase):
         model = model_gen()
         for quantize_method, error_method, relu_unbound_correction, shift_negative_correction\
                 in activation_test_combinations:
-            qc = mct.QuantizationConfig(activation_error_method=error_method,
+            qc = mct.OptimizationParams(activation_error_method=error_method,
                                         weights_error_method=mct.QuantizationErrorMethod.NOCLIPPING,
                                         activation_quantization_method=quantize_method,
-                                        weights_quantization_method=mct.QuantizationMethod.POWER_OF_TWO,
+                                        weights_quantization_method=model_compression_toolkit.common
+                                        .framework_hardware_spec.hardware_definition.quantization.quantization_config.QuantizationMethod.POWER_OF_TWO,
                                         activation_n_bits=8,
                                         weights_n_bits=16,
                                         relu_unbound_correction=relu_unbound_correction,

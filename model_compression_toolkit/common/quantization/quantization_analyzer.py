@@ -40,7 +40,7 @@ def create_tensor2node(graph: common.Graph,
 def analyzer_graph(node_analyze_func: Callable,
                    graph: common.Graph,
                    fw_info: common.FrameworkInfo,
-                   qc: common.QuantizationConfig = common.DEFAULTCONFIG):
+                   qc: common.OptimizationParams = common.DEFAULTCONFIG):
     """
     Go over all nodes in a graph, and create and set statistics collection tensors for each node's input and output.
     The tensors are stored in the graph.
@@ -60,7 +60,7 @@ def analyzer_graph(node_analyze_func: Callable,
         # If we use bias correction, and the node has coefficients to quantize, we need to make sure
         # its previous nodes' tensors are consistent with this node.
         # TODO: factor tensor marking in case of bias correction.
-        if qc.weights_bias_correction and fw_info.in_kernel_ops(n):
+        if qc.weights_bias_correction and n.is_weights_quantization_enabled():
             for ie in graph.incoming_edges(n):
                 input_node = ie.source_node
                 create_tensor2node(graph,

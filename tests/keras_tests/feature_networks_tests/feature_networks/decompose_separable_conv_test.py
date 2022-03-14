@@ -31,7 +31,7 @@ class DecomposeSeparableConvTest(BaseKerasFeatureNetworkTest):
         super().__init__(unit_test)
 
     def get_quantization_config(self):
-        return mct.QuantizationConfig(weights_bias_correction=False)
+        return mct.OptimizationParams(weights_bias_correction=False)
 
     # def create_inputs_shape(self):
     #     return [[self.val_batch_size, 3, 4, 5]]

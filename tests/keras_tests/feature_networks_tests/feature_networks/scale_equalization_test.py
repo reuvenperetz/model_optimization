@@ -16,11 +16,11 @@
 
 import numpy as np
 import tensorflow as tf
+
 from tests.keras_tests.feature_networks_tests.base_keras_feature_test import BaseKerasFeatureNetworkTest
 
 import model_compression_toolkit as mct
-from tests.common_tests.base_feature_test import BaseFeatureNetworkTest
-from tests.common_tests.helpers.tensors_compare import cosine_similarity
+from tests.keras_tests.keras_hw_models import get_keras_16bits_model
 
 keras = tf.keras
 layers = keras.layers
@@ -35,11 +35,15 @@ class ScaleEqualizationTest(BaseKerasFeatureNetworkTest):
         super().__init__(unit_test,
                          input_shape=(16,16,3))
 
+    def get_fw_hw_model(self):
+        return get_keras_16bits_model()
+
     def get_quantization_config(self):
-        return mct.QuantizationConfig(mct.QuantizationErrorMethod.MSE, mct.QuantizationErrorMethod.MSE,
-                                      mct.QuantizationMethod.POWER_OF_TWO, mct.QuantizationMethod.POWER_OF_TWO, 16, 16,
-                                      relu_unbound_correction=False, weights_bias_correction=False,
-                                      weights_per_channel_threshold=True, activation_channel_equalization=True)
+        return mct.OptimizationParams(mct.QuantizationErrorMethod.MSE,
+                                      mct.QuantizationErrorMethod.MSE,
+                                      relu_unbound_correction=False,
+                                      weights_bias_correction=False,
+                                      activation_channel_equalization=True)
 
     def create_networks(self):
         inputs = layers.Input(shape=self.get_input_shapes()[0][1:])

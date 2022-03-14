@@ -13,93 +13,26 @@
 # limitations under the License.
 # ==============================================================================
 
-
-import tensorflow as tf
-
-if tf.__version__ < "2.6":
-    from tensorflow.keras.layers import Conv2D, DepthwiseConv2D, Dense, Conv2DTranspose, Reshape, ZeroPadding2D, Dropout, \
-        MaxPooling2D, Activation, ReLU, GlobalAveragePooling2D, Add, Multiply, AveragePooling2D, UpSampling2D, InputLayer, \
-        Concatenate, Softmax, PReLU, Flatten, Cropping2D, ELU, Dot, LeakyReLU
-else:
-    from keras.layers import Conv2D, DepthwiseConv2D, Dense, Conv2DTranspose, Reshape, ZeroPadding2D, \
-    Dropout, MaxPooling2D, Activation, ReLU, GlobalAveragePooling2D, Add, Multiply, AveragePooling2D, UpSampling2D, \
-    InputLayer, Concatenate, Softmax, PReLU, Flatten, Cropping2D, Dot, ELU, LeakyReLU
-
-
-from model_compression_toolkit.common.defaultdict import DefaultDict
-from model_compression_toolkit.common.framework_info import FrameworkInfo, ChannelAxis
-from model_compression_toolkit.common.quantization.quantization_config import QuantizationMethod
+from model_compression_toolkit.hardware_model.quantization_config import QuantizationMethod
 from model_compression_toolkit.common.quantization.quantizers.kmeans_quantizer import kmeans_quantizer
 from model_compression_toolkit.common.quantization.quantizers.lut_kmeans_quantizer import lut_kmeans_quantizer
 from model_compression_toolkit.common.quantization.quantizers.uniform_quantizers import power_of_two_quantizer, \
     symmetric_quantizer, uniform_quantizer
+from model_compression_toolkit.keras.quantizer.fake_quant_builder import power_of_two_quantization, \
+    symmetric_quantization, uniform_quantization
+
+
+import tensorflow as tf
+
+if tf.__version__ < "2.6":
+    from tensorflow.keras.layers import Conv2D, DepthwiseConv2D, Dense, Conv2DTranspose, Softmax, ELU
+else:
+    from keras.layers import Conv2D, DepthwiseConv2D, Dense, Conv2DTranspose, Softmax, ELU
+
+from model_compression_toolkit.common.defaultdict import DefaultDict
+from model_compression_toolkit.common.framework_info import FrameworkInfo, ChannelAxis
 from model_compression_toolkit.keras.constants import SOFTMAX, LINEAR, RELU, SWISH, SIGMOID, IDENTITY, TANH, SELU, \
     KERNEL, DEPTHWISE_KERNEL
-from model_compression_toolkit.keras.quantizer.fake_quant_builder import power_of_two_quantization, symmetric_quantization, uniform_quantization
-
-"""
-Division of Keras layers by how they should be quantized.
-KERNEL_OPS: Layers that their coefficients should be quantized.
-ACTIVATION: Layers that their activation should be quantized.
-NO_QUANTIZATION: Layers that should not be quantized.
-"""
-
-KERNEL_OPS = [Conv2D,
-              DepthwiseConv2D,
-              Dense,
-              Conv2DTranspose]
-
-NO_QUANTIZATION = [Reshape,
-                   tf.reshape,
-                   Flatten,
-                   Cropping2D,
-                   ZeroPadding2D,
-                   Dropout,
-                   MaxPooling2D,
-                   tf.split,
-                   tf.quantization.fake_quant_with_min_max_vars]  # TODO:  replace with marking
-
-ACTIVATION = [Activation,
-              ReLU,
-              tf.nn.relu,
-              tf.nn.relu6,
-              tf.nn.leaky_relu,
-              Softmax,
-              GlobalAveragePooling2D,
-              Add,
-              Multiply,
-              AveragePooling2D,
-              UpSampling2D,
-              InputLayer,
-              Concatenate,
-              PReLU,
-              ELU,
-              tf.nn.silu,
-              tf.nn.swish,
-              tf.nn.sigmoid,
-              tf.nn.tanh,
-              tf.nn.relu,
-              tf.nn.relu6,
-              tf.nn.leaky_relu,
-              LeakyReLU,
-              tf.nn.softsign,
-              tf.nn.gelu,
-              tf.nn.elu,
-              tf.nn.selu,
-              tf.nn.softplus,
-              tf.nn.softmax,
-              tf.add,
-              tf.multiply,
-              tf.reduce_mean,
-              tf.reduce_min,
-              tf.reduce_sum,
-              tf.reduce_max,
-              tf.image.resize,
-              tf.image.crop_and_resize,
-              tf.concat,
-              Dot]
-
-
 
 
 """
@@ -154,6 +87,7 @@ LAYER2MINMAX = {Softmax: (0, 1),
                 tf.nn.softplus: (0, None),
                 tf.nn.softmax: (0, 1),
                 }
+
 """
 Mapping from a QuantizationMethod to an activation quantizer function.
 """
@@ -175,10 +109,7 @@ Output channel index of the model's layers
 """
 OUTPUT_CHANNEL_INDEX = ChannelAxis.NHWC
 
-DEFAULT_KERAS_INFO = FrameworkInfo(KERNEL_OPS,
-                                   ACTIVATION,
-                                   NO_QUANTIZATION,
-                                   ACTIVATION_QUANTIZER_MAPPING,
+DEFAULT_KERAS_INFO = FrameworkInfo(ACTIVATION_QUANTIZER_MAPPING,
                                    WEIGHTS_QUANTIZER_MAPPING,
                                    DEFAULT_CHANNEL_AXIS_DICT,
                                    ACTIVATION2MINMAX,

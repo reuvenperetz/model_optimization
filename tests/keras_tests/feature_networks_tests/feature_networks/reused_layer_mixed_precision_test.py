@@ -12,17 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-
-
 from model_compression_toolkit.common.mixed_precision.kpi import KPI
-from model_compression_toolkit.common.mixed_precision.mixed_precision_quantization_config import \
-    MixedPrecisionQuantizationConfig
-from tests.common_tests.base_feature_test import BaseFeatureNetworkTest
-import model_compression_toolkit as mct
 import tensorflow as tf
 from tests.keras_tests.feature_networks_tests.base_keras_feature_test import BaseKerasFeatureNetworkTest
 import numpy as np
-from tests.common_tests.helpers.tensors_compare import cosine_similarity
 
 keras = tf.keras
 layers = keras.layers
@@ -32,14 +25,16 @@ class ReusedLayerMixedPrecisionTest(BaseKerasFeatureNetworkTest):
     def __init__(self, unit_test):
         super().__init__(unit_test)
 
-    def get_quantization_config(self):
-        qc = mct.QuantizationConfig(mct.QuantizationErrorMethod.MSE, mct.QuantizationErrorMethod.MSE,
-                                    mct.QuantizationMethod.POWER_OF_TWO, mct.QuantizationMethod.POWER_OF_TWO,
-                                    activation_n_bits=16, relu_unbound_correction=True, weights_bias_correction=True,
-                                    weights_per_channel_threshold=True, input_scaling=True,
-                                    activation_channel_equalization=True)
-
-        return MixedPrecisionQuantizationConfig(qc, weights_n_bits=[2, 16, 4])
+    # def get_quantization_config(self):
+    #     qc = mct.QuantizationConfig(mct.QuantizationErrorMethod.MSE, mct.QuantizationErrorMethod.MSE,
+    #                                 model_compression_toolkit.common.framework_hardware_spec.hardware_definition
+    #                                 .quantization.quantization_config.QuantizationMethod.POWER_OF_TWO,
+    #                                 model_compression_toolkit.common.framework_hardware_spec.hardware_definition.quantization.quantization_config.QuantizationMethod.POWER_OF_TWO,
+    #                                 activation_n_bits=16, relu_unbound_correction=True, weights_bias_correction=True,
+    #                                 weights_per_channel_threshold=True, input_scaling=True,
+    #                                 activation_channel_equalization=True)
+    #
+    #     return MixedPrecisionQuantizationConfig(qc, weights_n_bits=[2, 16, 4])
 
     def create_networks(self):
         layer = layers.Conv2D(3, 4)

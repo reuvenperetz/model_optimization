@@ -19,9 +19,8 @@ from typing import Tuple, Any, Callable
 from model_compression_toolkit.common import FrameworkInfo, Graph, BaseNode
 from model_compression_toolkit.common.constants import THRESHOLD, SIGNED, SHIFT_NEGATIVE_NON_LINEAR_NUM_BITS
 from model_compression_toolkit.common.graph.graph_matchers import NodeOperationMatcher
-from model_compression_toolkit.common.quantization.set_node_quantization_config import create_node_activation_qc, \
-    set_quantization_configs_to_node
-from model_compression_toolkit.common.quantization.quantization_config import QuantizationConfig
+from model_compression_toolkit.common.quantization.set_node_quantization_config import set_quant_config_to_node
+from model_compression_toolkit.common.quantization.quantization_config import OptimizationParams
 from model_compression_toolkit.common.quantization.quantization_params_generation.qparams_activations_computation \
     import get_activations_qparams
 from model_compression_toolkit.keras.constants import PADDING
@@ -175,7 +174,7 @@ def remove_node_between_two_nodes(graph: Graph,
 
 
 def shift_negative_function(graph: Graph,
-                            qc: QuantizationConfig,
+                            qc: OptimizationParams,
                             non_linear_node: BaseNode,
                             op2d_node: BaseNode,
                             fw_info: FrameworkInfo,
@@ -283,9 +282,7 @@ def shift_negative_function(graph: Graph,
                                    pad_top, pad_btm, pad_left, pad_right)
 
         # Set quantization configuration to node, even though we do not quantize it:
-        set_quantization_configs_to_node(fw_info=fw_info,
-                                         node=pad_node,
-                                         quant_config=qc)
+        set_quant_config_to_node(graph, pad_node, qc)
 
         pad_node.activation_quantization_cfg.enable_activation_quantization = False
         for weight_qc in pad_node.candidates_weights_quantization_cfg:
@@ -301,17 +298,15 @@ def shift_negative_function(graph: Graph,
 
         op2d_node.input_shape = pad_node.output_shape
 
-    set_quantization_configs_to_node(fw_info=fw_info,
-                                     node=add_node,
-                                     quant_config=qc)
+    set_quant_config_to_node(graph, add_node, qc)
 
-    add_node.activation_quantization_cfg.enable_activation_quantization = False
+    # add_node.activation_quantization_cfg.enable_activation_quantization = False
 
     for weight_qc in add_node.candidates_weights_quantization_cfg:
         weight_qc.enable_weights_quantization = False
 
-    add_node.activation_quantization_cfg = create_node_activation_qc(qc,
-                                                                     fw_info)
+    # add_node.activation_quantization_cfg = create_node_activation_qc(qc,
+    #                                                                  fw_info)
 
     add_node.activation_quantization_cfg.set_activation_quantization_param({THRESHOLD: activation_threshold,
                                                                             SIGNED: False})
@@ -389,7 +384,7 @@ def get_next_nodes_to_correct(n: BaseNode,
 
 
 def apply_shift_negative_correction(graph: Graph,
-                                    quant_config: QuantizationConfig,
+                                    quant_config: OptimizationParams,
                                     fw_info: FrameworkInfo,
                                     snc_node_types: NodeOperationMatcher,
                                     linear_node_types: NodeOperationMatcher,
@@ -436,7 +431,7 @@ def apply_shift_negative_correction(graph: Graph,
                                                               pad_node_types,
                                                               is_padding_node_and_node_has_padding
                                                               )
-            if linear_node is not None:
+            if linear_node is not None and n.is_activation_quantization_enabled():
                 graph = shift_negative_function(graph,
                                                 quant_config,
                                                 n,

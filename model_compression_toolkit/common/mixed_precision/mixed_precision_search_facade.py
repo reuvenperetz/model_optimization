@@ -21,7 +21,7 @@ from typing import Callable, List
 from model_compression_toolkit.common import Graph, Logger
 from model_compression_toolkit.common.mixed_precision.kpi import KPI
 from model_compression_toolkit.common.mixed_precision.mixed_precision_quantization_config import \
-    MixedPrecisionQuantizationConfig
+    MixedPrecisionOptimizationParams
 from model_compression_toolkit.common.mixed_precision.mixed_precision_search_manager import MixedPrecisionSearchManager
 from model_compression_toolkit.common.mixed_precision.search_methods.linear_programming import \
     mp_integer_programming_search
@@ -38,7 +38,7 @@ search_methods = {
 
 
 def search_bit_width(graph_to_search_cfg: Graph,
-                     qc: MixedPrecisionQuantizationConfig,
+                     qc: MixedPrecisionOptimizationParams,
                      fw_info: FrameworkInfo,
                      target_kpi: KPI,
                      get_sensitivity_evaluation: Callable = None,

@@ -15,12 +15,22 @@
 
 
 from model_compression_toolkit.common.gptq.gptq_config import GradientPTQConfig
+from model_compression_toolkit.hardware_model import get_default_quantization_config_options, HardwareModel
+from model_compression_toolkit.hardware_model.attribute_filter import AndAttributeFilter, GreaterEq
+from model_compression_toolkit.hardware_model.framework_hardware_model import FrameworkHardwareModel
+from model_compression_toolkit.hardware_model.fusing import Fusing
+from model_compression_toolkit.hardware_model.global_config import GlobalConfig
+from model_compression_toolkit.hardware_model.operations_to_layers import OperationsSetToLayers, OperationsToLayers
+from model_compression_toolkit.hardware_model.operators import OperatorSetConcat, OperatorsSet
+from model_compression_toolkit.hardware_model.quantization_config import OpQuantizationConfig, \
+    QuantizationConfigOptions, QuantizationMethod
+
 from model_compression_toolkit.common.quantization import quantization_config
 from model_compression_toolkit.common.mixed_precision import mixed_precision_quantization_config
-from model_compression_toolkit.common.quantization.quantization_config import QuantizationConfig, \
-    QuantizationErrorMethod, QuantizationMethod, DEFAULTCONFIG
+from model_compression_toolkit.common.quantization.quantization_config import OptimizationParams, \
+    QuantizationErrorMethod, DEFAULTCONFIG
 from model_compression_toolkit.common.mixed_precision.kpi import KPI
-from model_compression_toolkit.common.mixed_precision.mixed_precision_quantization_config import MixedPrecisionQuantizationConfig
+from model_compression_toolkit.common.mixed_precision.mixed_precision_quantization_config import MixedPrecisionOptimizationParams
 from model_compression_toolkit.common.logger import set_log_folder
 from model_compression_toolkit.common.data_loader import FolderImageLoader
 from model_compression_toolkit.common.framework_info import FrameworkInfo, ChannelAxis

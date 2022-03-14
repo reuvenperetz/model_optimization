@@ -52,35 +52,39 @@ def calculate_quantization_params(graph: Graph,
 
     for n in nodes_list:  # iterate only nodes that we should compute their thresholds
 
-        weights_params, activation_params, activation_is_signed, output_channels_axis, \
-        input_channels_axis, activation_threshold_float = {}, {}, None, None, None, None
+        weights_params, activation_params, output_channels_axis = {}, {}, None
 
-        if fw_info.in_kernel_ops(n):  # If the node has a kernel to quantize
-            if n.is_weights_quantization_enabled():
-                for candidtae_qc in n.candidates_weights_quantization_cfg:
-                    output_channels_axis, _ = get_channels_axis(candidtae_qc, fw_info, n.type)
-                    weights_params = get_weights_qparams(n.get_weights_by_keys(fw_impl.constants.KERNEL),
-                                                         candidtae_qc,
-                                                         output_channels_axis)
+        # if fw_info.in_kernel_ops(n):  # If the node has a kernel to quantize
+        has_kernel = n.get_weights_by_keys(fw_impl.constants.KERNEL) is not None  # TODO: take from fw info attributes (model context)
 
-                    candidtae_qc.set_weights_quantization_param(weights_params)
-                    candidtae_qc.weights_channels_axis = output_channels_axis
+        if n.is_weights_quantization_enabled() and has_kernel:
+            for candidtae_qc in n.candidates_weights_quantization_cfg:
+                output_channels_axis, _ = get_channels_axis(candidtae_qc, fw_info, n.type)
+                weights_params = get_weights_qparams(n.get_weights_by_keys(fw_impl.constants.KERNEL),  # TODO: take from fw info attributes (model context)
+                                                     candidtae_qc,
+                                                     output_channels_axis)
 
-            if n.is_activation_quantization_enabled():  # If node's activations should be quantized as well, we compute its
-                # activation threshold
-                activation_params = get_activations_qparams(n=n, graph=graph)
+                candidtae_qc.set_weights_quantization_param(weights_params)
+                candidtae_qc.weights_channels_axis = output_channels_axis
 
-        elif fw_info.in_activation_ops(n):  # If node has no kernel, but its activations should be quantized
-            if n.is_activation_quantization_enabled():
-                activation_params = get_activations_qparams(n=n, graph=graph)
-        # If node should not be quantized at all
-        elif fw_info.in_no_quantization_ops(n):
-            pass  # pragma: no cover
+        if n.is_activation_quantization_enabled():  # If node's activations should be quantized as well, we compute its
+            # activation threshold
+            activation_params = get_activations_qparams(n=n, graph=graph)
+            n.activation_quantization_cfg.set_activation_quantization_param(activation_params)
+
+        # elif fw_info.in_activation_ops(n):  # If node has no kernel, but its activations should be quantized
+        #     if n.is_activation_quantization_enabled():
+        #         activation_params = get_activations_qparams(n=n, graph=graph)
+        # # If node should not be quantized at all
+        # elif fw_info.in_no_quantization_ops(n):
+        #     pass  # pragma: no cover
 
         # If layer type is not in framework info, log a warning.
-        else:
+        if not graph.fw_hw_model.is_layer_in_model(n.type, fw_impl.node_builder(n)):
             Logger.warning(f"Warning: unknown layer: {n.type.__name__}")
+        # else:
+        #     print(f'{n} in model')
 
         # Create a NodeQuantizationConfig containing all quantization params and attach it to the node
-        if n.is_activation_quantization_enabled():
-            n.activation_quantization_cfg.set_activation_quantization_param(activation_params)
+        # if n.is_activation_quantization_enabled():
+        #     n.activation_quantization_cfg.set_activation_quantization_param(activation_params)

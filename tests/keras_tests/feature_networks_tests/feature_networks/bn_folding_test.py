@@ -15,11 +15,11 @@
 
 
 from abc import ABC
-from tests.common_tests.base_feature_test import BaseFeatureNetworkTest
-import model_compression_toolkit as mct
+
+from tests.keras_tests.keras_hw_models import get_keras_float_model
+
 import tensorflow as tf
 
-from tests.common_tests.base_layer_test import LayerTestMode
 from tests.keras_tests.feature_networks_tests.base_keras_feature_test import BaseKerasFeatureNetworkTest
 import numpy as np
 from tests.common_tests.helpers.tensors_compare import cosine_similarity
@@ -33,11 +33,8 @@ class BaseBatchNormalizationFolding(BaseKerasFeatureNetworkTest, ABC):
     def __init__(self, unit_test):
         super(BaseBatchNormalizationFolding, self).__init__(unit_test=unit_test)
 
-    def get_quantization_config(self):
-        return mct.QuantizationConfig(mct.QuantizationErrorMethod.NOCLIPPING, mct.QuantizationErrorMethod.NOCLIPPING,
-                                      mct.QuantizationMethod.POWER_OF_TWO, mct.QuantizationMethod.POWER_OF_TWO, 16, 16,
-                                      False, False, True, enable_weights_quantization=False,
-                                      enable_activation_quantization=False)
+    def get_fw_hw_model(self):
+        return get_keras_float_model()
 
     def compare(self, quantized_model, float_model, input_x=None, quantization_info=None):
         y = float_model.predict(input_x)

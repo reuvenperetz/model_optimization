@@ -20,9 +20,7 @@ from model_compression_toolkit import QuantizationErrorMethod
 from tests.keras_tests.feature_networks_tests.feature_networks.activation_scaling_relu6_test import \
     ActivationScalingReLU6Test
 
-from tests.keras_tests.feature_networks_tests.feature_networks.mixed_percision_test import MixedPercisionBaseTest, \
-    MixedPercisionSearchTest, MixedPercisionManuallyConfiguredTest, MixedPercisionDepthwiseTest, \
-    MixedPercisionSearchKPI4BitsAvgTest, MixedPercisionSearchKPI2BitsAvgTest
+from tests.keras_tests.feature_networks_tests.feature_networks.mixed_percision_test import MixedPercisionSearchTest, MixedPercisionSearchKPI4BitsAvgTest, MixedPercisionSearchKPI2BitsAvgTest
 from tests.keras_tests.feature_networks_tests.feature_networks.multiple_inputs_node_tests import MultipleInputsNodeTests
 from tests.keras_tests.feature_networks_tests.feature_networks.multiple_outputs_node_tests import \
     MultipleOutputsNodeTests
@@ -54,13 +52,11 @@ from tests.keras_tests.feature_networks_tests.feature_networks.multiple_output_n
     MultipleOutputNodesMultipleTensors
 from tests.keras_tests.feature_networks_tests.feature_networks.split_concatenate_test import SplitConcatenateTest
 from tests.keras_tests.feature_networks_tests.feature_networks.conv_bn_relu_residual_test import ConvBnReluResidualTest
-from tests.keras_tests.feature_networks_tests.feature_networks.split_conv_bug_test import SplitConvBugTest
 from tests.keras_tests.feature_networks_tests.feature_networks.output_in_middle_test import OutputInMiddleTest
 from tests.keras_tests.feature_networks_tests.feature_networks.multiple_inputs_model_test import MultipleInputsModelTest
 from tests.keras_tests.feature_networks_tests.feature_networks.scale_equalization_test import ScaleEqualizationTest
 from tests.keras_tests.feature_networks_tests.feature_networks.multi_inputs_to_node_test import MultiInputsToNodeTest
-from tests.keras_tests.feature_networks_tests.feature_networks.gptq_test import GradientPTQTest, \
-    GradientPTQWeightsUpdateTest, GradientPTQLearnRateZeroTest
+from tests.keras_tests.feature_networks_tests.feature_networks.gptq_test import GradientPTQWeightsUpdateTest, GradientPTQLearnRateZeroTest
 from tests.keras_tests.feature_networks_tests.feature_networks.add_same_test import AddSameTest
 from tests.keras_tests.feature_networks_tests.feature_networks.network_editor.node_filter_test import NameFilterTest, \
     ScopeFilterTest, TypeFilterTest
@@ -102,8 +98,8 @@ class FeatureNetworkTest(unittest.TestCase):
     def test_mixed_precision_search(self):
         MixedPercisionSearchTest(self).run_test()
 
-    def test_mixed_precision_dw(self):
-        MixedPercisionDepthwiseTest(self).run_test()
+    # def test_mixed_precision_dw(self):
+    #     MixedPercisionDepthwiseTest(self).run_test()
 
     def test_name_filter(self):
         NameFilterTest(self).run_test()
@@ -266,31 +262,49 @@ class FeatureNetworkTest(unittest.TestCase):
         ActivationDecompositionTest(self, activation_function='swish').run_test()
         ActivationDecompositionTest(self, activation_function='relu').run_test()
         ActivationDecompositionTest(self, activation_function='tanh').run_test()
-        ActivationDecompositionTest(self, activation_function='softmax').run_test()
+        ActivationDecompositionTest(self, activation_function='sigmoid').run_test()
 
     def test_mark_activation(self):
-        MarkActivationTest(self, layers.Conv2D, layers.ReLU()).run_test()
-        MarkActivationTest(self, layers.DepthwiseConv2D, layers.Activation('relu')).run_test()
         tfoplambda_activations = [tf.nn.swish,
                                   tf.nn.silu,
                                   tf.nn.sigmoid,
                                   tf.nn.tanh,
                                   tf.nn.relu,
                                   tf.nn.relu6,
-                                  tf.nn.leaky_relu,
-                                  tf.nn.gelu,
-                                  tf.nn.elu,
-                                  tf.nn.selu,
-                                  tf.nn.softplus,
+                                  layers.Activation('swish'),
+                                  layers.Activation('sigmoid'),
+                                  layers.Activation('tanh'),
+                                  layers.Activation('relu'),
+                                  layers.ReLU(),
+                                  layers.ReLU(max_value=5),
                                   ]
         for act_op in tfoplambda_activations:
-            MarkActivationTest(self, layers.Conv2D, act_op).run_test()
+            MarkActivationTest(self, layers.Conv2D(3,4), act_op).run_test()
+            MarkActivationTest(self, layers.DepthwiseConv2D(3,4), act_op).run_test()
+
+        tfoplambda_activations = [tf.nn.swish,
+                                  tf.nn.silu,
+                                  tf.nn.sigmoid,
+                                  tf.nn.relu,
+                                  tf.nn.relu6,
+                                  layers.Activation('swish'),
+                                  layers.Activation('sigmoid'),
+                                  layers.Activation('relu'),
+                                  layers.ReLU(),
+                                  layers.ReLU(max_value=5),
+                                  ]
+        for act_op in tfoplambda_activations:
+            MarkActivationTest(self, layers.Dense(5), act_op).run_test()
+
         AssertNoMarkActivationTest(self, layers.Dense, layers.Activation('softmax'))
         AssertNoMarkActivationTest(self, layers.DepthwiseConv2D, layers.Activation('softmax')).run_test()
         AssertNoMarkActivationTest(self, layers.Conv2D, layers.Activation('softmax')).run_test()
         AssertNoMarkActivationTest(self, layers.Dense, tf.nn.softmax)
         AssertNoMarkActivationTest(self, layers.DepthwiseConv2D, tf.nn.softmax)
         AssertNoMarkActivationTest(self, layers.Conv2D, tf.nn.softmax)
+        AssertNoMarkActivationTest(self, layers.Dense, tf.nn.tanh)
+        AssertNoMarkActivationTest(self, layers.Dense, layers.Activation('tanh'))
+        AssertNoMarkActivationTest(self, layers.Dense, layers.PReLU())
 
     def test_conv2d_bn_concant(self):
         Conv2DBNConcatnFoldingTest(self).run_test()
@@ -335,12 +349,11 @@ class FeatureNetworkTest(unittest.TestCase):
         MultiInputsToNodeTest(self).run_test()
 
     def test_gptq(self):
-        GradientPTQTest(self).run_test()
         GradientPTQWeightsUpdateTest(self).run_test()
         GradientPTQLearnRateZeroTest(self).run_test()
 
-    def test_split_conv_bug(self):
-        SplitConvBugTest(self).run_test()
+    # def test_split_conv_bug(self):
+    #     SplitConvBugTest(self).run_test()
 
     def test_symmetric_threshold_selection_activation(self):
         SymmetricThresholdSelectionActivationTest(self, QuantizationErrorMethod.NOCLIPPING).run_test()

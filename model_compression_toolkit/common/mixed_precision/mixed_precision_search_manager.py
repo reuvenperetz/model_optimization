@@ -19,7 +19,7 @@ from typing import Dict, List
 from model_compression_toolkit.common.graph.base_graph import Graph
 from model_compression_toolkit.common.mixed_precision.kpi import KPI
 from model_compression_toolkit.common.mixed_precision.mixed_precision_quantization_config import \
-    MixedPrecisionQuantizationConfig
+    MixedPrecisionOptimizationParams
 from model_compression_toolkit.common.framework_info import FrameworkInfo
 
 
@@ -30,7 +30,7 @@ class MixedPrecisionSearchManager(object):
 
     def __init__(self,
                  graph: Graph,
-                 qc: MixedPrecisionQuantizationConfig,
+                 qc: MixedPrecisionOptimizationParams,
                  fw_info: FrameworkInfo,
                  get_sensitivity_evaluation: Callable):
         """

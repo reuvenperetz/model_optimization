@@ -31,20 +31,18 @@ layers = keras.layers
 
 class MarkActivationTest(BaseKerasFeatureNetworkTest):
     def __init__(self, unit_test, kernel_op_layer, activation_function):
-        assert kernel_op_layer in [layers.Conv2D,
-                                   layers.DepthwiseConv2D], f'layer {kernel_op_layer} not in substitution'
         self.activation_function = activation_function
         self.kernel_op_layer = kernel_op_layer
         super().__init__(unit_test)
 
     def create_networks(self):
         inputs = layers.Input(shape=self.get_input_shapes()[0][1:])
-        outputs = self.activation_function(self.kernel_op_layer(3, 4)(inputs))
+        outputs = self.activation_function(self.kernel_op_layer(inputs))
         return keras.Model(inputs=inputs, outputs=outputs)
 
     def compare(self, quantized_model, float_model, input_x=None, quantization_info=None):
         kernel_op_layer_index = 2
-        self.unit_test.assertTrue(isinstance(quantized_model.layers[kernel_op_layer_index], self.kernel_op_layer))
+        self.unit_test.assertTrue(type(quantized_model.layers[kernel_op_layer_index])==type(self.kernel_op_layer))
         activation_layer = quantized_model.layers[kernel_op_layer_index + 1]
         if isinstance(activation_layer, TFOpLambda):
             self.unit_test.assertTrue(activation_layer.function is self.activation_function)

@@ -12,16 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
+import model_compression_toolkit.common.hardware_model.quantization_config
 import model_compression_toolkit.common.gptq.gptq_config
 from model_compression_toolkit.keras.gradient_ptq.gptq_loss import multiple_tensors_mse_loss
-from tests.common_tests.base_feature_test import BaseFeatureNetworkTest
 import model_compression_toolkit as mct
 from model_compression_toolkit.keras.default_framework_info import DEFAULT_KERAS_INFO
 from model_compression_toolkit.common.user_info import UserInformation
 import tensorflow as tf
 from tests.keras_tests.feature_networks_tests.base_keras_feature_test import BaseKerasFeatureNetworkTest
 import numpy as np
-from tests.common_tests.helpers.tensors_compare import cosine_similarity
 
 keras = tf.keras
 layers = keras.layers
@@ -33,9 +32,8 @@ class GradientPTQBaseTest(BaseKerasFeatureNetworkTest):
                          input_shape=(1,16,16,3))
 
     def get_quantization_config(self):
-        return mct.QuantizationConfig(mct.QuantizationErrorMethod.NOCLIPPING, mct.QuantizationErrorMethod.NOCLIPPING,
-                                      mct.QuantizationMethod.POWER_OF_TWO, mct.QuantizationMethod.POWER_OF_TWO, 16, 16,
-                                      True, False, True)
+        return mct.OptimizationParams(mct.QuantizationErrorMethod.NOCLIPPING,
+                                      mct.QuantizationErrorMethod.NOCLIPPING)
 
 
     def get_gptq_config(self):
@@ -82,13 +80,13 @@ class GradientPTQBaseTest(BaseKerasFeatureNetworkTest):
         self.compare(ptq_model, ptq_gptq_model, input_x=x, quantization_info=quantization_info)
 
 
-class GradientPTQTest(GradientPTQBaseTest):
-
-    def compare(self, quantized_model, float_model, input_x=None, quantization_info=None):
-        y = float_model.predict(input_x)
-        y_hat = quantized_model.predict(input_x)
-        cs = cosine_similarity(y, y_hat)
-        self.unit_test.assertTrue(np.isclose(cs, 1), msg=f'fail cosine similarity check: {cs}')
+# class GradientPTQTest(GradientPTQBaseTest):
+#
+#     def compare(self, quantized_model, float_model, input_x=None, quantization_info=None):
+#         y = float_model.predict(input_x)
+#         y_hat = quantized_model.predict(input_x)
+#         cs = cosine_similarity(y, y_hat)
+#         self.unit_test.assertTrue(np.isclose(cs, 1), msg=f'fail cosine similarity check: {cs}')
 
 
 class GradientPTQWeightsUpdateTest(GradientPTQBaseTest):

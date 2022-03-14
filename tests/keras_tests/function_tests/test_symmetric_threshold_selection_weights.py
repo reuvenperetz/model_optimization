@@ -18,7 +18,7 @@ import unittest
 from keras import Input, Model
 from keras.layers import Conv2D, Conv2DTranspose
 
-from model_compression_toolkit import QuantizationConfig, QuantizationMethod, QuantizationErrorMethod
+from model_compression_toolkit import OptimizationParams, QuantizationMethod, QuantizationErrorMethod
 from model_compression_toolkit.common.bias_correction.compute_bias_correction_of_graph import \
     compute_bias_correction_of_graph
 from model_compression_toolkit.common.constants import THRESHOLD
@@ -88,7 +88,7 @@ class TestSymmetricThresholdSelectionWeights(unittest.TestCase):
         self.run_test_for_threshold_method(QuantizationErrorMethod.KL, per_channel=False)
 
     def run_test_for_threshold_method(self, threshold_method, per_channel=True):
-        qc = QuantizationConfig(weights_error_method=threshold_method,
+        qc = OptimizationParams(weights_error_method=threshold_method,
                                 weights_quantization_method=QuantizationMethod.SYMMETRIC, weights_n_bits=8,
                                 weights_per_channel_threshold=per_channel)
 

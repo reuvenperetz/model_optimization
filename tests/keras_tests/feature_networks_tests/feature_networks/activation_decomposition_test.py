@@ -31,19 +31,16 @@ class ActivationDecompositionTest(BaseKerasFeatureNetworkTest):
         self.activation_function = activation_function
         super().__init__(unit_test)
 
-    def get_quantization_config(self):
-        return mct.QuantizationConfig(enable_weights_quantization=False, enable_activation_quantization=False)
-
     def create_networks(self):
         inputs = layers.Input(shape=self.get_input_shapes()[0][1:])
         outputs = layers.Conv2D(3, 4, activation=self.activation_function)(inputs)
         return keras.Model(inputs=inputs, outputs=outputs)
 
     def compare(self, quantized_model, float_model, input_x=None, quantization_info=None):
-        self.unit_test.assertTrue(isinstance(quantized_model.layers[1], layers.Conv2D))
-        self.unit_test.assertTrue(isinstance(quantized_model.layers[2], layers.Activation))
+        self.unit_test.assertTrue(isinstance(quantized_model.layers[2], layers.Conv2D))
+        self.unit_test.assertTrue(isinstance(quantized_model.layers[3], layers.Activation))
         self.unit_test.assertTrue(
-            quantized_model.layers[1].get_config().get(ACTIVATION) == LINEAR)
+            quantized_model.layers[2].get_config().get(ACTIVATION) == LINEAR)
         self.unit_test.assertTrue(
-            quantized_model.layers[2].get_config().get(ACTIVATION) == self.activation_function)
+            quantized_model.layers[3].get_config().get(ACTIVATION) == self.activation_function)
 

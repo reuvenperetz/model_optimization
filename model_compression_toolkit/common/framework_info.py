@@ -18,9 +18,8 @@ from collections import Callable
 from enum import Enum
 from typing import Dict, Any, List
 
-from model_compression_toolkit.common.quantization.quantization_config import QuantizationMethod
+from model_compression_toolkit.hardware_model.quantization_config import QuantizationMethod
 from model_compression_toolkit.common.defaultdict import DefaultDict
-from model_compression_toolkit.common.graph.base_node import BaseNode
 
 
 class ChannelAxis(Enum):
@@ -40,9 +39,6 @@ class ChannelAxis(Enum):
 class FrameworkInfo(object):
 
     def __init__(self,
-                 kernel_ops: list,
-                 activation_ops: list,
-                 no_quantization_ops: list,
                  activation_quantizer_mapping: Dict[QuantizationMethod, Callable],
                  weights_quantizer_mapping: Dict[QuantizationMethod, Callable],
                  kernel_channels_mapping: DefaultDict,
@@ -60,9 +56,6 @@ class FrameworkInfo(object):
         no_quantization_ops:Layers that should not get quantized (e.g., Reshape, Transpose, etc.)
 
         Args:
-            kernel_ops (list): A list of operators that are in the kernel_ops group.
-            activation_ops (list): A list of operators that are in the activation_ops group.
-            no_quantization_ops (list): A list of operators that are in the no_quantization_ops group.
             activation_quantizer_mapping (Dict[QuantizationMethod, Callable]): A dictionary mapping from QuantizationMethod to a quantization function.
             weights_quantizer_mapping (Dict[QuantizationMethod, Callable]): A dictionary mapping from QuantizationMethod to a quantization function.
             kernel_channels_mapping (DefaultDict): Dictionary from a layer to a tuple of its kernel in/out channels indices.
@@ -106,10 +99,6 @@ class FrameworkInfo(object):
             >>> FrameworkInfo(kernel_ops, activation_ops, no_quantization_ops, kernel_channels_mapping, activation_min_max_mapping, layer_min_max_mapping)
 
         """
-
-        self.kernel_ops = kernel_ops
-        self.activation_ops = activation_ops
-        self.no_quantization_ops = no_quantization_ops
         self.activation_quantizer_mapping = activation_quantizer_mapping
         self.weights_quantizer_mapping = weights_quantizer_mapping
         self.kernel_channels_mapping = kernel_channels_mapping
@@ -157,39 +146,39 @@ class FrameworkInfo(object):
 
         return activation_name in self.activation_min_max_mapping
 
-    def in_kernel_ops(self, n: BaseNode) -> bool:
-        """
-        Check whether a node is in the kernel_ops group or not.
-
-        Args:
-            n: A node to check.
-
-        Returns:
-            Whether the node is in the kernel_ops group or not.
-        """
-
-        return n.type in self.kernel_ops
-
-    def in_activation_ops(self, n: BaseNode) -> bool:
-        """
-        Check whether a node is in the activation group or not.
-
-        Args:
-            n: A node to check.
-
-        Returns:
-            Whether the node is in the activation group or not.
-        """
-        return n.type in self.activation_ops
-
-    def in_no_quantization_ops(self, n: BaseNode) -> bool:
-        """
-        Check whether a node is in the no quantization group or not.
-
-        Args:
-            n: A node to check.
-
-        Returns:
-            Whether the node is in the no quantization group or not.
-        """
-        return n.type in self.no_quantization_ops
+    # def in_kernel_ops(self, n: BaseNode) -> bool:
+    #     """
+    #     Check whether a node is in the kernel_ops group or not.
+    #
+    #     Args:
+    #         n: A node to check.
+    #
+    #     Returns:
+    #         Whether the node is in the kernel_ops group or not.
+    #     """
+    #
+    #     return n.type in self.kernel_ops
+    #
+    # def in_activation_ops(self, n: BaseNode) -> bool:
+    #     """
+    #     Check whether a node is in the activation group or not.
+    #
+    #     Args:
+    #         n: A node to check.
+    #
+    #     Returns:
+    #         Whether the node is in the activation group or not.
+    #     """
+    #     return n.type in self.activation_ops
+    #
+    # def in_no_quantization_ops(self, n: BaseNode) -> bool:
+    #     """
+    #     Check whether a node is in the no quantization group or not.
+    #
+    #     Args:
+    #         n: A node to check.
+    #
+    #     Returns:
+    #         Whether the node is in the no quantization group or not.
+    #     """
+    #     return n.type in self.no_quantization_ops

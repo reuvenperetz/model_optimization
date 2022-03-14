@@ -14,16 +14,16 @@
 # ==============================================================================
 from typing import Callable, List
 
-from model_compression_toolkit import common
+from model_compression_toolkit import common, FrameworkHardwareModel
 from model_compression_toolkit.common import Logger
 from model_compression_toolkit.common.gptq.gptq_config import GradientPTQConfig
 from model_compression_toolkit.common.mixed_precision.kpi import KPI
 from model_compression_toolkit.common.framework_info import FrameworkInfo
 from model_compression_toolkit.common.network_editors.actions import EditRule
 from model_compression_toolkit.common.mixed_precision.mixed_precision_quantization_config import \
-    MixedPrecisionQuantizationConfig, DEFAULT_MIXEDPRECISION_CONFIG
+    MixedPrecisionOptimizationParams, DEFAULT_MIXEDPRECISION_CONFIG
 from model_compression_toolkit.common.post_training_quantization import post_training_quantization
-from model_compression_toolkit.common.quantization.quantization_config import QuantizationConfig
+from model_compression_toolkit.common.quantization.quantization_config import OptimizationParams
 from model_compression_toolkit.common.quantization.quantization_config import DEFAULTCONFIG
 
 import importlib
@@ -37,11 +37,12 @@ if importlib.util.find_spec("torch") is not None:
     def pytorch_post_training_quantization(in_module: Module,
                                            representative_data_gen: Callable,
                                            n_iter: int = 500,
-                                           quant_config: QuantizationConfig = DEFAULTCONFIG,
+                                           quant_config: OptimizationParams = DEFAULTCONFIG,
                                            fw_info: FrameworkInfo = DEFAULT_PYTORCH_INFO,
                                            network_editor: List[EditRule] = [],
                                            gptq_config: GradientPTQConfig = None,
-                                           analyze_similarity: bool = False):
+                                           analyze_similarity: bool = False,
+                                           fw_hw_model: FrameworkHardwareModel = None):
         """
         Quantize a trained Pytorch module using post-training quantization. The module is quantized using a
         symmetric constraint quantization thresholds (power of two).
@@ -51,17 +52,26 @@ if importlib.util.find_spec("torch") is not None:
         Thresholds are then being calculated using the collected statistics and the module is quantized
         (both coefficients and activations by default).
         If a gptq configuration is passed, the quantized weights are optimized using gradient based post
-        training quantization by comparing points between the float and quantized modules, and minimizing the observed loss.
+        training quantization by comparing points between the float and quantized modules, and minimizing the
+        observed loss.
 
         Args:
             in_module (Module): Pytorch module to quantize.
             representative_data_gen (Callable): Dataset used for calibration.
             n_iter (int): Number of calibration iterations to run.
-            quant_config (QuantizationConfig): QuantizationConfig containing parameters of how the module should be quantized. `Default configuration. <https://github.com/sony/model_optimization/blob/21e21c95ca25a31874a5be7af9dd2dd5da8f3a10/model_compression_toolkit/common/quantization/quantization_config.py#L154>`_
-            fw_info (FrameworkInfo): Information needed for quantization about the specific framework (e.g., kernel channels indices, groups of layers by how they should be quantized, etc.). `Default Pytorch info <https://github.com/sony/model_optimization/blob/21e21c95ca25a31874a5be7af9dd2dd5da8f3a10/model_compression_toolkit/pytorch/default_framework_info.py#L113>`_
-            network_editor (List[EditRule]): List of EditRules. Each EditRule consists of a node filter and an action to change quantization settings of the filtered nodes.
+            quant_config (OptimizationParams): QuantizationConfig containing parameters of how the module should be
+            quantized. `Default configuration.
+            <https://github.com/sony/model_optimization/blob/21e21c95ca25a31874a5be7af9dd2dd5da8f3a10
+            /model_compression_toolkit/common/quantization/quantization_config.py#L154>`_
+            fw_info (FrameworkInfo): Information needed for quantization about the specific framework (e.g.,
+            kernel channels indices, groups of layers by how they should be quantized, etc.). `Default Pytorch info
+            <https://github.com/sony/model_optimization/blob/21e21c95ca25a31874a5be7af9dd2dd5da8f3a10
+            /model_compression_toolkit/pytorch/default_framework_info.py#L113>`_
+            network_editor (List[EditRule]): List of EditRules. Each EditRule consists of a node filter and an action
+            to change quantization settings of the filtered nodes.
             gptq_config (GradientPTQConfig): Configuration for using gptq (e.g. optimizer).
-            analyze_similarity (bool): Whether to plot similarity figures within TensorBoard (when logger is enabled) or not.
+            analyze_similarity (bool): Whether to plot similarity figures within TensorBoard (when logger is enabled)
+            or not.
 
         Returns:
             A quantized module and information the user may need to handle the quantized module.
@@ -92,7 +102,8 @@ if importlib.util.find_spec("torch") is not None:
                                           PytorchImplementation(),
                                           network_editor,
                                           gptq_config,
-                                          analyze_similarity)
+                                          analyze_similarity,
+                                          fw_hw_model=fw_hw_model)
 
 else:
     # If torch is not installed,

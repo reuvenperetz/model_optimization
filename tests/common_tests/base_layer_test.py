@@ -3,8 +3,10 @@ from enum import Enum
 from typing import List, Any
 import numpy as np
 
-from model_compression_toolkit import MixedPrecisionQuantizationConfig, DEFAULTCONFIG
+from model_compression_toolkit import MixedPrecisionOptimizationParams, DEFAULTCONFIG
 from tests.common_tests.base_test import BaseTest
+
+from tests.common_tests.helpers.fw_hw_models import get_float_fw_hw_model, get_8bits_fw_hw_model
 
 
 class LayerTestMode(Enum):
@@ -46,17 +48,25 @@ class BaseLayerTest(BaseTest):
 
     def get_quantization_config(self):
         qc = copy.deepcopy(DEFAULTCONFIG)
-        qc.weights_bias_correction = False
+        # qc.weights_bias_correction = False
+        # if self.current_mode == LayerTestMode.FLOAT:
+        #     Disable all features that are enabled by default:
+        #     qc.enable_activation_quantization = False
+        #     qc.enable_weights_quantization = False
+        # elif self.current_mode == LayerTestMode.QUANTIZED_8_BITS:
+        #     qc.weights_n_bits = 8
+        #     qc.activation_n_bits = 8
+        # else:
+        #     raise NotImplemented
+        return qc
+
+    def get_fw_hw_model(self):
         if self.current_mode == LayerTestMode.FLOAT:
-            # Disable all features that are enabled by default:
-            qc.enable_activation_quantization = False
-            qc.enable_weights_quantization = False
+            return get_float_fw_hw_model()
         elif self.current_mode == LayerTestMode.QUANTIZED_8_BITS:
-            qc.weights_n_bits = 8
-            qc.activation_n_bits = 8
+            return get_8bits_fw_hw_model()
         else:
             raise NotImplemented
-        return qc
 
     def run_test(self):
         feature_networks = self.create_networks()
@@ -65,18 +75,20 @@ class BaseLayerTest(BaseTest):
             for mode in self.quantization_modes:
                 self.current_mode = mode
                 qc = self.get_quantization_config()
-                if isinstance(qc, MixedPrecisionQuantizationConfig):
+                if isinstance(qc, MixedPrecisionOptimizationParams):
                     ptq_model, quantization_info = self.get_mixed_precision_ptq_facade()(model_float,
                                                                                          self.representative_data_gen,
                                                                                          n_iter=self.num_calibration_iter,
                                                                                          quant_config=qc,
-                                                                                         fw_info=self.get_fw_info())
+                                                                                         fw_info=self.get_fw_info(),
+                                                                                         fw_hw_model=self.get_fw_hw_model())
                 else:
                     ptq_model, quantization_info = self.get_ptq_facade()(model_float,
                                                                          self.representative_data_gen,
                                                                          n_iter=self.num_calibration_iter,
                                                                          quant_config=qc,
-                                                                         fw_info=self.get_fw_info())
+                                                                         fw_info=self.get_fw_info(),
+                                                                         fw_hw_model=self.get_fw_hw_model())
 
                 self.compare(ptq_model, model_float, input_x=self.representative_data_gen(),
                              quantization_info=quantization_info)

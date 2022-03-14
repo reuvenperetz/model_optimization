@@ -17,14 +17,14 @@ from typing import Callable, Any, List, Tuple
 
 import numpy as np
 
-from model_compression_toolkit import common, GradientPTQConfig, MixedPrecisionQuantizationConfig
+from model_compression_toolkit import common, GradientPTQConfig, MixedPrecisionOptimizationParams
 from model_compression_toolkit.common import BaseNode
 from model_compression_toolkit.common.collectors.statistics_collector import BaseStatsCollector
 from model_compression_toolkit.common.framework_info import FrameworkInfo
 from model_compression_toolkit.common.graph.base_graph import Graph
 from model_compression_toolkit.common.model_builder_mode import ModelBuilderMode
 from model_compression_toolkit.common.node_prior_info import NodePriorInfo
-from model_compression_toolkit.common.quantization.quantization_config import QuantizationConfig
+from model_compression_toolkit.common.quantization.quantization_config import OptimizationParams
 from model_compression_toolkit.common.user_info import UserInformation
 
 
@@ -128,7 +128,7 @@ class FrameworkImplementation(ABC):
     @abstractmethod
     def shift_negative_correction(self,
                                   graph: Graph,
-                                  qc: QuantizationConfig,
+                                  qc: OptimizationParams,
                                   fw_info: FrameworkInfo) -> Graph:
         """
         Apply shift negative correction (SNC) on a graph.
@@ -161,17 +161,6 @@ class FrameworkImplementation(ABC):
                              f'framework\'s attach_sc_to_node method.')
 
     @abstractmethod
-    def get_substitutions_marking(self) -> List[common.BaseSubstitution]:
-        """
-
-        Returns: A list of the framework substitutions used for marking
-        points we fuse.
-
-        """
-        raise NotImplemented(f'{self.__class__.__name__} have to implement the '
-                             f'framework\'s get_substitutions_marking method.')
-
-    @abstractmethod
     def get_substitutions_pre_statistics_collection(self) -> List[common.BaseSubstitution]:
         """
 
@@ -192,7 +181,7 @@ class FrameworkImplementation(ABC):
                              f'framework\'s get_substitutions_pre_build method.')
 
     @abstractmethod
-    def get_substitutions_post_statistics_collection(self, quant_config: QuantizationConfig) -> List[
+    def get_substitutions_post_statistics_collection(self, quant_config: OptimizationParams) -> List[
         common.BaseSubstitution]:
         """
         Return a list of the framework substitutions used after we collect statistics.
@@ -208,7 +197,7 @@ class FrameworkImplementation(ABC):
 
     @abstractmethod
     def get_substitutions_channel_equalization(self,
-                                               quant_config: QuantizationConfig,
+                                               quant_config: OptimizationParams,
                                                fw_info: FrameworkInfo) -> List[common.BaseSubstitution]:
         """
         Return a list of the framework substitutions used for channel equalization.
@@ -251,7 +240,7 @@ class FrameworkImplementation(ABC):
     @abstractmethod
     def get_sensitivity_evaluation_fn(self,
                                       graph: Graph,
-                                      quant_config: MixedPrecisionQuantizationConfig,
+                                      quant_config: MixedPrecisionOptimizationParams,
                                       metrics_weights: np.ndarray,
                                       representative_data_gen: Callable,
                                       fw_info: FrameworkInfo) -> Callable:
@@ -287,4 +276,9 @@ class FrameworkImplementation(ABC):
 
         raise NotImplemented(f'{self.__class__.__name__} have to implement the '
                              f'framework\'s get_node_prior_info method.')
+
+
+    def node_builder(self, n: common.BaseNode):
+        raise NotImplemented(f'{self.__class__.__name__} have to implement the '
+                             f'framework\'s node_builder method.')
 

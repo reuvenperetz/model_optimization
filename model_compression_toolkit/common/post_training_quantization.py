@@ -22,6 +22,9 @@ from tqdm import tqdm
 
 from model_compression_toolkit import common
 from model_compression_toolkit.common import Logger
+from model_compression_toolkit.hardware_model.framework_hardware_model import \
+    FrameworkHardwareModel
+from model_compression_toolkit.common.fuse_graph import fuse_graph
 from model_compression_toolkit.common.gptq.gptq_config import GradientPTQConfig
 from model_compression_toolkit.common.framework_implementation import FrameworkImplementation
 from model_compression_toolkit.common.mixed_precision.kpi import KPI
@@ -35,16 +38,14 @@ from model_compression_toolkit.common.model_builder_mode import ModelBuilderMode
 from model_compression_toolkit.common.network_editors.actions import EditRule
 from model_compression_toolkit.common.network_editors.edit_network import edit_network_graph
 from model_compression_toolkit.common.mixed_precision.mixed_precision_quantization_config import \
-    MixedPrecisionQuantizationConfig
-from model_compression_toolkit.common.quantization.quantization_params_fn_selection import \
-    get_activation_quantization_params_fn
+    MixedPrecisionOptimizationParams
+from model_compression_toolkit.common.optimization_context import OptimizationContext
 from model_compression_toolkit.common.quantization.quantize_graph_weights import quantize_graph_weights
 from model_compression_toolkit.common.bias_correction.compute_bias_correction_of_graph import compute_bias_correction_of_graph
 
 from model_compression_toolkit.common.quantization.quantization_analyzer import analyzer_graph
-from model_compression_toolkit.common.quantization.quantization_config import DEFAULTCONFIG, QuantizationErrorMethod, \
-    QuantizationMethod
-from model_compression_toolkit.common.quantization.quantization_config import QuantizationConfig
+from model_compression_toolkit.common.quantization.quantization_config import DEFAULTCONFIG
+from model_compression_toolkit.common.quantization.quantization_config import OptimizationParams
 from model_compression_toolkit.common.quantization.quantization_params_generation.qparams_computation import \
     calculate_quantization_params
 
@@ -60,17 +61,17 @@ from model_compression_toolkit.common.bias_correction.apply_bias_correction_to_g
 
 
 
-
 def post_training_quantization(in_model: Any,
                                representative_data_gen: Callable,
                                n_iter: int,
-                               quant_config: QuantizationConfig,
+                               quant_config: OptimizationParams,
                                fw_info: FrameworkInfo,
                                fw_impl: FrameworkImplementation,
                                network_editor: List[EditRule] = [],
                                gptq_config: GradientPTQConfig = None,
                                analyze_similarity: bool = False,
-                               target_kpi: KPI = None):
+                               target_kpi: KPI = None,
+                               fw_hw_model: FrameworkHardwareModel = None):
     """
     Quantize a trained model using post-training quantization. The model is quantized using a
     symmetric constraint quantization thresholds (power of two).
@@ -108,14 +109,15 @@ def post_training_quantization(in_model: Any,
                                          quant_config,
                                          fw_info,
                                          tb_w,
-                                         fw_impl)
+                                         fw_impl,
+                                         fw_hw_model)
 
 
     ######################################
     # Finalize bit widths
     ######################################
     if target_kpi is not None:
-        assert isinstance(quant_config, MixedPrecisionQuantizationConfig)
+        assert isinstance(quant_config, MixedPrecisionOptimizationParams)
         if quant_config.configuration_overwrite is None:
             bit_widths_config = search_bit_width(tg,
                                                  quant_config,
@@ -334,10 +336,11 @@ def _prepare_model_for_quantization(in_model: Any,
                                     representative_data_gen: Callable,
                                     network_editor: List[EditRule] = [],
                                     n_iter: int = 500,
-                                    quant_config: QuantizationConfig = DEFAULTCONFIG,
+                                    quant_config: OptimizationParams = DEFAULTCONFIG,
                                     fw_info: FrameworkInfo = None,
                                     tb_w: TensorboardWriter = None,
-                                    fw_impl: FrameworkImplementation = None) -> Graph:
+                                    fw_impl: FrameworkImplementation = None,
+                                    fw_hw_model:FrameworkHardwareModel = None) -> Graph:
     """
     Prepare a trained Keras model for post-training quantization. The model is prepared to be quantized using a
     symmetric constraint quantization thresholds (power of two).
@@ -353,12 +356,13 @@ def _prepare_model_for_quantization(in_model: Any,
         network_editor (List[EditRule]): List of EditRules. Each EditRule consists of a node filter and an action to
         change quantization settings of the filtered nodes.
         n_iter (int): Number of calibration iterations to run.
-        quant_config (QuantizationConfig): QuantizationConfig containing parameters of how the model should be
+        quant_config (OptimizationParams): QuantizationConfig containing parameters of how the model should be
         quantized.
         fw_info (FrameworkInfo): Information needed for quantization about the specific framework (e.g.,
         kernel channels indices, groups of layers by how they should be quantized, etc.)
         tb_w (TensorboardWriter): TensorboardWriter object to use for logging events such as graphs, histograms, etc.
-        fw_impl (FrameworkImplementation): FrameworkImplementation object with a specific framework methods implementation.
+        fw_impl (FrameworkImplementation): FrameworkImplementation object with a specific framework methods
+        implementation.
 
     Returns:
         Graph object that represents the Keras model, contains thresholds, and ready for quantization.
@@ -369,8 +373,14 @@ def _prepare_model_for_quantization(in_model: Any,
     ######################################
     graph = fw_impl.model_reader(in_model,
                                  representative_data_gen)  # model reading
+    #
+    # optimization_context = OptimizationContext(graph,
+    #                                            fw_info,
+    #                                            fw_impl,
+    #                                            fw_hw_model)
     graph.set_fw_info(fw_info)
-
+    graph.set_fw_hw_model(fw_hw_model)
+    graph.set_fw_impl(fw_impl)
 
     if tb_w is not None:
         tb_w.add_graph(graph, 'initial_graph')
@@ -395,13 +405,12 @@ def _prepare_model_for_quantization(in_model: Any,
     # Add quantization configurations
     ######################################
     transformed_graph = set_quantization_configuration_to_graph(graph=transformed_graph,
-                                                                quant_config=quant_config,
-                                                                fw_info=fw_info)
+                                                                quant_config=quant_config)
 
     ######################################
-    # Graph marking points
+    # Fuse patterns in graph
     ######################################
-    transformed_graph = substitute(transformed_graph, fw_impl.get_substitutions_marking())
+    transformed_graph = fuse_graph(transformed_graph, fw_impl)
 
     if tb_w is not None:
         tb_w.add_graph(transformed_graph, 'after_graph_marking')
@@ -462,9 +471,7 @@ def _prepare_model_for_quantization(in_model: Any,
     ######################################
     # Shift Negative Activations
     ######################################
-    if quant_config.shift_negative_activation_correction and \
-            quant_config.enable_activation_quantization and \
-            quant_config.activation_quantization_method is not QuantizationMethod.UNIFORM:
+    if quant_config.shift_negative_activation_correction:
         transformed_graph = fw_impl.shift_negative_correction(transformed_graph,
                                                               quant_config,
                                                               fw_info)

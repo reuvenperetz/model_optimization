@@ -12,12 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-
-
+import model_compression_toolkit.common.hardware_model.quantization_config
 from model_compression_toolkit.common.matchers.node_matcher import NodeAndMatcher
 from model_compression_toolkit.common.quantization.quantization_params_fn_selection import \
     get_weights_quantization_params_fn
-from tests.common_tests.base_feature_test import BaseFeatureNetworkTest
 import model_compression_toolkit as mct
 import tensorflow as tf
 from tests.keras_tests.feature_networks_tests.base_keras_feature_test import BaseKerasFeatureNetworkTest
@@ -26,6 +24,7 @@ from model_compression_toolkit.common.network_editors.node_filters import NodeNa
     NodeTypeFilter
 from model_compression_toolkit.common.network_editors.actions import ChangeActivationQuantConfigAttr, \
     ChangeQuantizationParamFunction, EditRule, ChangeCandidatesWeightsQuantConfigAttr
+from tests.keras_tests.keras_hw_models import get_keras_16bits_model
 
 keras = tf.keras
 layers = keras.layers
@@ -52,11 +51,16 @@ class ScopeFilterTest(BaseKerasFeatureNetworkTest):
         self.scope = 'scope'
         self.conv_w = get_uniform_weights(self.kernel, self.num_conv_channels, self.num_conv_channels)
         super().__init__(unit_test)
+    #
+    # def get_quantization_config(self):
+    #     return mct.OptimizationParams(mct.QuantizationErrorMethod.MSE, mct.QuantizationErrorMethod.MSE,
+    #                                   model_compression_toolkit.common.framework_hardware_spec.hardware_definition
+    #                                   .quantization.quantization_config.QuantizationMethod.POWER_OF_TWO,
+    #                                   model_compression_toolkit.common.framework_hardware_spec.hardware_definition.quantization.quantization_config.QuantizationMethod.POWER_OF_TWO, 16, 16,
+    #                                   False, False, True)
 
-    def get_quantization_config(self):
-        return mct.QuantizationConfig(mct.QuantizationErrorMethod.MSE, mct.QuantizationErrorMethod.MSE,
-                                      mct.QuantizationMethod.POWER_OF_TWO, mct.QuantizationMethod.POWER_OF_TWO, 16, 16,
-                                      False, False, True)
+    def get_fw_hw_model(self):
+        return get_keras_16bits_model()
 
     def get_network_editor(self):
         # first rule is to check that the scope filter catches the 2 convs with
@@ -125,10 +129,14 @@ class NameFilterTest(BaseKerasFeatureNetworkTest):
         self.conv_w = get_uniform_weights(self.kernel, self.num_conv_channels, self.num_conv_channels)
         super().__init__(unit_test)
 
-    def get_quantization_config(self):
-        return mct.QuantizationConfig(mct.QuantizationErrorMethod.MSE, mct.QuantizationErrorMethod.MSE,
-                                      mct.QuantizationMethod.POWER_OF_TWO, mct.QuantizationMethod.POWER_OF_TWO, 16, 16,
-                                      False, False, True)
+    # def get_quantization_config(self):
+    #     return mct.OptimizationParams(mct.QuantizationErrorMethod.MSE, mct.QuantizationErrorMethod.MSE,
+    #                                   model_compression_toolkit.common.framework_hardware_spec.hardware_definition
+    #                                   .quantization.quantization_config.QuantizationMethod.POWER_OF_TWO, model_compression_toolkit.common.framework_hardware_spec.hardware_definition.quantization.quantization_config.QuantizationMethod.POWER_OF_TWO, 16, 16,
+    #                                   False, False, True)
+
+    def get_fw_hw_model(self):
+        return get_keras_16bits_model()
 
     def get_network_editor(self):
         return [EditRule(filter=NodeNameFilter(self.node_to_change_name),
@@ -182,13 +190,11 @@ class TypeFilterTest(BaseKerasFeatureNetworkTest):
         super().__init__(unit_test)
 
     def params_fn(self):
-        return get_weights_quantization_params_fn(mct.QuantizationMethod.POWER_OF_TWO,
+        return get_weights_quantization_params_fn(model_compression_toolkit.QuantizationMethod.POWER_OF_TWO,
                                                   mct.QuantizationErrorMethod.NOCLIPPING)
 
-    def get_quantization_config(self):
-        return mct.QuantizationConfig(mct.QuantizationErrorMethod.MSE, mct.QuantizationErrorMethod.MSE,
-                                      mct.QuantizationMethod.POWER_OF_TWO, mct.QuantizationMethod.POWER_OF_TWO, 16, 16,
-                                      False, False, False)
+    def get_fw_hw_model(self):
+        return get_keras_16bits_model()
 
     def get_network_editor(self):
         return [EditRule(filter=NodeTypeFilter(self.type_to_change),
@@ -248,12 +254,14 @@ class FilterLogicTest(BaseKerasFeatureNetworkTest):
         super().__init__(unit_test)
 
     def params_fn(self):
-        return get_weights_quantization_params_fn(cmo.QuantizationMethod.POWER_OF_TWO,
-                                                  cmo.QuantizationErrorMethod.NOCLIPPING)
+        return get_weights_quantization_params_fn(
+            model_compression_toolkit.common.framework_hardware_spec.hardware_definition.quantization.quantization_config.QuantizationMethod.POWER_OF_TWO,
+            cmo.QuantizationErrorMethod.NOCLIPPING)
 
     def get_quantization_config(self):
-        return mct.QuantizationConfig(mct.QuantizationErrorMethod.MSE, mct.QuantizationErrorMethod.MSE,
-                                      mct.QuantizationMethod.POWER_OF_TWO, mct.QuantizationMethod.POWER_OF_TWO, 16, 16,
+        return mct.OptimizationParams(mct.QuantizationErrorMethod.MSE, mct.QuantizationErrorMethod.MSE,
+                                      model_compression_toolkit.common.framework_hardware_spec.hardware_definition
+                                      .quantization.quantization_config.QuantizationMethod.POWER_OF_TWO, model_compression_toolkit.common.framework_hardware_spec.hardware_definition.quantization.quantization_config.QuantizationMethod.POWER_OF_TWO, 16, 16,
                                       False, False, False)
 
     def get_network_editor(self):
