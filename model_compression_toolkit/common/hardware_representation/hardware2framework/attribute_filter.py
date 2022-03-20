@@ -18,8 +18,72 @@ from typing import Any, Callable, Dict
 
 
 class Filter:
+    """
+    Filter a layer configuration by its attributes.
+    """
     def match(self, layer_config: Dict[str, Any]):
+        """
+        Check whether the passed configuration matches the filter.
+        Args:
+            layer_config: Layer's configuration to check.
+
+        Returns:
+            Whether the passed configuration matches the filter or not.
+        """
         raise Exception('Filter did not implement match')
+
+
+
+
+class AttributeFilter(Filter):
+    """
+    Wrap a key, value and an operation to filter a layer's configuration according to.
+    If the layer's configuration has the key, and its' value matches when applying the operator,
+    the configuration matches the AttributeFilter.
+    """
+
+    def __init__(self,
+                 attr: str,
+                 value: Any,
+                 op: Callable):
+        """
+
+        Args:
+            attr: Attribute to filter a layer's configuration according to.
+            value: Value to filter to filter a layer's configuration according to.
+            op: Operator to apply on a layer's configuration
+        """
+        self.attr = attr
+        self.value = value
+        self.op = op
+
+    def __eq__(self, other):
+        if not isinstance(other, AttributeFilter):
+            return False
+        return  self.attr==other.attr and self.value==other.value and self.op==other.op
+
+    def __or__(self, other: Any):
+        if not isinstance(other, AttributeFilter):
+            raise Exception("Not an attribute filter. Can not run an OR operation.")
+        return OrAttributeFilter(self, other)
+
+    def __and__(self, other: Any):
+        if not isinstance(other, AttributeFilter):
+            raise Exception("Not an attribute filter. Can not run an AND operation.")
+        return AndAttributeFilter(self, other)
+
+    def match(self, layer_config: Dict[str, Any]):
+        if self.attr in layer_config:
+            return self.op(layer_config.get(self.attr), self.value)
+        return False
+
+    def op_as_str(self):
+        raise Exception("Filter must implement op_as_str ")
+
+    def __repr__(self):
+        return f'{self.attr} {self.op_as_str()} {self.value}'
+
+
 
 
 class OrAttributeFilter(Filter):
@@ -50,37 +114,6 @@ class AndAttributeFilter(Filter):
         return ' & '.join([str(f) for f in self.filters])
 
 
-class AttributeFilter(Filter):
-    def __init__(self, attr: str, value: Any, op: Callable):
-        self.attr = attr
-        self.value = value
-        self.op = op
-
-    def __eq__(self, other):
-        if not isinstance(other, AttributeFilter):
-            return False
-        return  self.attr==other.attr and self.value==other.value and self.op==other.op
-
-    def __or__(self, other: Any):
-        if not isinstance(other, AttributeFilter):
-            raise Exception("Not an attribute filter. Can not run an OR operation.")
-        return OrAttributeFilter(self, other)
-
-    def __and__(self, other: Any):
-        if not isinstance(other, AttributeFilter):
-            raise Exception("Not an attribute filter. Can not run an AND operation.")
-        return AndAttributeFilter(self, other)
-
-    def match(self, layer_config: Dict[str, Any]):
-        if self.attr in layer_config:
-            return self.op(layer_config.get(self.attr), self.value)
-        return False
-
-    def op_as_str(self):
-        raise Exception("Filter must implement op_as_str ")
-
-    def __repr__(self):
-        return f'{self.attr} {self.op_as_str()} {self.value}'
 
 
 class Greater(AttributeFilter):

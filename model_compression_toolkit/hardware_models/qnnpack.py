@@ -17,9 +17,11 @@ from model_compression_toolkit import hardware_representation as hw_model
 
 
 def get_qnnpack_model():
-    # Create a quantization config.
-    # A quantization configuration defines how an operation
-    # should be quantized on the modeled hardware:
+    # Create a quantization config. A quantization configuration defines how an operator
+    # should be quantized on the modeled hardware.
+    # For qnnpack backend, Pytorch uses a QConfig with torch.per_tensor_affine for
+    # activations quantization and a torch.per_tensor_symmetric quantization scheme
+    # for weights quantization (https://pytorch.org/docs/stable/quantization.html#natively-supported-backends):
     eight_bits = hw_model.OpQuantizationConfig(
         activation_quantization_method=hw_model.QuantizationMethod.UNIFORM,
         weights_quantization_method=hw_model.QuantizationMethod.SYMMETRIC,
@@ -44,7 +46,10 @@ def get_qnnpack_model():
     # To start defining the model's components (such as operator sets, and fusing patterns),
     # use 'with' the hardware model instance, and create them as below:
     with qnnpack_model:
-        # Fusing: [Conv, Relu], [Conv, BatchNorm], [Conv, BatchNorm, Relu], [Linear, Relu]
+        # Combine operations/modules into a single module.
+        # Pytorch supports the next fusing patterns:
+        # [Conv, Relu], [Conv, BatchNorm], [Conv, BatchNorm, Relu], [Linear, Relu]
+        # Source: # https://pytorch.org/docs/stable/quantization.html#model-preparation-for-quantization-eager-mode
         conv = hw_model.OperatorsSet("Conv")
         batchnorm = hw_model.OperatorsSet("BatchNorm")
         relu = hw_model.OperatorsSet("Relu")
@@ -61,53 +66,3 @@ def get_qnnpack_model():
 if __name__ == '__main__':
     qnnpack = get_qnnpack_model()
     qnnpack.show()
-
-#
-# class HistogramObserver(_ObserverBase):
-#     r"""
-#     The module records the running histogram of tensor values along with
-#     min/max values. ``calculate_qparams`` will calculate scale and zero_point.
-#     Args:
-#         bins: Number of bins to use for the histogram
-#         upsample_rate: Factor by which the histograms are upsampled, this is
-#                        used to interpolate histograms with varying ranges across observations
-#         dtype: Quantized data type
-#         qscheme: Quantization scheme to be used
-#         reduce_range: Reduces the range of the quantized data type by 1 bit
-#     The scale and zero point are computed as follows:
-#     1. Create the histogram of the incoming inputs.
-#         The histogram is computed continuously, and the ranges per bin change
-#         with every new tensor observed.
-#     2. Search the distribution in the histogram for optimal min/max values.
-#         The search for the min/max values ensures the minimization of the
-#         quantization error with respect to the floating point model.
-#     3. Compute the scale and zero point the same way as in the
-#         :class:`~torch.ao.quantization.MinMaxObserver`
-#
-# def get_default_qconfig(backend='fbgemm'):
-#     """
-#     Returns the default PTQ qconfig for the specified backend.
-#     Args:
-#       * `backend`: a string representing the target backend. Currently supports `fbgemm`
-#         and `qnnpack`.
-#     Return:
-#         qconfig
-#     """
-#
-#     if backend == 'fbgemm':
-#         qconfig = QConfig(activation=HistogramObserver.with_args(reduce_range=True),
-#                           weight=default_per_channel_weight_observer)
-#     elif backend == 'qnnpack':
-#         qconfig = QConfig(activation=HistogramObserver.with_args(reduce_range=False),
-#                           weight=default_weight_observer)
-#     else:
-#         qconfig = default_qconfig
-#     return qconfig
-# default_weight_observer = MinMaxObserver.with_args(
-#     dtype=torch.qint8, qscheme=torch.per_tensor_symmetric
-# )
-#
-# Fuse modules: combine operations/modules into a single module to obtain higher
-# accuracy and performance. This is done using the torch.quantization.fuse_modules() API,
-# which takes in lists of modules to be fused. We currently support the following fusions:
-# [Conv, Relu], [Conv, BatchNorm], [Conv, BatchNorm, Relu], [Linear, Relu]

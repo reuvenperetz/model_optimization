@@ -24,7 +24,7 @@ from model_compression_toolkit.common.hardware_representation.operators import Q
 
 def get_imx500_model():
     # Create a quantization config.
-    # A quantization configuration defines how an operation
+    # A quantization configuration defines how an operator
     # should be quantized on the modeled hardware:
     eight_bits = OpQuantizationConfig(
         activation_quantization_method=QuantizationMethod.POWER_OF_TWO,
@@ -87,10 +87,8 @@ def get_imx500_model():
         conv = OperatorsSet("Conv", mixed_precision_configuration_options)
         fc_fuse = OperatorsSet("FullyConnected", mixed_precision_configuration_options)
 
-        # Define operations sets for without quantization configuration
+        # Define operations sets without quantization configuration
         # options (useful for creating fusing patterns, for example):
-        # disable_weights_quantization_options = get_default_quantization_config_options().clone_and_edit(
-        # enable_weights_quantization=False)
         any_relu = OperatorsSet("AnyReLU")
         add = OperatorsSet("Add")
         prelu = OperatorsSet("PReLU")
@@ -98,7 +96,8 @@ def get_imx500_model():
         sigmoid = OperatorsSet("Sigmoid")
         tanh = OperatorsSet("Tanh")
 
-        # Define fusing patterns using the sets that were defined.
+        # Combine multiple operators into a single operator to avoid quantization between
+        # them. To do this we define fusing patterns using the OperatorsSets that were created.
         # To group multiple sets with regard to fusing, an OperatorSetConcat can be created
         activations_after_conv_to_fuse = OperatorSetConcat(any_relu, swish, prelu, sigmoid, tanh)
         activations_after_fc_to_fuse = OperatorSetConcat(any_relu, swish, sigmoid)

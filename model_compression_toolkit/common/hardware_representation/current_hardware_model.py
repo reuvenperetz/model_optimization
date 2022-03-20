@@ -13,26 +13,53 @@
 # limitations under the License.
 # ==============================================================================
 
+def get_current_model():
+    """
+
+    Returns: The current HardwaeModel that is being used and accessed.
+
+    """
+    return _current_hardware_model.get()
+
+
 class CurrentHardwareModel:
-    """A thread-local stack of objects for providing implicit defaults."""
+    """
+    Wrapper of the current HardwareModel object that is being accessed and defined.
+    """
 
     def __init__(self):
         super(CurrentHardwareModel, self).__init__()
         self.hwm = None
 
     def get(self):
+        """
+
+        Returns: The current HardwareModel that is being defined.
+
+        """
         if self.hwm is None:
             raise Exception('Hardware model is not initialized.')
         return self.hwm
 
     def reset(self):
+        """
+
+        Reset the current HardwareModel so a new HardwareModel can be wrapped and
+        used as the current HardwareModel object.
+
+        """
         self.hwm = None
 
     def set(self, hwm):
+        """
+        Set and wrap a HardwareModel as the current HardwareModel.
+
+        Args:
+            hwm: HardwareModel to set as the current HardwareModel to access and use.
+
+        """
         self.hwm = hwm
 
 
+# Use a single instance for the current model.
 _current_hardware_model = CurrentHardwareModel()
-
-def get_current_model():
-    return _current_hardware_model.get()

@@ -19,7 +19,7 @@ from model_compression_toolkit.common.hardware_representation.op_quantization_co
 
 def get_tflite_hw_model():
     # Create a quantization config.
-    # A quantization configuration defines how an operation
+    # A quantization configuration defines how an operator
     # should be quantized on the modeled hardware:
     eight_bits = hw_model.OpQuantizationConfig(
         activation_quantization_method=QuantizationMethod.UNIFORM,

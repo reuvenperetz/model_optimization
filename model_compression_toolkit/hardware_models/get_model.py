@@ -43,6 +43,21 @@ fw_hw_models_dict = {'tensorflow': tf_models_dict,
 
 def get_model(fw_name: str,
               hw_name: str) -> FrameworkHardwareModel:
+    """
+    Get a FrameworkHardwareModel by the hardware model name and the framework name.
+    For now, it supports the next models:
+    For 'tensorflow' - hw_name can be 'imx500' or 'tflite'.
+    For 'pytorch' - hw_name can be 'imx500' or 'qnnpack'.
+
+    Args:
+        fw_name: Framework name of the FrameworkHardwareModel.
+        hw_name: Hardware model name the model will use for inference.
+
+    Returns:
+        A FrameworkHardwareModel object that models the hardware and attaches
+        a framework information to it.
+    """
+
     supported_models_by_fw = fw_hw_models_dict.get(fw_name)
     assert hw_name in supported_models_by_fw, f'Hardware model named {hw_name} is not' \
                                               f' supported for framework {fw_name}'

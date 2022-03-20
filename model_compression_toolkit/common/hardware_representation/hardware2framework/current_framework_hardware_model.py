@@ -14,23 +14,52 @@
 # ==============================================================================
 
 
-class _CurrentFrameworkHardwareModel(object):
-    """A thread-local stack of objects for providing implicit defaults."""
+def get_current_fw_hw_model():
+    """
 
+    Returns: The current FrameworkHardwaeModel that is being used and accessed.
+
+    """
+    return _current_framework_hardware_model.get()
+
+
+class _CurrentFrameworkHardwareModel(object):
+    """
+    Wrapper of the current FrameworkHardwareModel object that is being accessed and defined.
+    """
     def __init__(self):
         super(_CurrentFrameworkHardwareModel, self).__init__()
         self.fwhw_model = None
 
     def get(self):
+        """
+
+        Returns: The current FrameworkHardwareModel that is being defined.
+
+        """
         if self.fwhw_model is None:
-            raise Exception()
+            raise Exception('FrameworkHardwareModel is not initialized.')
         return self.fwhw_model
 
     def reset(self):
+        """
+
+        Reset the current FrameworkHardwareModel so a new FrameworkHardwareModel can be wrapped and
+        used as the current FrameworkHardwareModel object.
+
+        """
         self.fwhw_model = None
 
     def set(self, fwhw_model):
+        """
+        Set and wrap a FrameworkHardwareModel as the current FrameworkHardwareModel.
+
+        Args:
+            fwhw_model: FrameworkHardwareModel to set as the current FrameworkHardwareModel to access and use.
+
+        """
         self.fwhw_model = fwhw_model
 
 
+# Use a single instance for the current model.
 _current_framework_hardware_model = _CurrentFrameworkHardwareModel()
