@@ -180,3 +180,19 @@ def compute_lp_norm(float_tensor: np.ndarray, fxp_tensor: np.ndarray, p: int, no
     if norm:
         error /= (np.power(np.abs(float_tensor), p).mean() + norm_eps)
     return error
+
+
+def compute_nuclear_norm(float_tensor: np.ndarray,
+                         fxp_tensor: np.ndarray) -> float:
+
+    validate_before_compute_similarity(float_tensor, fxp_tensor)
+
+    # Numpy SVD computation requires the tensor to have at least 2 dimensions
+    if float_tensor.ndim == 1:
+        float_tensor = np.expand_dims(float_tensor, axis=0)
+        fxp_tensor = np.expand_dims(fxp_tensor, axis=0)
+
+    singular_values = np.linalg.svd(float_tensor, compute_uv=False)
+    norm = np.power(tensor_norm(float_tensor-fxp_tensor), 2)
+    return np.sum(singular_values) * norm
+
