@@ -193,6 +193,10 @@ def compute_nuclear_norm(float_tensor: np.ndarray,
         fxp_tensor = np.expand_dims(fxp_tensor, axis=0)
 
     singular_values = np.linalg.svd(float_tensor, compute_uv=False)
-    norm = np.power(tensor_norm(float_tensor-fxp_tensor), 2)
+
+    normalized_float_tensor = float_tensor / tensor_norm(float_tensor, 1.0)
+    normalized_fxp_tensor = fxp_tensor / tensor_norm(fxp_tensor, 1.0)
+
+    norm = np.power(tensor_norm(normalized_float_tensor-normalized_fxp_tensor), 2)
     return np.sum(singular_values) * norm
 
