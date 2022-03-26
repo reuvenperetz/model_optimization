@@ -45,6 +45,8 @@ def set_bit_widths(quant_config: QuantizationConfig,
     graph = copy.deepcopy(graph_to_set_bit_widths)
 
     if isinstance(quant_config, MixedPrecisionQuantizationConfig):
+        assert len(bit_widths_config)==len(graph.get_configurable_sorted_nodes_names()), f'Length of bit-width configuration={len(bit_widths_config)} is different ' \
+                                                                                         f'from number of nodes to configure={len(graph.get_configurable_sorted_nodes_names())}'
         if len(quant_config.weights_n_bits) == 0:
             Logger.critical(
                 f'Quantization configuration nbits has to contain at least one bit width. Length is: '
