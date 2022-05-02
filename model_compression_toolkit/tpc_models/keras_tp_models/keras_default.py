@@ -30,10 +30,10 @@ import model_compression_toolkit as mct
 hwm = mct.target_platform
 
 
-def get_default_hwm_keras():
-    default_hwm = get_default_tp_model()
-    return generate_fhw_model_keras(name='default_hwm_keras',
-                                    hardware_model=default_hwm)
+def get_default_keras_tpc():
+    default_tp_model = get_default_tp_model()
+    return generate_fhw_model_keras(name='default_keras_tpc',
+                                    hardware_model=default_tp_model)
 
 
 def generate_fhw_model_keras(name: str, hardware_model: TargetPlatformModel):

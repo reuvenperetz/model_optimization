@@ -27,12 +27,12 @@ found_tf = importlib.util.find_spec("tensorflow") is not None and importlib.util
 tf_models_dict = {}
 
 if found_tf:
-    from model_compression_toolkit.tpc_models.keras_tp_models.keras_default import get_default_hwm_keras
+    from model_compression_toolkit.tpc_models.keras_tp_models.keras_default import get_default_keras_tpc
     from model_compression_toolkit.tpc_models.keras_tp_models.keras_tflite import get_keras_tp_model_tflite
     from model_compression_toolkit.tpc_models.keras_tp_models.keras_qnnpack import get_qnnpack_tensorflow
     from model_compression_toolkit.keras.constants import DEFAULT_TP_MODEL, TFLITE_TP_MODEL, QNNPACK_TP_MODEL
 
-    tf_models_dict = {DEFAULT_TP_MODEL: get_default_hwm_keras(),
+    tf_models_dict = {DEFAULT_TP_MODEL: get_default_keras_tpc(),
                       TFLITE_TP_MODEL: get_keras_tp_model_tflite(),
                       QNNPACK_TP_MODEL: get_qnnpack_tensorflow()}
 
