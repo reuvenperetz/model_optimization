@@ -32,22 +32,22 @@ hwm = mct.target_platform
 
 def get_default_keras_tpc():
     default_tp_model = get_default_tp_model()
-    return generate_fhw_model_keras(name='default_keras_tpc',
-                                    hardware_model=default_tp_model)
+    return generate_keras_tpc(name='default_keras_tpc',
+                              tp_model=default_tp_model)
 
 
-def generate_fhw_model_keras(name: str, hardware_model: TargetPlatformModel):
+def generate_keras_tpc(name: str, tp_model: TargetPlatformModel):
     """
     Generates a TargetPlatformCapabilities object with default operation sets to layers mapping.
     Args:
-        name: Name of the framework hardware model.
-        hardware_model: TargetPlatformModel object.
+        name: Name of the TPC.
+        tp_model: TargetPlatformModel object.
     Returns: a TargetPlatformCapabilities object for the given TargetPlatformModel.
     """
 
-    fhwm_keras = hwm.TargetPlatformCapabilities(hardware_model,
+    keras_tpc = hwm.TargetPlatformCapabilities(tp_model,
                                                 name=name)
-    with fhwm_keras:
+    with keras_tpc:
         hwm.OperationsSetToLayers("NoQuantization", [Reshape,
                                                      tf.reshape,
                                                      Flatten,
@@ -86,4 +86,4 @@ def generate_fhw_model_keras(name: str, hardware_model: TargetPlatformModel):
 
         hwm.OperationsSetToLayers("Tanh", [tf.nn.tanh,
                                            hwm.LayerFilterParams(Activation, activation="tanh")])
-    return fhwm_keras
+    return keras_tpc
