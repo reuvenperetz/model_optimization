@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 
-from typing import Callable, List
+from typing import Callable
 
 from model_compression_toolkit.core import common
 from model_compression_toolkit.core.common import Logger
@@ -25,7 +25,7 @@ from model_compression_toolkit.core.common.mixed_precision.mixed_precision_quant
 from model_compression_toolkit import CoreConfig
 from model_compression_toolkit.core.runner import core_runner, _init_tensorboard_writer
 from model_compression_toolkit.ptq.runner import ptq_runner
-from model_compression_toolkit.core.exporter import export_model
+from model_compression_toolkit.exporter.framework_agnostic.export_manager import ExportManager
 from model_compression_toolkit.core.analyzer import analyzer_model_quantization
 from model_compression_toolkit.core.common.target_platform.targetplatform2framework import TargetPlatformCapabilities
 
@@ -34,7 +34,6 @@ import importlib
 
 if importlib.util.find_spec("tensorflow") is not None\
         and importlib.util.find_spec("tensorflow_model_optimization") is not None:
-    import tensorflow as tf
     from model_compression_toolkit.core.keras.default_framework_info import DEFAULT_KERAS_INFO
     from model_compression_toolkit.core.keras.keras_implementation import KerasImplementation
     from model_compression_toolkit.core.keras.keras_model_validation import KerasModelValidation

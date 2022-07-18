@@ -19,6 +19,7 @@ from model_compression_toolkit.core import common
 from model_compression_toolkit.core.common import Logger
 from model_compression_toolkit.core.common.constants import TENSORFLOW
 from model_compression_toolkit.core.common.user_info import UserInformation
+from model_compression_toolkit.exporter.keras.export_targets import TFExportType
 from model_compression_toolkit.gptq.common.gptq_config import GradientPTQConfig
 from model_compression_toolkit.core.common.mixed_precision.kpi import KPI
 from model_compression_toolkit.core.common.framework_info import FrameworkInfo
@@ -32,7 +33,7 @@ from model_compression_toolkit.core.common.quantization.quantization_config impo
 from model_compression_toolkit.core.runner import core_runner, _init_tensorboard_writer
 from model_compression_toolkit.gptq.runner import gptq_runner
 from model_compression_toolkit.ptq.runner import ptq_runner
-from model_compression_toolkit.core.exporter import export_model
+from model_compression_toolkit.exporter.framework_agnostic.export_manager import ExportManager
 from model_compression_toolkit.core.analyzer import analyzer_model_quantization
 
 import importlib
@@ -60,7 +61,8 @@ if importlib.util.find_spec("tensorflow") is not None\
                                          network_editor: List[EditRule] = [],
                                          gptq_config: GradientPTQConfig = None,
                                          analyze_similarity: bool = False,
-                                         target_platform_capabilities: TargetPlatformCapabilities = DEFAULT_KERAS_TPC) -> Tuple[Model, UserInformation]:
+                                         target_platform_capabilities: TargetPlatformCapabilities = DEFAULT_KERAS_TPC,
+                                         export_target: TFExportType = TFExportType.FQ_TF) -> Tuple[Model, UserInformation]:
         """
         Quantize a pretrained Keras model using post-training quantization. By default, the model is quantized
         using a symmetric constraint quantization thresholds (power of two) as defined in the default TargetPlatformCapabilities.
@@ -106,7 +108,7 @@ if importlib.util.find_spec("tensorflow") is not None\
 
         """
         KerasModelValidation(model=in_model,
-                             fw_info=fw_info).validate()
+                             fw_info=fw_info).validate() # TODO: add validation that export target is supported (from tf enum)
 
         core_config = CoreConfig(n_iter,
                                  quantization_config=quant_config,
@@ -127,15 +129,33 @@ if importlib.util.find_spec("tensorflow") is not None\
                                             tb_w=tb_w)
 
         if gptq_config is None:
-            tg = ptq_runner(tg, fw_info, fw_impl, tb_w)
+            tg = ptq_runner(tg,
+                            fw_info,
+                            fw_impl,
+                            tb_w)
         else:
-            tg = gptq_runner(tg, gptq_config, representative_data_gen,
-                             fw_info, fw_impl, tb_w)
+            tg = gptq_runner(tg,
+                             gptq_config,
+                             representative_data_gen,
+                             fw_info,
+                             fw_impl,
+                             tb_w)
 
         if core_config.debug_config.analyze_similarity:
-            analyzer_model_quantization(representative_data_gen, tb_w, tg, fw_impl, fw_info)
+            analyzer_model_quantization(representative_data_gen,
+                                        tb_w,
+                                        tg,
+                                        fw_impl,
+                                        fw_info)
 
-        quantized_model, user_info = export_model(tg, fw_info, fw_impl, tb_w, bit_widths_config)
+        exporter = ExportManager(graph=tg,
+                                 fw_impl=fw_impl,
+                                 fw_info=fw_info,
+                                 tb_writer=tb_w,
+                                 bit_widths_config=bit_widths_config,
+                                 export_target=export_target)
+
+        quantized_model, user_info = exporter.export_model()
 
         return quantized_model, user_info
 

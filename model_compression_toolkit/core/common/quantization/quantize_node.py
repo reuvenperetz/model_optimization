@@ -60,6 +60,7 @@ def get_quantized_kernel_by_weights_qc(fw_info:FrameworkInfo,
                                                           signed=True,
                                                           quantization_params=weights_qc.weights_quantization_params,
                                                           per_channel=weights_qc.weights_per_channel_threshold,
-                                                          output_channels_axis=output_channels_axis)
+                                                          output_channels_axis=output_channels_axis,
+                                                          fakely_quant=False)
 
     return quantized_kernel, (input_channels_axis, output_channels_axis)
