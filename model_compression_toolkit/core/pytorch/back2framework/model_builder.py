@@ -139,6 +139,17 @@ class PytorchModelBuilder(torch.nn.Module):
         self.nodes_dict = {}
         self.append2output = append2output
 
+        for n in self.node_sort:
+            x=layer_build(n)
+            if x is not None:
+                self.add_module(n.name,x)
+
+         def layer_builder(m):
+             if n in configurable_nodes:
+                 return PytorchMixedPrecisionWrapper(n, fw_info)
+             else:
+
+
         if mode == ModelBuilderMode.MIXEDPRECISION:
             configurable_nodes = self.graph.get_configurable_sorted_nodes()
             for n in self.node_sort:

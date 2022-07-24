@@ -18,6 +18,10 @@ from tensorflow_model_optimization.python.core.quantization.keras.quantize_wrapp
 from tqdm import tqdm
 
 # As from Tensorflow 2.6, keras is a separate package and some classes should be imported differently.
+from model_compression_toolkit.core.keras.back2framework.model_builder import get_node_name_from_layer, \
+    is_layer_fake_quant
+from model_compression_toolkit.gptq.keras.quantizer.config_factory import quantization_config_builder_gptq
+
 if tf.__version__ < "2.6":
     from tensorflow.python.keras.engine.base_layer import TensorFlowOpLayer
 else:
@@ -93,6 +97,32 @@ class KerasGPTQTrainer(GPTQTrainer):
         else:
             self.input_scale = self.gptq_user_info.input_scale
 
+
+    def get_post_building_fn(self, model):
+
+        def _wrap_gptq_layers(layer):
+            nodes = self.graph_quant.find_node_by_name(get_node_name_from_layer(layer))
+            if len(nodes) == 1:
+                node = nodes[0]
+                return QuantizeWrapper(layer, quantization_config_builder_gptq(node,
+                                                                               self.fw_info,
+                                                                               self.gptq_config))
+            elif is_layer_fake_quant(layer):
+                return layer
+            else:
+                raise Exception(
+                    f"Mismatch between keras model and graph can't find node named: {get_node_name_from_layer(layer)}")
+
+        return tf.keras.models.clone_model(model,
+                                           input_tensors=None,
+                                           clone_function=_wrap_gptq_layers)
+
+    def get_activation_quantization_fn(self, node, input_tensors):
+        if node.is_activation_quantization_enabled():
+            return node.final_activation_quantization_cfg.quantize_node_output(input_tensors)
+        return input_tensors
+
+
     def build_gptq_model(self):
         """
         Build the GPTQ model with QuantizationWrappers
@@ -101,9 +131,10 @@ class KerasGPTQTrainer(GPTQTrainer):
         """
         return gptq_model_builder(self.graph_quant,
                                   self.gptq_config,
-                                  mode=ModelBuilderMode.QUANTIZED,
                                   append2output=self.compare_points,
-                                  fw_info=self.fw_info)
+                                  fw_info=self.fw_info,
+                                  post_builder_fn=self.get_post_building_fn,
+                                  activation_quantization_fn=self.get_activation_quantization_fn)
 
     def compute_gradients(self, in_y_float: List[tf.Tensor], input_data: List[np.ndarray], parameter2update: List,
                           training=True) -> Tuple[tf.Tensor, List[tf.Tensor]]:

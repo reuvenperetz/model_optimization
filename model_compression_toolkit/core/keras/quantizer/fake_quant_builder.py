@@ -148,3 +148,4 @@ def q(x: TFReference, min_value, max_value, activation_n_bits) -> TFReference:
                                                         min=min_value,
                                                         max=max_value,
                                                         num_bits=activation_n_bits)
+

@@ -2,33 +2,38 @@ from typing import List, Any, Tuple, Callable, Type, Dict
 
 import numpy as np
 import tensorflow as tf
+from tensorflow.keras.models import Model
+from tensorflow.python.layers.base import Layer
+from tensorflow_model_optimization.python.core.quantization.keras.quantize_wrapper import QuantizeWrapper
 
 from model_compression_toolkit.core.common.mixed_precision.sensitivity_evaluation import SensitivityEvaluation
+from model_compression_toolkit.core.common.similarity_analyzer import compute_kl_divergence, compute_cs, compute_mse
 from model_compression_toolkit.core.keras.back2framework.model_gradients import \
     keras_iterative_approx_jacobian_trace
 from model_compression_toolkit.core.keras.constants import ACTIVATION, SOFTMAX, SIGMOID, ARGMAX, LAYER_NAME
-from tensorflow.keras.models import Model
-from tensorflow.python.layers.base import Layer
-
-from model_compression_toolkit.core.common.similarity_analyzer import compute_kl_divergence, compute_cs, compute_mse
 from model_compression_toolkit.core.keras.mixed_precision.set_layer_to_bitwidth import set_layer_to_bitwidth
+from model_compression_toolkit.core.keras.quantizer.mixed_precision.input_layer_quantize_transform import \
+    InputLayerMixedPrecisionTransform
+from model_compression_toolkit.core.keras.quantizer.mixed_precision.quantization_config_factory import \
+    quantization_config_builder_mixed_precision
 
 if tf.__version__ < "2.6":
     from tensorflow.keras.layers import Dense, Activation, Conv2D, DepthwiseConv2D, Conv2DTranspose, Concatenate, Add
-    from tensorflow.python.keras.layers.core import TFOpLambda
+    from tensorflow.python.keras.layers.core import TFOpLambda, SlicingOpLambda
 else:
     from keras.layers import Dense, Activation, Conv2D, DepthwiseConv2D, Conv2DTranspose, Concatenate, Add
-    from keras.layers.core import TFOpLambda
+    from keras.layers.core import TFOpLambda, SlicingOpLambda
 
 from model_compression_toolkit import QuantizationConfig, FrameworkInfo, CoreConfig, MixedPrecisionQuantizationConfigV2
 from model_compression_toolkit.core import common
-from model_compression_toolkit.core.common import Graph, BaseNode
+from model_compression_toolkit.core.common import Graph, BaseNode, Logger
 from model_compression_toolkit.core.common.collectors.statistics_collector import BaseStatsCollector
 from model_compression_toolkit.core.common.framework_implementation import FrameworkImplementation
 from model_compression_toolkit.core.common.model_builder_mode import ModelBuilderMode
 from model_compression_toolkit.core.common.node_prior_info import NodePriorInfo
 from model_compression_toolkit.core.common.user_info import UserInformation
-from model_compression_toolkit.core.keras.back2framework.model_builder import model_builder
+from model_compression_toolkit.core.keras.back2framework.model_builder import model_builder, get_node_name_from_layer, \
+    is_layer_fake_quant
 from model_compression_toolkit.core.keras.default_framework_info import DEFAULT_KERAS_INFO
 from model_compression_toolkit.gptq.common.gptq_training import GPTQTrainer
 from model_compression_toolkit.gptq.keras.gptq_training import KerasGPTQTrainer
@@ -62,6 +67,7 @@ from model_compression_toolkit.core.keras.reader.reader import model_reader
 from model_compression_toolkit.core.common.collectors.statistics_collector_generator import create_stats_collector_for_node
 import model_compression_toolkit.core.keras.constants as keras_constants
 from model_compression_toolkit.core.keras.tf_tensor_numpy import tf_tensor_to_numpy, to_tf_tensor
+import tensorflow_model_optimization.quantization.keras.graph_transformations.model_transformer as mt
 
 
 class KerasImplementation(FrameworkImplementation):
@@ -122,7 +128,10 @@ class KerasImplementation(FrameworkImplementation):
                       mode: ModelBuilderMode,
                       append2output: List[Any] = None,
                       fw_info: FrameworkInfo = DEFAULT_KERAS_INFO,
-                      return_float_outputs: bool = False) -> Tuple[Model, UserInformation]:
+                      return_float_outputs: bool = False,
+                      wrap_layer_fn: Callable = lambda x: x,
+                      activation_quantization_fn: Callable = lambda x, y: y,
+                      layer_builder_fn: Callable = None) -> Tuple[Model, UserInformation]:
         """
         Build a Keras model from a graph.
         The mode determines how the model should be build. append2output is a list of Nodes
@@ -138,10 +147,15 @@ class KerasImplementation(FrameworkImplementation):
             A tuple of the Keras model that was built and an UserInformation object.
         """
         return model_builder(graph,
-                             mode,
                              append2output,
                              fw_info,
-                             return_float_outputs=return_float_outputs)
+                             return_float_outputs=return_float_outputs,
+                             wrap_layer_fn=wrap_layer_fn,
+                             activation_quantization_fn=activation_quantization_fn,
+                             layer_builder_fn=layer_builder_fn)
+
+
+
 
     def run_model_inference(self,
                             model: Any,
@@ -307,7 +321,6 @@ class KerasImplementation(FrameworkImplementation):
         Returns:
             A SensitivityEvaluation object.
         """
-
         return SensitivityEvaluation(graph=graph,
                                      quant_config=quant_config,
                                      representative_data_gen=representative_data_gen,

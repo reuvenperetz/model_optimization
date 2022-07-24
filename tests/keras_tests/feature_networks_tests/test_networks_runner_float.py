@@ -63,8 +63,7 @@ class NetworkTest(object):
         graph.set_tpc(keras_default_tpc)
         graph = set_quantization_configuration_to_graph(graph,
                                                         copy.deepcopy(DEFAULTCONFIG))
-        ptq_model, _ = model_builder(graph,
-                                     mode=ModelBuilderMode.FLOAT)
+        ptq_model, _ = model_builder(graph)
         self.compare(inputs_list, ptq_model)
 
         graph = substitute(graph, fw_impl.get_substitutions_prepare_graph())
@@ -77,8 +76,7 @@ class NetworkTest(object):
         graph = set_quantization_configuration_to_graph(graph,
                                                         copy.deepcopy(DEFAULTCONFIG))
 
-        ptq_model, _ = model_builder(graph,
-                                     mode=ModelBuilderMode.FLOAT)
+        ptq_model, _ = model_builder(graph)
         self.compare(inputs_list, ptq_model)
 
     @staticmethod

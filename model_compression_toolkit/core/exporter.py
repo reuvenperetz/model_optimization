@@ -17,7 +17,7 @@
 from typing import Callable, Tuple, Any
 
 from model_compression_toolkit.core.common.framework_implementation import FrameworkImplementation
-from model_compression_toolkit.core.common import FrameworkInfo
+from model_compression_toolkit.core.common import FrameworkInfo, BaseNode
 from model_compression_toolkit.core.common.graph.base_graph import Graph
 from model_compression_toolkit.core.common.model_builder_mode import ModelBuilderMode
 from model_compression_toolkit.core.common.quantization.quantize_graph_weights import quantize_graph_weights
@@ -56,9 +56,17 @@ def _quantize_model(tg: Graph,
     # Before building a quantized model, first apply some substitutions.
     quantized_tg = substitute(quantized_tg,
                               fw_impl.get_substitutions_pre_build())
+
+    def _quantize_node_activation(node: BaseNode,
+                                  input_tensors: Any):
+
+        if node.is_activation_quantization_enabled():
+            return node.final_activation_quantization_cfg.quantize_node_output(input_tensors)
+        return input_tensors
+
     quantized_model, user_info = fw_impl.model_builder(quantized_tg,
-                                                       mode=ModelBuilderMode.QUANTIZED,
-                                                       fw_info=fw_info)
+                                                       fw_info=fw_info,
+                                                       activation_quantization_fn=_quantize_node_activation)
     return quantized_model, user_info
 
 

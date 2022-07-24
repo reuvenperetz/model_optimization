@@ -17,7 +17,6 @@ from typing import Callable, Any, List
 
 from model_compression_toolkit import FrameworkInfo, MixedPrecisionQuantizationConfigV2
 from model_compression_toolkit.core.common import Graph, BaseNode
-from model_compression_toolkit.core.common.model_builder_mode import ModelBuilderMode
 from model_compression_toolkit.core.common import Logger
 
 
@@ -83,9 +82,12 @@ class SensitivityEvaluation:
             self.outputs_replacement_nodes = get_output_replacement_nodes(graph, fw_impl)
             self.output_nodes_indices = self._update_ips_with_outputs_replacements()
 
-        # Build a mixed-precision model which can be configured to use different bitwidth in different layers.
-        # And a baseline model.
-        self.baseline_model, self.model_mp = self._build_models()
+        # Build a baseline model and a mixed-precision model which can be configured to use
+        # different bitwidth in different layers
+        self.baseline_model = self._build_baseline_model()
+        self.model_mp = self._build_mp_dynamic_model(builder_wrap_fn=builder_mp_cloning_fn,
+                                                     builder_act_quant_fn=builder_mp_activation_quantization_fn,
+                                                     layer_builder_fn=layer_builder_fn)
 
         # Build images batches for inference comparison
         self.images_batches = self._get_images_batches(quant_config.num_of_images)
@@ -109,6 +111,43 @@ class SensitivityEvaluation:
 
             self.interest_points_gradients = self._compute_gradient_based_weights()
             self.quant_config.distance_weighting_method = lambda d: self.interest_points_gradients
+
+
+        def _mp_clone_fn(layer):
+            nodes = graph.find_node_by_name(get_node_name_from_layer(layer))
+            if len(nodes) == 1:
+                node = nodes[0]
+                # Wrap only if its weights should be quantized
+                if node.name in graph.get_configurable_sorted_nodes_names():
+                    if node.layer_class in [TFOpLambda, SlicingOpLambda]:
+                        Logger.critical(f"Activation mixed-precision is not supported for layers of type "
+                                        f"{node.layer_class}. Please modify the TargetPlatformModel object, "
+                                        f"such that layers of type {node.layer_class} "
+                                        f"won't have more than one quantization configuration option.")
+                    return QuantizeWrapper(layer, quantization_config_builder_mixed_precision(node, fw_info))
+                return layer
+
+            elif is_layer_fake_quant(layer):
+                return layer
+            else:
+                raise Exception(
+                    f'Mismatch between keras model and graph cant find node named: {get_node_name_from_layer(layer)}')
+
+        def _mp_act_quant_fn(node, input_tensors):
+            if node.is_all_activation_candidates_equal():
+                return node.candidates_quantization_cfg[0].activation_quantization_cfg.quantize_node_output(input_tensors)
+            return input_tensors
+
+        # We use a model transformer to wrap the input layer with QuantizeWrapper,
+        # to allow layer configuration to different bitwidths.
+        # A model transformer allows to modify a layer in an existing model, by applying the given list of
+        # transformers on the model (in this case,
+        # we only apply single transformer - InputLayerQuantizeTransform)
+        # model_inputs = graph.get_inputs()
+        # input_transformer = mt.ModelTransformer(model, [InputLayerMixedPrecisionTransform(inp, fw_info)
+        #                                                 for inp in model_inputs])
+        # model = input_transformer.transform()[0]
+
 
     def compute_metric(self,
                        mp_model_configuration: List[int],
@@ -155,7 +194,17 @@ class SensitivityEvaluation:
         self.baseline_tensors_list = [self._tensors_as_list(self.fw_impl.to_numpy(self.baseline_model(images)))
                                       for images in self.images_batches]
 
-    def _build_models(self) -> Any:
+    def _build_baseline_model(self) -> Any:
+        # Build a baseline model.
+        baseline_model, _ = self.fw_impl.model_builder(self.graph,
+                                                       append2output=self.interest_points)
+
+        return baseline_model
+
+    def _build_mp_dynamic_model(self,
+                                builder_wrap_fn: Callable,
+                                builder_act_quant_fn: Callable,
+                                layer_builder_fn: Callable) -> Any:
         """
         Builds two models - an MP model with configurable layers and a baseline, float model.
 
@@ -165,16 +214,13 @@ class SensitivityEvaluation:
         """
         # Build a mixed-precision model which can be configured to use different bitwidth in different layers.
         model_mp, _ = self.fw_impl.model_builder(self.graph,
-                                                 mode=ModelBuilderMode.MIXEDPRECISION,
                                                  append2output=self.interest_points,
-                                                 fw_info=self.fw_info)
+                                                 fw_info=self.fw_info,
+                                                 wrap_layer_fn=builder_wrap_fn,
+                                                 activation_quantization_fn=builder_act_quant_fn,
+                                                 layer_builder_fn=layer_builder_fn)
 
-        # Build a baseline model.
-        baseline_model, _ = self.fw_impl.model_builder(self.graph,
-                                                       mode=ModelBuilderMode.FLOAT,
-                                                       append2output=self.interest_points)
-
-        return baseline_model, model_mp
+        return model_mp
 
     def _compute_gradient_based_weights(self) -> np.ndarray:
         """

@@ -18,7 +18,7 @@ import tensorflow as tf
 
 from model_compression_toolkit.core.common.model_builder_mode import ModelBuilderMode
 from tensorflow_model_optimization.python.core.quantization.keras.quantize_wrapper import QuantizeWrapper
-from typing import Tuple, Any
+from typing import Tuple, Any, Callable
 from model_compression_toolkit.core.common.logger import Logger
 from model_compression_toolkit.core import common
 from model_compression_toolkit.gptq.common.gptq_config import GradientPTQConfig
@@ -32,9 +32,11 @@ from model_compression_toolkit.core.keras.back2framework.model_builder import mo
 
 def model_builder(graph: common.Graph,
                   gptq_config: GradientPTQConfig,
-                  mode: ModelBuilderMode = ModelBuilderMode.QUANTIZED,
+                  # mode: ModelBuilderMode = ModelBuilderMode.QUANTIZED,
                   append2output=None,
-                  fw_info: FrameworkInfo = DEFAULT_KERAS_INFO) -> Tuple[tf.keras.models.Model, Any]:
+                  fw_info: FrameworkInfo = DEFAULT_KERAS_INFO,
+                  post_builder_fn: Callable = lambda x: x,
+                  activation_quantization_fn: Callable = lambda x, y: y) -> Tuple[tf.keras.models.Model, Any]:
     """
     Build a Keras model for GPTQ from a graph representing the model.
     The model is built by converting the graph nodes to Keras layers and applying them sequentially to get the model
@@ -56,20 +58,26 @@ def model_builder(graph: common.Graph,
     if gptq_config is None:
         Logger.exception("Building a model in GPTQ requires a GPTQ configuration as input")
 
-    model, graph_user_info = core_model_builder(graph, mode, append2output, fw_info, return_float_outputs=True)
-
-    def _quantize(layer):
-        nodes = graph.find_node_by_name(get_node_name_from_layer(layer))
-        if len(nodes) == 1:
-            node = nodes[0]
-            return QuantizeWrapper(layer, quantization_config_builder_gptq(node, fw_info, gptq_config))
-        elif is_layer_fake_quant(layer):
-            return layer
-        else:
-            raise Exception(
-                f"Mismatch between keras model and graph can't find node named: {get_node_name_from_layer(layer)}")
-
-    # clone each layer in the model and apply _quantize to the layer.
-    model = tf.keras.models.clone_model(model, input_tensors=None, clone_function=_quantize)
+    model, graph_user_info = core_model_builder(graph,
+                                                # mode,
+                                                append2output,
+                                                fw_info,
+                                                return_float_outputs=True,
+                                                post_building_fn=post_builder_fn,
+                                                activation_quantization_fn=activation_quantization_fn)
+    #
+    # def _quantize(layer):
+    #     nodes = graph.find_node_by_name(get_node_name_from_layer(layer))
+    #     if len(nodes) == 1:
+    #         node = nodes[0]
+    #         return QuantizeWrapper(layer, quantization_config_builder_gptq(node, fw_info, gptq_config))
+    #     elif is_layer_fake_quant(layer):
+    #         return layer
+    #     else:
+    #         raise Exception(
+    #             f"Mismatch between keras model and graph can't find node named: {get_node_name_from_layer(layer)}")
+    #
+    # # clone each layer in the model and apply _quantize to the layer.
+    # model = tf.keras.models.clone_model(model, input_tensors=None, clone_function=_quantize)
 
     return model, graph_user_info

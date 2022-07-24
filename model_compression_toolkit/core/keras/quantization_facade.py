@@ -135,7 +135,11 @@ if importlib.util.find_spec("tensorflow") is not None\
         if core_config.debug_config.analyze_similarity:
             analyzer_model_quantization(representative_data_gen, tb_w, tg, fw_impl, fw_info)
 
-        quantized_model, user_info = export_model(tg, fw_info, fw_impl, tb_w, bit_widths_config)
+        quantized_model, user_info = export_model(tg,
+                                                  fw_info,
+                                                  fw_impl,
+                                                  tb_w,
+                                                  bit_widths_config)
 
         return quantized_model, user_info
 

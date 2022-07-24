@@ -76,7 +76,6 @@ class ModelCollector:
         # Build a float model and output all layers' outputs
         # (that should be collected) as the model's outputs
         self.model, _ = self.fw_impl.model_builder(self.graph,
-                                                   mode=ModelBuilderMode.FLOAT,
                                                    append2output=node2fetch,
                                                    fw_info=self.fw_info)
 

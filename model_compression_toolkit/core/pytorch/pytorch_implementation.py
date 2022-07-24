@@ -113,10 +113,12 @@ class PytorchImplementation(FrameworkImplementation):
 
     def model_builder(self,
                       graph: Graph,
-                      mode: ModelBuilderMode,
+                      # mode: ModelBuilderMode,
                       append2output: List[Any] = None,
                       fw_info: FrameworkInfo = DEFAULT_PYTORCH_INFO,
-                      return_float_outputs: bool = False) -> Tuple[Module, UserInformation]:
+                      return_float_outputs: bool = False,
+                      post_builder_fn: Callable = lambda x: x,
+                      activation_quantization_fn: Callable = lambda x, y: y) -> Tuple[Module, UserInformation]:
         """
         Build a Pytorch module from a graph.
         The mode determines how the module should be build. append2output is a list of Nodes
@@ -131,10 +133,12 @@ class PytorchImplementation(FrameworkImplementation):
             A tuple of the Pytorch module that was built and an UserInformation object.
         """
         return model_builder(graph,
-                             mode,
+                             # mode,
                              append2output,
                              fw_info,
-                             return_float_outputs)
+                             return_float_outputs,
+                             post_builder_fn,
+                             activation_quantization_fn)
 
     def run_model_inference(self,
                             model: Any,

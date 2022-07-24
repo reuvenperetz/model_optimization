@@ -91,10 +91,13 @@ class FrameworkImplementation(ABC):
     @abstractmethod
     def model_builder(self,
                       graph: Graph,
-                      mode: ModelBuilderMode,
+                      # mode: ModelBuilderMode,
                       append2output: List[Any],
                       fw_info: FrameworkInfo,
-                      return_float_outputs: bool = False) -> Tuple[Any, UserInformation]:
+                      return_float_outputs: bool = False,
+                      wrap_layer_fn: Callable = lambda x: x,
+                      activation_quantization_fn: Callable = lambda x, y: y,
+                      layer_builder_fn: Callable = None) -> Tuple[Any, UserInformation]:
         """
         Build a framework model from a graph.
         The mode determines how the model should be build. append2output is a list of Nodes
@@ -112,6 +115,8 @@ class FrameworkImplementation(ABC):
         """
         raise NotImplemented(f'{self.__class__.__name__} have to implement the '
                              f'framework\'s model_builder method.')
+
+
 
     @abstractmethod
     def run_model_inference(self,
