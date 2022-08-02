@@ -20,6 +20,7 @@ from tests.keras_tests.feature_networks_tests.feature_networks.activation_relu_b
     ReLUBoundToPOTNetTest
 from tests.keras_tests.feature_networks_tests.feature_networks.bias_correction_dw_test import \
     BiasCorrectionDepthwiseTest
+from tests.keras_tests.feature_networks_tests.feature_networks.custom_layer_test import CustomLayerTest
 from tests.keras_tests.feature_networks_tests.feature_networks.network_editor.edit_error_method_test import \
     EditActivationErrorMethod
 from tests.keras_tests.feature_networks_tests.feature_networks.network_editor.change_qc_attr_test import \
@@ -104,9 +105,13 @@ layers = tf.keras.layers
 
 class FeatureNetworkTest(unittest.TestCase):
 
+    def test_custom_layer(self):
+        CustomLayerTest(self).run_test()
+
     def test_edit_error_method(self):
+        EditActivationErrorMethod(self).run_test(experimental_facade=True, experimental_exporter=True)
         EditActivationErrorMethod(self).run_test()
-        EditActivationErrorMethod(self).run_test(experimental_facade=True)
+
 
     def test_change_qc_attr(self):
         ChangeFinalWeightQCAttrTest(self).run_test()
