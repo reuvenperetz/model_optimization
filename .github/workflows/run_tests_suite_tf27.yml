@@ -5,10 +5,8 @@ on:
     - cron: 0 0 * * *
 
 jobs:
-  build:
+  run-tensorflow-2_7:
     runs-on: ubuntu-latest
-    env:
-      COVERAGE_THRESHOlD: 80
     steps:
       - uses: actions/checkout@v2
       - name: Install Python 3
@@ -19,10 +17,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install tensorflow==2.7.*
           pip install tensorflow_model_optimization
-          pip install coverage
-      - name: Run unittests
-        run: coverage run -m --omit "./tests*,*__init__.py" unittest tests/test_suite.py -v
-      - name: Run Coverage
-        run: coverage report -i --skip-covered --fail-under $COVERAGE_THRESHOlD
+      - uses: ./.github/workflows/run_keras_tests
+        with:
+          tf-version: "2.7.*"

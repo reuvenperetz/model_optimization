@@ -1,0 +1,18 @@
+name: Run Keras Tests
+
+on:
+  workflow_call:
+    inputs:
+      tf-version:
+        required: true
+        type: string
+
+jobs:
+  run-tensorflow:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install tf
+        run: |
+          pip install tensorflow==${{ inputs.tf-version }}
+      - name: Run unittests
+        run: python -m unittest discover tests/keras_tests -v
