@@ -18,6 +18,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install tensorflow_model_optimization
-      - uses: ./.github/workflows/run_keras_tests
+      - uses: ./.github/workflows/run_keras_tests.yml
         with:
           tf-version: "2.7.*"
