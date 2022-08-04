@@ -11,6 +11,7 @@ jobs:
   run-tensorflow:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - name: Install tf
         run: |
           pip install tensorflow==${{ inputs.tf-version }}
