@@ -4,20 +4,30 @@ on:
   schedule:
     - cron: 0 0 * * *
 
+
+#jobs:
+#  job1:
+#    uses: octo-org/example-repo/.github/workflows/called-workflow.yml@v1
+
+
 jobs:
   run-tensorflow-2_7:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Install Python 3
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.8
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install tensorflow_model_optimization
-      - uses: ./.github/workflows/run_keras_tests.yml
-        with:
-          tf-version: "2.7.*"
+    uses: ./.github/workflows/run_keras_tests
+    with:
+      tf-version: "2.7.*"
+
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v2
+#      - name: Install Python 3
+#        uses: actions/setup-python@v1
+#        with:
+#          python-version: 3.8
+#      - name: Install dependencies
+#        run: |
+#          python -m pip install --upgrade pip
+#          pip install -r requirements.txt
+#          pip install tensorflow_model_optimization
+#      uses: ./.github/workflows/run_keras_tests
+#      with:
+#        tf-version: "2.7.*"

@@ -12,8 +12,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Install tf
+      - name: Install Python 3
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.8
+      - name: Install dependencies
         run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt          
+          pip install tensorflow_model_optimization
           pip install tensorflow==${{ inputs.tf-version }}
       - name: Run unittests
         run: python -m unittest discover tests/keras_tests -v
+
+
+
+
