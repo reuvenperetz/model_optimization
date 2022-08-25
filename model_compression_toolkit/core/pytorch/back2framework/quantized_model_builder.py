@@ -24,7 +24,6 @@ from model_compression_toolkit.core.common.user_info import UserInformation
 from model_compression_toolkit.core.pytorch.back2framework.pytorch_model_builder import PyTorchModelBuilder, \
     PytorchModel
 from model_compression_toolkit.core.pytorch.default_framework_info import DEFAULT_PYTORCH_INFO
-from model_compression_toolkit.core.pytorch.utils import to_torch_tensor
 
 
 class QuantizedPyTorchModel(PytorchModel):
