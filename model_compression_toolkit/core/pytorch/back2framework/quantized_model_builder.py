@@ -24,6 +24,7 @@ from model_compression_toolkit.core.common.user_info import UserInformation
 from model_compression_toolkit.core.pytorch.back2framework.pytorch_model_builder import PyTorchModelBuilder, \
     PytorchModel
 from model_compression_toolkit.core.pytorch.default_framework_info import DEFAULT_PYTORCH_INFO
+from model_compression_toolkit.core.pytorch.utils import to_torch_tensor
 
 
 class QuantizedPyTorchModel(PytorchModel):
@@ -61,7 +62,9 @@ class QuantizedPyTorchModel(PytorchModel):
             Output of the node.
 
         """
-        if node.final_activation_quantization_cfg:
+        if node.is_activation_quantization_enabled():
+            if isinstance(input_tensors, list):
+                input_tensors = torch.cat(input_tensors, dim=0)
             return node.final_activation_quantization_cfg.quantize_node_output(input_tensors)
         return input_tensors
 

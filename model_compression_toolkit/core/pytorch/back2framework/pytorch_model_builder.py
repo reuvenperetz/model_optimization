@@ -239,7 +239,6 @@ class PytorchModel(torch.nn.Module):
 
         Args:
             node: The corresponding node of the layer it runs.
-            configurable_nodes_names: A list of names of configurable nodes in the quantized model.
 
         Returns: Module/functional to apply to the input tensors.
 
