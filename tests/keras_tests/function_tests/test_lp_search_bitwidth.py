@@ -37,6 +37,7 @@ from model_compression_toolkit.core.tpc_models.default_tpc.latest import get_op_
 from model_compression_toolkit.core.keras.default_framework_info import DEFAULT_KERAS_INFO
 from model_compression_toolkit.core.keras.keras_implementation import KerasImplementation
 from tests.common_tests.helpers.generate_test_tp_model import generate_mixed_precision_test_tp_model
+from tests.common_tests.timer_testcase import TimerTestCase
 
 
 class MockReconstructionHelper:
@@ -84,7 +85,7 @@ class MockMixedPrecisionSearchManager:
         return np.array(kpi_matrix)
 
 
-class TestLpSearchBitwidth(unittest.TestCase):
+class TestLpSearchBitwidth(TimerTestCase):
 
     def test_search_weights_only(self):
         target_kpi = KPI(weights_memory=2)
@@ -185,7 +186,7 @@ class TestLpSearchBitwidth(unittest.TestCase):
         self.assertTrue(bit_cfg[0] == 1)
 
 
-class TestSearchBitwidthConfiguration(unittest.TestCase):
+class TestSearchBitwidthConfiguration(TimerTestCase):
 
     def test_search_engine(self):
         core_config = CoreConfig(n_iter=1, quantization_config=DEFAULTCONFIG,
