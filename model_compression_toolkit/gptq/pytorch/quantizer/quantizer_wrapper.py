@@ -15,6 +15,8 @@
 import torch
 import torch.nn as nn
 from model_compression_toolkit.core.common import BaseNode, Logger
+from model_compression_toolkit.core.pytorch.back2framework.quantization_wrapper.quantized_layer_wrapper import \
+    QuantizedLayerWrapper
 from model_compression_toolkit.gptq.common.gptq_config import GradientPTQConfig, RoundingType
 from model_compression_toolkit.gptq.pytorch.quantizer.gptq_quantizer import BaseWeightQuantizer
 from model_compression_toolkit.gptq.pytorch.quantizer.ste_rounding.ste_weights_quantizer import STEWeightQuantizer
@@ -25,7 +27,10 @@ from model_compression_toolkit.core.pytorch.utils import to_torch_tensor
 
 class WeightQuantizerWrapper(nn.Module):
 
-    def __init__(self, node: BaseNode, gptq_config: GradientPTQConfig, weight_quantizer: BaseWeightQuantizer):
+    def __init__(self,
+                 node: BaseNode,
+                 gptq_config: GradientPTQConfig,
+                 weight_quantizer: BaseWeightQuantizer):
         """
         Construct a Pytorch model that constitutes as a wrapper for a Pytorch layer, built from a given graph node.
         Args:
@@ -48,7 +53,9 @@ class WeightQuantizerWrapper(nn.Module):
         setattr(getattr(self.op, KERNEL), 'requires_grad', True)
 
         # quantizer
-        self.weight_quantizer = weight_quantizer(node.final_weights_quantization_cfg, gptq_config, self.float_weight.shape)
+        self.weight_quantizer = weight_quantizer(node.final_weights_quantization_cfg,
+                                                 gptq_config,
+                                                 self.float_weight.shape)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
@@ -63,21 +70,26 @@ class WeightQuantizerWrapper(nn.Module):
         # Do computation
         return self.op(x)
 
-
-def quantizer_wrapper(node: BaseNode, gptq_config: GradientPTQConfig) -> nn.Module:
-    """
-    Construct a Pytorch model that constitutes as a wrapper for a Pytorch layer, built from a given graph node.
-    Args:
-        node: Node to build its Pytorch layer.
-        gptq_config: GradientPTQConfig with parameters about the tuning process.
-    """
-    if node.is_weights_quantization_enabled():
-        if gptq_config.rounding_type == RoundingType.STE:
-            node_instance = WeightQuantizerWrapper(node, gptq_config, STEWeightQuantizer)
-        else:
-            Logger.critical('No support for GumbelRounding GPTQ yet. Work in progress..')
-    else:
-        # No quantization
-        node_instance = node_builder(node)
-
-    return node_instance
+#
+# def quantizer_wrapper(node: BaseNode, gptq_config: GradientPTQConfig) -> nn.Module:
+#     """
+#     Construct a Pytorch model that constitutes as a wrapper for a Pytorch layer, built from a given graph node.
+#     Args:
+#         node: Node to build its Pytorch layer.
+#         gptq_config: GradientPTQConfig with parameters about the tuning process.
+#     """
+#     if node.is_weights_quantization_enabled():
+#         if gptq_config.rounding_type == RoundingType.STE:
+#
+#             node_instance = WeightQuantizerWrapper(node,
+#                                                    gptq_config,
+#                                                    STEWeightQuantizer)
+#             #
+#             node_instance = QuantizedLayerWrapper(node,
+#                                                   get_quantization_config(node))
+#         else:
+#             Logger.critical('No support for GumbelRounding GPTQ yet. Work in progress..')
+#     else:
+#         # No quantization
+#         node_instance = node_builder(node)
+#     return node_instance

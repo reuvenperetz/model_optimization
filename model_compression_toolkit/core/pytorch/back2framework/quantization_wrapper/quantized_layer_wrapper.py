@@ -17,14 +17,14 @@ import copy
 import torch
 from typing import Any
 
+from model_compression_toolkit.core.pytorch.constants import KERNEL
+
 from model_compression_toolkit.core.common import BaseNode
 from model_compression_toolkit.core.common.graph.functional_node import FunctionalNode
 from model_compression_toolkit.core.pytorch.back2framework.quantization_wrapper.wrapper_quantize_config import \
     WrapperQuantizeConfig
 from model_compression_toolkit.core.pytorch.default_framework_info import DEFAULT_PYTORCH_INFO
-from model_compression_toolkit.core.pytorch.utils import set_model
-
-
+from model_compression_toolkit.core.pytorch.utils import set_model, to_torch_tensor
 
 
 class QuantizedLayerWrapper(torch.nn.Module):
@@ -53,9 +53,19 @@ class QuantizedLayerWrapper(torch.nn.Module):
         self._build_layer(n)
         self.quantization_config = quantize_config
 
+        if self.quantization_config.store_float_weight:
+            self.layer.load_state_dict({k: torch.Tensor(v) for k, v in n.weights.items()}, strict=False)
+            self.float_weight = to_torch_tensor(getattr(self.layer, KERNEL)).detach()
+
         # Setting layers' weights
         if self.quantization_config.is_weight_quantized and not self.is_function: #TODO: can functions have weights
             self._quantize_weights(n)
+
+            # replace non-gradient needed nn.Parameter with gradient needed torch.tensor
+            if self.quantization_config.store_float_weight and self.quantization_config.requires_grad:
+                delattr(self.layer, KERNEL)
+                setattr(self.layer, KERNEL, self.float_weight)
+                setattr(getattr(self.layer, KERNEL), 'requires_grad', quantize_config.requires_grad)
 
         if not self.is_function:
             set_model(self.layer)
@@ -68,6 +78,10 @@ class QuantizedLayerWrapper(torch.nn.Module):
         Returns:
             torch Tensor which is the output of the wrapped layer on the given input.
         """
+        if self.quantization_config.store_float_weight:
+            assert self.quantization_config.requires_grad
+            setattr(self.layer, KERNEL, self.quantization_config.get_weight_quantizers()[0](self.float_weight))
+
         outputs = self.layer(x, *args, **kwargs)
 
         if self.quantization_config.is_activation_quantized:
@@ -92,7 +106,7 @@ class QuantizedLayerWrapper(torch.nn.Module):
         # float_weights is a list of weights for each attribute that we want to quantize.
         float_weights = [n.get_weights_by_keys(attr) for attr in self.weight_attrs]
         assert len(self.weight_attrs) == len(float_weights)
-        self.quantized_weights = self._get_quantized_weights(float_weights)
+        self.quantized_weights = self._get_quantized_weights(to_torch_tensor(float_weights))
         if not isinstance(n, FunctionalNode):
             self._load_quantized_weights()
 
@@ -105,10 +119,10 @@ class QuantizedLayerWrapper(torch.nn.Module):
                 # need to prepare the weights' tensor - extract it from the maintained quantized_weights list
                 # and move it to the relevant device as the wrapped layer's weights.
                 weights_tensor = self.quantized_weights[attr_idx]
-                weights_device = loaded_weights[self.weight_attrs[attr_idx]].device
-                active_weights = torch.nn.Parameter(torch.from_numpy(weights_tensor).to(weights_device))
+                # weights_device = loaded_weights[self.weight_attrs[attr_idx]].device
+                active_weights = torch.nn.Parameter(to_torch_tensor(weights_tensor))
                 loaded_weights[self.weight_attrs[attr_idx]] = active_weights
-            self.layer.load_state_dict(loaded_weights, strict=True)
+            self.layer.load_state_dict(loaded_weights, strict=False)
 
 
     def _get_quantized_weights(self, float_weights):
@@ -123,7 +137,7 @@ class QuantizedLayerWrapper(torch.nn.Module):
         assert len(quantizers)==len(float_weights)
         for float_weight, quantizer in zip(float_weights, quantizers):
             # for each attribute
-            quantized_weights.append(quantizer(float_weight=float_weight))
+            quantized_weights.append(quantizer(float_weight))
         return quantized_weights
 
 

@@ -19,6 +19,8 @@ from tqdm import tqdm
 import copy
 import torch
 from model_compression_toolkit.core.common.logger import Logger
+from model_compression_toolkit.core.pytorch.back2framework.quantization_wrapper.quantized_layer_wrapper import \
+    QuantizedLayerWrapper
 from model_compression_toolkit.gptq.common.gptq_training import GPTQTrainer
 from model_compression_toolkit.gptq.common.gptq_config import GradientPTQConfig
 from model_compression_toolkit.core.common import Graph
@@ -29,6 +31,8 @@ from model_compression_toolkit.gptq.pytorch.gptq_model_builder import GPTQPytorc
 from model_compression_toolkit.core.pytorch.utils import to_torch_tensor, set_model, torch_tensor_to_numpy
 from model_compression_toolkit.gptq.pytorch.gptq_graph_info import get_trainable_parameters, get_weights_for_loss
 from model_compression_toolkit.gptq.pytorch.quantizer.quantizer_wrapper import WeightQuantizerWrapper
+from model_compression_toolkit.gptq.pytorch.weights_quantize_config import WeightsQuantizeConfig
+
 
 class PytorchGPTQTrainer(GPTQTrainer):
     """
@@ -190,16 +194,16 @@ class PytorchGPTQTrainer(GPTQTrainer):
 
         # Update graph after training
         for name, layer in self.fxp_model.named_modules():
-            if isinstance(layer, WeightQuantizerWrapper):
+            if isinstance(layer, QuantizedLayerWrapper) and isinstance(layer.quantization_config, WeightsQuantizeConfig):
                 node = self.graph_quant.find_node_by_name(name)
                 if len(node) != 1:
                     Logger.error(f"Can't update GPTQ graph due to missing layer named: {name}")
                 node = node[0]
                 # Weight
-                node.set_weights_by_keys(KERNEL, self.fw_impl.to_numpy(layer.weight_quantizer(layer.float_weight)))
+                node.set_weights_by_keys(KERNEL, self.fw_impl.to_numpy(layer.quantization_config.get_weight_quantizers()[0](layer.float_weight)))
                 # Bias
                 if self.gptq_config.train_bias:
-                    node.set_weights_by_keys(BIAS, self.fw_impl.to_numpy(getattr(layer.op, BIAS)))
+                    node.set_weights_by_keys(BIAS, self.fw_impl.to_numpy(getattr(layer.layer, BIAS)))
 
         return graph_quant
 
@@ -216,9 +220,9 @@ class PytorchGPTQTrainer(GPTQTrainer):
 
         # Fxp model: unfreeze only trainable parameters
         for layer in self.fxp_model.modules():
-            if isinstance(layer, WeightQuantizerWrapper):
-                for param in layer.weight_quantizer.get_trainable_params():
+            if isinstance(layer, QuantizedLayerWrapper) and isinstance(layer.quantization_config, WeightsQuantizeConfig):
+                for param in layer.quantization_config.get_weight_quantizers()[0].get_trainable_params():
                     param.requires_grad = True
-                if self.gptq_config.train_bias and hasattr(layer.op, BIAS):
-                    bias = getattr(layer.op, BIAS)
+                if self.gptq_config.train_bias and hasattr(layer.layer, BIAS):
+                    bias = getattr(layer.layer, BIAS)
                     bias.requires_grad = True

@@ -17,12 +17,15 @@ from typing import Tuple, List
 from model_compression_toolkit.core.common.user_info import UserInformation
 from model_compression_toolkit.core import common
 from model_compression_toolkit.core.common.graph.base_graph import BaseNode
+from model_compression_toolkit.core.pytorch.back2framework.quantization_wrapper.quantized_layer_wrapper import \
+    QuantizedLayerWrapper
 from model_compression_toolkit.gptq.common.gptq_config import GradientPTQConfig
 from model_compression_toolkit.core.common.framework_info import FrameworkInfo
 from model_compression_toolkit.core.pytorch.default_framework_info import DEFAULT_PYTORCH_INFO
 from model_compression_toolkit.core.pytorch.back2framework.pytorch_model_builder import PyTorchModelBuilder, PytorchModel
 from model_compression_toolkit.core.common.graph.functional_node import FunctionalNode
-from model_compression_toolkit.gptq.pytorch.quantizer.quantizer_wrapper import quantizer_wrapper
+from model_compression_toolkit.gptq.pytorch.node_to_quantize_config import get_quantization_config
+
 
 
 class GPTQPytorchModel(PytorchModel):
@@ -50,7 +53,9 @@ class GPTQPytorchModel(PytorchModel):
 
         for node in graph.nodes():
             if not isinstance(node, FunctionalNode):
-                self.add_module(node.name, quantizer_wrapper(node, gptq_config))
+                self.add_module(node.name, QuantizedLayerWrapper(node,
+                                                  get_quantization_config(node,
+                                                                          gptq_config)))
 
     def _quantize_node_activations(self,
                                    node: BaseNode,

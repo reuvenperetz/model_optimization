@@ -77,6 +77,10 @@ class STEWeightQuantizer(BaseWeightQuantizer):
         """
         return []
 
+    def __call__(self, w: nn.Parameter, *args, **kwargs) -> nn.Parameter:
+        return self.forward(w)
+
+
     def forward(self, w: nn.Parameter) -> nn.Parameter:
         """
         Weight fake quantizer

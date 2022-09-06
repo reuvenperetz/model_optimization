@@ -14,6 +14,7 @@
 # ==============================================================================
 import numpy as np
 import torch
+from model_compression_toolkit.core.pytorch.utils import to_torch_tensor, torch_tensor_to_numpy
 
 from model_compression_toolkit.core.common.quantization.quantizers.quantizers_helpers import uniform_quantize_tensor
 from model_compression_toolkit.core.common.target_platform import QuantizationMethod
@@ -45,8 +46,8 @@ class UniformWeightsQuantizer(torch.nn.Module):
         self.per_channel = per_channel
         self.output_channels_axis = output_channels_axis
 
-    def __call__(self, float_weight, *args, **kwargs):
-        return uniform_quantize_tensor(tensor_data=float_weight,
+    def __call__(self, float_weight:torch.Tensor, *args, **kwargs):
+        return uniform_quantize_tensor(tensor_data=torch_tensor_to_numpy(float_weight),
                                        range_min=self.min_range,
                                        range_max=self.max_range,
                                        n_bits=self.num_bits)

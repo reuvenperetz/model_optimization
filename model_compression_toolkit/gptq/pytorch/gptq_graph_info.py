@@ -14,7 +14,11 @@
 # ==============================================================================
 import torch.nn as nn
 from typing import List
+
+from model_compression_toolkit.core.pytorch.back2framework.quantization_wrapper.quantized_layer_wrapper import \
+    QuantizedLayerWrapper
 from model_compression_toolkit.gptq.pytorch.quantizer.quantizer_wrapper import WeightQuantizerWrapper
+from model_compression_toolkit.gptq.pytorch.weights_quantize_config import WeightsQuantizeConfig
 
 
 def get_trainable_parameters(fxp_model: nn.Module,
@@ -36,12 +40,12 @@ def get_trainable_parameters(fxp_model: nn.Module,
     trainable_bias = nn.ParameterList()
 
     for layer in fxp_model.modules():
-        if isinstance(layer, WeightQuantizerWrapper):
-            trainable_aux_weights.append(layer.weight_quantizer.get_aux_variable())
+        if isinstance(layer, QuantizedLayerWrapper) and isinstance(layer.quantization_config, WeightsQuantizeConfig):
+            trainable_aux_weights.append(layer.quantization_config.get_weight_quantizers()[0].get_aux_variable())
             if quantization_parameters_learning:
-                trainable_threshold.append(layer.weight_quantizer.get_quantization_variable())
-            if add_bias and layer.op.bias is not None:
-                trainable_bias.append(layer.op.bias)
+                trainable_threshold.append(layer.quantization_config.get_weight_quantizers()[0].get_quantization_variable())
+            if add_bias and layer.layer.bias is not None:
+                trainable_bias.append(layer.layer.bias)
 
     return trainable_aux_weights, trainable_bias, trainable_threshold
 
@@ -60,10 +64,10 @@ def get_weights_for_loss(fxp_model: nn.Module) -> [List, List]:
 
     flp_weights_list, fxp_weights_list = [], []
     for layer in fxp_model.modules():
-        if isinstance(layer, WeightQuantizerWrapper):
+        if isinstance(layer, QuantizedLayerWrapper) and isinstance(layer.quantization_config, WeightsQuantizeConfig):
             # Collect pairs of float and quantized weights per layer
-            weights = layer.op.weight
+            weights = layer.layer.weight
             flp_weights_list.append(weights)
-            fxp_weights_list.append(layer.weight_quantizer(weights))
+            fxp_weights_list.append(layer.quantization_config.get_weight_quantizers()[0](weights))
 
     return flp_weights_list, fxp_weights_list
