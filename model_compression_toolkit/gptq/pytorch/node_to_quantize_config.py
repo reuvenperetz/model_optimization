@@ -42,7 +42,7 @@ def get_quantization_config(node: BaseNode, gptq_config: GradientPTQConfig) -> W
         QuantizeConfig to use for wrapping the layer from the passed node.
     """
 
-    if node.is_weights_quantization_enabled() and not node.is_activation_quantization_enabled():
+    if node.is_weights_quantization_enabled():
         if not gptq_config.rounding_type == RoundingType.STE:
             Logger.critical('No support for GumbelRounding GPTQ yet. Work in progress..')
         else:
