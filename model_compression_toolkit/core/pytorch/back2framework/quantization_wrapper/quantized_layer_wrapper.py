@@ -45,6 +45,7 @@ class QuantizedLayerWrapper(torch.nn.Module):
             n: Node to build its Pytorch layer.
 
         """
+        print('Initiating layer wrapper')
         super(QuantizedLayerWrapper, self).__init__()
 
         self.is_function = isinstance(n, FunctionalNode)
