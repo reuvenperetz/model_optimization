@@ -144,7 +144,7 @@ MCT aims at keeping a more up-to-date fork and welcomes contributions from anyon
 
 
 ## License
-[Apache License 2.0](LICENSE).
+[Apache License 2.0](LICENSE.md).
 
 ## References 
 
