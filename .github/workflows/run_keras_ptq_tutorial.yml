@@ -1,5 +1,9 @@
 name: Run Keras Tutorial
 
+on:
+  workflow_dispatch: # Allow manual triggers
+
+
 jobs:
   run-tensorflow-tests:
     runs-on: ubuntu-latest
