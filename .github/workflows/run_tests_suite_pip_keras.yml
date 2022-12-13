@@ -15,11 +15,9 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: '3.10'
-#      - name: Install dependencies
-#        run: |
-#          pip install model-compression-toolkit
-#          pip install tensorflow
-#          pip install tensorflow_model_optimization
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
       - name: Build nightly
         run: |
           version=$(python -c 'import model_compression_toolkit; print(model_compression_toolkit.__version__)')
