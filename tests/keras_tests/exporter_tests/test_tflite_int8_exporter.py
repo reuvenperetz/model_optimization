@@ -137,6 +137,8 @@ class TestTFLiteINT8Exporter(unittest.TestCase):
 
         fq_model_output = _infer(test_image, SAVED_MODEL_PATH_FQ_TFLITE)
         int8_model_output = _infer(test_image, SAVED_MODEL_PATH_INT8_TFLITE)
+        self.assertTrue(fq_model_output.shape==int8_model_output.shape, f'Expected shapes of fq and int8 tflite models'
+                                                                        f'are expected to be equal but fq output shape is {fq_model_output.shape} and int8 output shape is {int8_model_output.shape}')
         diff = fq_model_output.flatten()-int8_model_output.flatten()
         print(f'Diff shape {diff.shape}')
         maximal_error = np.max(np.abs(diff))

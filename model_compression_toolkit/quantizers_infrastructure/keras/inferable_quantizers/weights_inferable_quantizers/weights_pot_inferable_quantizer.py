@@ -14,13 +14,13 @@
 # ==============================================================================
 
 import numpy as np
-from tensorflow_model_optimization.python.core.quantization.keras import quant_ops
 
 from model_compression_toolkit.core.common.constants import FOUND_TF
 from model_compression_toolkit.quantizers_infrastructure.common.base_inferable_quantizer import QuantizationTarget
 
 if FOUND_TF:
     import tensorflow as tf
+    from tensorflow_model_optimization.python.core.quantization.keras import quant_ops
     from model_compression_toolkit.quantizers_infrastructure.keras.inferable_quantizers.base_pot_inferable_quantizer import BasePOTInferableQuantizer
 
     class WeightsPOTInferableQuantizer(BasePOTInferableQuantizer):

@@ -105,7 +105,8 @@ class INT8TFLiteExporter(FakelyQuantKerasExporter):
         """
 
         def _substitute_model(wrapped_layer):
-            assert isinstance(wrapped_layer, qi.KerasQuantizationWrapper), f'Layer must be wrapped but of type {type(wrapped_layer)}'
+            # assert isinstance(wrapped_layer, qi.KerasQuantizationWrapper), f'Layer must be wrapped but of type {type(wrapped_layer)}'
+            assert self.is_layer_exportable_fn(wrapped_layer), f'Layer {wrapped_layer.get_config()} did not pass validation'
 
             if isinstance(wrapped_layer.layer, Dense):
                 # pw_kernel = self._convert_dense_kernel_to_pw_kernel(wrapped_layer)
@@ -150,17 +151,16 @@ class INT8TFLiteExporter(FakelyQuantKerasExporter):
                 new_dispatcher = copy.deepcopy(wrapped_layer.dispatcher)
                 new_dispatcher.set_weight_quantizers(new_weights_quantizer)
 
-                # dense_weight_quantizers = wrapped_layer.dispatcher.weight_quantizers
-                # dense_weight_quantizers['kernel'] = dense_weight_quantizers['kernel'].from_config()
-                # pw_dispatcher.weight_quantizers
+                dim = wrapped_layer.layer.input_shape[1:][:-1]
+
+                target_shape = (1,int(np.prod(dim))) + (dense_kernel.get_shape()[0],)
+
                 return Sequential([
-                    Reshape((1, 1, 1, dense_kernel.get_shape()[0])),
+                    Reshape(target_shape=target_shape),
                     qi.KerasQuantizationWrapper(pw_layer,
-                                                new_dispatcher)
-                    # TODO: Reshape from ((1, 1, 1, 1000)) -> (1,1000)
+                                                new_dispatcher),
+                    Reshape(wrapped_layer.layer.output_shape[1:])
                 ])
-
-
             return wrapped_layer
 
         self.transformed_model = clone_model(self.model, clone_function=_substitute_model)
