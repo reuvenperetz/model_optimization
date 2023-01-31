@@ -26,31 +26,16 @@ from model_compression_toolkit import quantizers_infrastructure as qi
 from model_compression_toolkit.core.common import Logger
 from model_compression_toolkit.exporter.model_exporter.keras.fakely_quant_keras_exporter import FakelyQuantKerasExporter
 
-POINTWISE_KERNEL = 'pointwise_kernel'
-DEPTH_MULTIPLIER = 'depth_multiplier'
-DATA_FORMAT = 'data_format'
-DILATION_RATE = 'dilation_rate'
-DEPTHWISE_INITIALIZER = 'depthwise_initializer'
-DEPTHWISE_REGULARIZER = 'depthwise_regularizer'
-DEPTHWISE_CONSTRAINT = 'depthwise_constraint'
 BIAS_INITIALIZER = 'bias_initializer'
 BIAS_REGULARIZER = 'bias_regularizer'
 BIAS_CONSTRAINT = 'bias_constraint'
 ACTIVITY_REGULARIZER = 'activity_regularizer'
 KERNEL_INITIALIZER = 'kernel_initializer'
-
-
 KERNEL_REGULARIZER = 'kernel_regularizer'
-SEPARABLE_PW_KERNEL_REGULARIZER = 'pointwise_regularizer'
 KERNEL_CONSTRAINT = 'kernel_constraint'
-SEPARABLE_PW_KERNEL_CONSTRAINT = 'pointwise_constraint'
-# Layers attributes constants:
 KERNEL_SIZE = 'kernel_size'
 PADDING = 'padding'
-GROUPS = 'groups'
 STRIDES = 'strides'
-DILATIONS = 'dilation_rate'
-DATA_FORMAT = 'data_format'
 LAYER_NAME = 'name'
 TRAINABLE = 'trainable'
 ACTIVATION = 'activation'
@@ -58,19 +43,6 @@ USE_BIAS = 'use_bias'
 FILTERS = 'filters'
 UNITS = 'units'
 PAD_VALID = 'valid'
-PAD_SAME = 'same'
-RELU_MAX_VALUE = 'max_value'
-THRESHOLD = 'threshold'
-NEGATIVE_SLOPE = 'negative_slope'
-CHANNELS_FORMAT = 'data_format'
-CHANNELS_FORMAT_FIRST = 'channels_first'
-CHANNELS_FORMAT_LAST = 'channels_last'
-AXES = 'axes'
-AXIS = 'axis'
-DIMS = 'dims'
-TARGET_SHAPE = 'target_shape'
-TRANSPOSE_A = 'transpose_a'
-TRANSPOSE_B = 'transpose_b'
 
 class INT8TFLiteExporter(FakelyQuantKerasExporter):
     """
@@ -105,14 +77,13 @@ class INT8TFLiteExporter(FakelyQuantKerasExporter):
         """
 
         def _substitute_model(wrapped_layer):
-            # assert isinstance(wrapped_layer, qi.KerasQuantizationWrapper), f'Layer must be wrapped but of type {type(wrapped_layer)}'
             assert self.is_layer_exportable_fn(wrapped_layer), f'Layer {wrapped_layer.get_config()} did not pass validation'
 
             if isinstance(wrapped_layer.layer, Dense):
                 # pw_kernel = self._convert_dense_kernel_to_pw_kernel(wrapped_layer)
                 # List of pw attributes that should take from separable as they are.
 
-                pw_attr_list = ['name', ACTIVATION, USE_BIAS, BIAS_CONSTRAINT,
+                pw_attr_list = [LAYER_NAME, ACTIVATION, USE_BIAS, BIAS_CONSTRAINT,
                                 BIAS_INITIALIZER, BIAS_REGULARIZER, TRAINABLE, ACTIVITY_REGULARIZER,
                                 KERNEL_INITIALIZER, KERNEL_REGULARIZER, KERNEL_CONSTRAINT]
 
@@ -172,5 +143,4 @@ class INT8TFLiteExporter(FakelyQuantKerasExporter):
         with open(self.save_model_path, 'wb') as f:
             f.write(self.exported_model)
 
-    def _convert_dense_kernel_to_pw_kernel(self, wrapped_layer:qi.KerasQuantizationWrapper):
-        pass
+
