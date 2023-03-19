@@ -1,48 +1,83 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-
-<!doctype html>
-
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
-
-    <title>target_platform Module &#8212; MCT Documentation: ver 1.8.0</title>
-    <link rel="stylesheet" type="text/css" href="../../../static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../static/bizstyle.css" />
-    <link rel="stylesheet" type="text/css" href="../../../static/css/custom.css" />
-    
-    <script data-url_root="../../../" id="documentation_options" src="../../../static/documentation_options.js"></script>
-    <script src="../../../static/jquery.js"></script>
-    <script src="../../../static/underscore.js"></script>
-    <script src="../../../static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../../../static/doctools.js"></script>
-    <script src="../../../static/bizstyle.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>target_platform Module &mdash; MCT Documentation: ver 1.8.0</title>
+      <link rel="stylesheet" href="../../../static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../static/documentation_options.js"></script>
+        <script src="../../../static/doctools.js"></script>
+        <script src="../../../static/sphinx_highlight.js"></script>
+    <script src="../../../static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
-    <link rel="search" title="Search" href="../../../search.html" />
-    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-    <!--[if lt IE 9]>
-    <script src="static/css3-mediaqueries.js"></script>
-    <![endif]-->
-  </head><body>
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="../../../genindex.html" title="General Index"
-             accesskey="I">index</a></li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">MCT Documentation: ver 1.8.0</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">target_platform Module</a></li> 
-      </ul>
-    </div>  
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          <div class="body" role="main">
-            
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            MCT
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../guidelines/visualization.html">Visualization within TensorBoard</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../guidelines/visualization.html#cosine-similarity-comparison">Cosine Similarity Comparison</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../guidelines/visualization.html#mixed-precision-configuration-bit-width">Mixed-precision Configuration Bit-width</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../guidelines/quickstart_keras.html">Quick start tutorial for Keras Post Training Quantization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../guidelines/quickstart_pytorch.html">Quick start tutorial for Pytorch Post Training Quantization</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../index.html">API Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">MCT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">target_platform Module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/api/experimental_api_docs/modules/target_platform.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
   <section id="target-platform-module">
-<span id="ug-target-platform"></span><h1>target_platform Module<a class="headerlink" href="#target-platform-module" title="Permalink to this heading">¶</a></h1>
+<span id="ug-target-platform"></span><h1>target_platform Module<a class="headerlink" href="#target-platform-module" title="Permalink to this heading"></a></h1>
 <p>MCT can be configured to quantize and optimize models for different hardware settings.
 For example, when using qnnpack backend for Pytorch model inference, Pytorch <a class="reference external" href="https://github.com/pytorch/pytorch/blob/master/torch/ao/quantization/qconfig.py#L199">quantization
 configuration</a>
@@ -74,11 +109,11 @@ This diagram demonstrates the main components:</p>
 <p>The first part is configuring the quantization method for both wights and activations of an operator.
 Several methods can be used using QuantizationMethod API:</p>
 <section id="quantizationmethod">
-<h2>QuantizationMethod<a class="headerlink" href="#quantizationmethod" title="Permalink to this heading">¶</a></h2>
+<h2>QuantizationMethod<a class="headerlink" href="#quantizationmethod" title="Permalink to this heading"></a></h2>
 <p>Select a method to use during quantization:</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="model_compression_toolkit.target_platform.QuantizationMethod">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">model_compression_toolkit.target_platform.</span></span><span class="sig-name descname"><span class="pre">QuantizationMethod</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#model_compression_toolkit.target_platform.QuantizationMethod" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">model_compression_toolkit.target_platform.</span></span><span class="sig-name descname"><span class="pre">QuantizationMethod</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#model_compression_toolkit.target_platform.QuantizationMethod" title="Permalink to this definition"></a></dt>
 <dd><p>Method for quantization function selection:</p>
 <p>POWER_OF_TWO - Symmetric, uniform, threshold is power of two quantization.</p>
 <p>KMEANS - k-means quantization.</p>
@@ -95,10 +130,10 @@ Several methods can be used using QuantizationMethod API:</p>
 Quantization configuration of different operators can be created using OpQuantizationConfig:</p>
 </section>
 <section id="opquantizationconfig">
-<h2>OpQuantizationConfig<a class="headerlink" href="#opquantizationconfig" title="Permalink to this heading">¶</a></h2>
+<h2>OpQuantizationConfig<a class="headerlink" href="#opquantizationconfig" title="Permalink to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="model_compression_toolkit.target_platform.OpQuantizationConfig">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">model_compression_toolkit.target_platform.</span></span><span class="sig-name descname"><span class="pre">OpQuantizationConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">activation_quantization_method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights_quantization_method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">activation_n_bits</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights_n_bits</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights_per_channel_threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enable_weights_quantization</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enable_activation_quantization</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quantization_preserving</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixed_scale</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixed_zero_point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights_multiplier_nbits</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#model_compression_toolkit.target_platform.OpQuantizationConfig" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">model_compression_toolkit.target_platform.</span></span><span class="sig-name descname"><span class="pre">OpQuantizationConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">activation_quantization_method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights_quantization_method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">activation_n_bits</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights_n_bits</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights_per_channel_threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enable_weights_quantization</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enable_activation_quantization</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quantization_preserving</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixed_scale</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixed_zero_point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights_multiplier_nbits</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#model_compression_toolkit.target_platform.OpQuantizationConfig" title="Permalink to this definition"></a></dt>
 <dd><p>OpQuantizationConfig is a class to configure the quantization parameters of an operator.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -145,10 +180,10 @@ one can create a QuantizationConfigOptions instance to represent a set of possib
 configuration options for an operator:</p>
 </section>
 <section id="quantizationconfigoptions">
-<h2>QuantizationConfigOptions<a class="headerlink" href="#quantizationconfigoptions" title="Permalink to this heading">¶</a></h2>
+<h2>QuantizationConfigOptions<a class="headerlink" href="#quantizationconfigoptions" title="Permalink to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="model_compression_toolkit.target_platform.QuantizationConfigOptions">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">model_compression_toolkit.target_platform.</span></span><span class="sig-name descname"><span class="pre">QuantizationConfigOptions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantization_config_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#model_compression_toolkit.target_platform.QuantizationConfigOptions" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">model_compression_toolkit.target_platform.</span></span><span class="sig-name descname"><span class="pre">QuantizationConfigOptions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantization_config_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#model_compression_toolkit.target_platform.QuantizationConfigOptions" title="Permalink to this definition"></a></dt>
 <dd><p>Wrap a set of quantization configurations to consider during the quantization
 of an operator.</p>
 <dl class="field-list simple">
@@ -187,10 +222,10 @@ object we can create operator sets, configure how these operators sets will be q
 group operators by common properties and configure patterns of operators to fuse:</p>
 </section>
 <section id="targetplatformmodel">
-<h2>TargetPlatformModel<a class="headerlink" href="#targetplatformmodel" title="Permalink to this heading">¶</a></h2>
+<h2>TargetPlatformModel<a class="headerlink" href="#targetplatformmodel" title="Permalink to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="model_compression_toolkit.target_platform.TargetPlatformModel">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">model_compression_toolkit.target_platform.</span></span><span class="sig-name descname"><span class="pre">TargetPlatformModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">default_qco</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'default_tp_model'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#model_compression_toolkit.target_platform.TargetPlatformModel" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">model_compression_toolkit.target_platform.</span></span><span class="sig-name descname"><span class="pre">TargetPlatformModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">default_qco</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'default_tp_model'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#model_compression_toolkit.target_platform.TargetPlatformModel" title="Permalink to this definition"></a></dt>
 <dd><p>Modeling of the hardware the quantized model will use during inference.
 The model contains definition of operators, quantization configurations of them, and
 fusing patterns so that multiple operators will be combined into a single operator.</p>
@@ -224,10 +259,10 @@ in the default QuantizationConfigOptions will guide MCT how this operator should
 <p>Then, we can start defining the model by creating OperatorsSets:</p>
 </section>
 <section id="operatorsset">
-<h2>OperatorsSet<a class="headerlink" href="#operatorsset" title="Permalink to this heading">¶</a></h2>
+<h2>OperatorsSet<a class="headerlink" href="#operatorsset" title="Permalink to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="model_compression_toolkit.target_platform.OperatorsSet">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">model_compression_toolkit.target_platform.</span></span><span class="sig-name descname"><span class="pre">OperatorsSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qc_options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#model_compression_toolkit.target_platform.OperatorsSet" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">model_compression_toolkit.target_platform.</span></span><span class="sig-name descname"><span class="pre">OperatorsSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qc_options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#model_compression_toolkit.target_platform.OperatorsSet" title="Permalink to this definition"></a></dt>
 <dd><p>Set of operators that are represented by a unique label.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -268,10 +303,10 @@ of operators that should be combined and treated as a single operator, hence no
 quantization is applied between them when they appear in a model:</p>
 </section>
 <section id="fusing">
-<h2>Fusing<a class="headerlink" href="#fusing" title="Permalink to this heading">¶</a></h2>
+<h2>Fusing<a class="headerlink" href="#fusing" title="Permalink to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="model_compression_toolkit.target_platform.Fusing">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">model_compression_toolkit.target_platform.</span></span><span class="sig-name descname"><span class="pre">Fusing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">operator_groups_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#model_compression_toolkit.target_platform.Fusing" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">model_compression_toolkit.target_platform.</span></span><span class="sig-name descname"><span class="pre">Fusing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">operator_groups_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#model_compression_toolkit.target_platform.Fusing" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>name</strong> – Name of component.</p>
@@ -322,10 +357,10 @@ of [fc_opset, relu_opset], of course).</p>
 <p>When multiple operators should be fused in a similar way, an OperatorSetConcat can be used:</p>
 </section>
 <section id="operatorsetconcat">
-<h2>OperatorSetConcat<a class="headerlink" href="#operatorsetconcat" title="Permalink to this heading">¶</a></h2>
+<h2>OperatorSetConcat<a class="headerlink" href="#operatorsetconcat" title="Permalink to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="model_compression_toolkit.target_platform.OperatorSetConcat">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">model_compression_toolkit.target_platform.</span></span><span class="sig-name descname"><span class="pre">OperatorSetConcat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">opsets</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#model_compression_toolkit.target_platform.OperatorSetConcat" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">model_compression_toolkit.target_platform.</span></span><span class="sig-name descname"><span class="pre">OperatorSetConcat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">opsets</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#model_compression_toolkit.target_platform.OperatorSetConcat" title="Permalink to this definition"></a></dt>
 <dd><p>Concatenate a list of operator sets to treat them similarly in different places (like fusing).</p>
 <p>Group a list of operation sets.</p>
 <dl class="field-list simple">
@@ -352,7 +387,7 @@ can be used as follows:</p>
 </div>
 </section>
 <section id="targetplatformmodel-code-example">
-<h2>TargetPlatformModel Code Example<a class="headerlink" href="#targetplatformmodel-code-example" title="Permalink to this heading">¶</a></h2>
+<h2>TargetPlatformModel Code Example<a class="headerlink" href="#targetplatformmodel-code-example" title="Permalink to this heading"></a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span>
 
 <span class="kn">import</span> <span class="nn">model_compression_toolkit</span> <span class="k">as</span> <span class="nn">mct</span>
@@ -362,7 +397,7 @@ can be used as follows:</p>
 
 
 <span class="k">def</span> <span class="nf">get_tp_model</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">TargetPlatformModel</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A method that generates a default target platform model, with base 8-bit quantization configuration and 8, 4, 2</span>
 <span class="sd">    bits configuration list for mixed-precision quantization.</span>
 <span class="sd">    NOTE: in order to generate a target platform model with different configurations but with the same Operators Sets</span>
@@ -380,7 +415,7 @@ can be used as follows:</p>
 
 
 <span class="k">def</span> <span class="nf">get_op_quantization_configs</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">OpQuantizationConfig</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">OpQuantizationConfig</span><span class="p">]]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Creates a default configuration object for 8-bit quantization, to be used to set a default TargetPlatformModel.</span>
 <span class="sd">    In addition, creates a default configuration objects list (with 8, 4 and 2 bit quantization) to be used as</span>
 <span class="sd">    default configuration for mixed-precision quantization.</span>
@@ -420,7 +455,7 @@ can be used as follows:</p>
                       <span class="n">base_config</span><span class="p">:</span> <span class="n">OpQuantizationConfig</span><span class="p">,</span>
                       <span class="n">mixed_precision_cfg_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">OpQuantizationConfig</span><span class="p">],</span>
                       <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TargetPlatformModel</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generates TargetPlatformModel with default defined Operators Sets, based on the given base configuration and</span>
 <span class="sd">    mixed-precision configurations options list.</span>
 
@@ -509,10 +544,10 @@ To attach a list of framework’s layers to an OperatorsSet that is defined in t
 an OperationsSetToLayers can be used:</p>
 </section>
 <section id="operationssettolayers">
-<h2>OperationsSetToLayers<a class="headerlink" href="#operationssettolayers" title="Permalink to this heading">¶</a></h2>
+<h2>OperationsSetToLayers<a class="headerlink" href="#operationssettolayers" title="Permalink to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="model_compression_toolkit.target_platform.OperationsSetToLayers">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">model_compression_toolkit.target_platform.</span></span><span class="sig-name descname"><span class="pre">OperationsSetToLayers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">op_set_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layers</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#model_compression_toolkit.target_platform.OperationsSetToLayers" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">model_compression_toolkit.target_platform.</span></span><span class="sig-name descname"><span class="pre">OperationsSetToLayers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">op_set_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layers</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#model_compression_toolkit.target_platform.OperationsSetToLayers" title="Permalink to this definition"></a></dt>
 <dd><p>Associate an OperatorsSet to a list of framework’s layers.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -541,10 +576,10 @@ can be created, and the layers that will be attached to each OperatorSet will ha
 For that, LayerFilterParams can be used:</p>
 </section>
 <section id="layerfilterparams">
-<h2>LayerFilterParams<a class="headerlink" href="#layerfilterparams" title="Permalink to this heading">¶</a></h2>
+<h2>LayerFilterParams<a class="headerlink" href="#layerfilterparams" title="Permalink to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="model_compression_toolkit.target_platform.LayerFilterParams">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">model_compression_toolkit.target_platform.</span></span><span class="sig-name descname"><span class="pre">LayerFilterParams</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layer</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">conditions</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#model_compression_toolkit.target_platform.LayerFilterParams" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">model_compression_toolkit.target_platform.</span></span><span class="sig-name descname"><span class="pre">LayerFilterParams</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layer</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">conditions</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#model_compression_toolkit.target_platform.LayerFilterParams" title="Permalink to this definition"></a></dt>
 <dd><p>Wrap a layer with filters to filter framework’s layers by their attributes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -597,10 +632,10 @@ using OperationsSetToLayers just like any other layers:</p>
 which attaches the layers representations to OperatorsSets in a TargetPlatformModel instance:</p>
 </section>
 <section id="targetplatformcapabilities">
-<h2>TargetPlatformCapabilities<a class="headerlink" href="#targetplatformcapabilities" title="Permalink to this heading">¶</a></h2>
+<h2>TargetPlatformCapabilities<a class="headerlink" href="#targetplatformcapabilities" title="Permalink to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="model_compression_toolkit.target_platform.TargetPlatformCapabilities">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">model_compression_toolkit.target_platform.</span></span><span class="sig-name descname"><span class="pre">TargetPlatformCapabilities</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tp_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'base'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#model_compression_toolkit.target_platform.TargetPlatformCapabilities" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">model_compression_toolkit.target_platform.</span></span><span class="sig-name descname"><span class="pre">TargetPlatformCapabilities</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tp_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'base'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#model_compression_toolkit.target_platform.TargetPlatformCapabilities" title="Permalink to this definition"></a></dt>
 <dd><p>Attach framework information to a modeled hardware.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -618,7 +653,7 @@ TargetPlatformCapabilities initialization. Then, OperationsSetToLayers can be cr
 to the TargetPlatformCapabilities like in the following example:</p>
 </section>
 <section id="targetplatformcapabilities-code-example">
-<h2>TargetPlatformCapabilities Code Example<a class="headerlink" href="#targetplatformcapabilities-code-example" title="Permalink to this heading">¶</a></h2>
+<h2>TargetPlatformCapabilities Code Example<a class="headerlink" href="#targetplatformcapabilities-code-example" title="Permalink to this heading"></a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
 <span class="kn">from</span> <span class="nn">packaging</span> <span class="kn">import</span> <span class="n">version</span>
 
@@ -638,7 +673,7 @@ to the TargetPlatformCapabilities like in the following example:</p>
 
 
 <span class="k">def</span> <span class="nf">get_keras_tpc</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">tp</span><span class="o">.</span><span class="n">TargetPlatformCapabilities</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    get a Keras TargetPlatformCapabilities object with default operation sets to layers mapping.</span>
 <span class="sd">    Returns: a Keras TargetPlatformCapabilities object for the given TargetPlatformModel.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -647,7 +682,7 @@ to the TargetPlatformCapabilities like in the following example:</p>
 
 
 <span class="k">def</span> <span class="nf">generate_keras_tpc</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tp_model</span><span class="p">:</span> <span class="n">tp</span><span class="o">.</span><span class="n">TargetPlatformModel</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generates a TargetPlatformCapabilities object with default operation sets to layers mapping.</span>
 
 <span class="sd">    Args:</span>
@@ -697,60 +732,31 @@ to the TargetPlatformCapabilities like in the following example:</p>
 </section>
 
 
-            <div class="clearer"></div>
+           </div>
           </div>
-        </div>
-      </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-  <div>
-    <h3><a href="../../../index.html">Table of Contents</a></h3>
-    <ul>
-<li><a class="reference internal" href="#">target_platform Module</a><ul>
-<li><a class="reference internal" href="#quantizationmethod">QuantizationMethod</a></li>
-<li><a class="reference internal" href="#opquantizationconfig">OpQuantizationConfig</a></li>
-<li><a class="reference internal" href="#quantizationconfigoptions">QuantizationConfigOptions</a></li>
-<li><a class="reference internal" href="#targetplatformmodel">TargetPlatformModel</a></li>
-<li><a class="reference internal" href="#operatorsset">OperatorsSet</a></li>
-<li><a class="reference internal" href="#fusing">Fusing</a></li>
-<li><a class="reference internal" href="#operatorsetconcat">OperatorSetConcat</a></li>
-<li><a class="reference internal" href="#targetplatformmodel-code-example">TargetPlatformModel Code Example</a></li>
-<li><a class="reference internal" href="#operationssettolayers">OperationsSetToLayers</a></li>
-<li><a class="reference internal" href="#layerfilterparams">LayerFilterParams</a></li>
-<li><a class="reference internal" href="#targetplatformcapabilities">TargetPlatformCapabilities</a></li>
-<li><a class="reference internal" href="#targetplatformcapabilities-code-example">TargetPlatformCapabilities Code Example</a></li>
-</ul>
-</li>
-</ul>
+          <footer>
 
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Sony Semiconductor Israel.</p>
   </div>
-<div id="searchbox" style="display: none" role="search">
-  <h3 id="searchlabel">Quick search</h3>
-    <div class="searchformwrapper">
-    <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
-      <input type="submit" value="Go" />
-    </form>
-    </div>
-</div>
-<script>document.getElementById('searchbox').style.display = "block"</script>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
         </div>
       </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="../../../genindex.html" title="General Index"
-             >index</a></li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">MCT Documentation: ver 1.8.0</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">target_platform Module</a></li> 
-      </ul>
-    </div>
-    <div class="footer" role="contentinfo">
-        &#169; Copyright 2022, Sony Semiconductor Israel.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.1.1.
-    </div>
-  </body>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
 </html>

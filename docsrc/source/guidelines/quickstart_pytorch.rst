@@ -101,6 +101,4 @@ Run Post Training Quantization:
                                                                                              representative_data_gen,
                                                                                              core_config=core_config,
                                                                                              target_platform_capabilities=target_platform_cap)
-|
-
 
