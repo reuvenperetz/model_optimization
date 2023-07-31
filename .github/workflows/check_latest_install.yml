@@ -6,7 +6,7 @@ on:
     - cron: 0 0 * * *
 
 jobs:
-  run-tensorflow-tests:
+  check-latest-install:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
