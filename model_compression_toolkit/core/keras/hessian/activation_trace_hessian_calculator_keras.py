@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
+import gc
 
 from typing import List, Tuple, Dict, Any
 
@@ -84,6 +85,7 @@ class ActivationTraceHessianCalculatorKeras(TraceHessianCalculatorKeras):
                         # Getting a random vector with normal distribution
                         v = tf.random.normal(shape=output.shape)
                         f_v = tf.reduce_sum(v * output)
+                        gc.collect()
 
                         with g.stop_recording():
                             # Computing the approximation by getting the gradient of (output * v)
@@ -99,6 +101,10 @@ class ActivationTraceHessianCalculatorKeras(TraceHessianCalculatorKeras):
                             for grad in gradients:
                                 grad = tf.reshape(grad, [grad.shape[0], -1])
                                 score_approx_per_output.append(tf.reduce_mean(tf.reduce_sum(tf.pow(grad, 2.0))))
+
+                            del grad
+                            del gradients
+                            gc.collect()
 
                             # If the change to the mean approximation is insignificant (to all outputs)
                             # we stop the calculation.
@@ -135,6 +141,8 @@ class ActivationTraceHessianCalculatorKeras(TraceHessianCalculatorKeras):
 
             # Free gradient tape
             del g
+            gc.collect()
+
             return trace_approx_by_node.numpy().tolist()
 
         else:

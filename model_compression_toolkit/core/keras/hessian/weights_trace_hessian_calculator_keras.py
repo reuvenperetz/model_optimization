@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
+import gc
 
 import numpy as np
 import tensorflow as tf
@@ -106,6 +107,7 @@ class WeightsTraceHessianCalculatorKeras(TraceHessianCalculatorKeras):
                 # Getting a random vector with normal distribution and the same shape as the model output
                 v = tf.random.normal(shape=output.shape)
                 f_v = tf.reduce_sum(v * output)
+                gc.collect()
 
                 # Stop recording operations for automatic differentiation
                 with tape.stop_recording():
@@ -115,6 +117,7 @@ class WeightsTraceHessianCalculatorKeras(TraceHessianCalculatorKeras):
                                                         output_channel_axis,
                                                         num_of_scores)
                     approx = tf.reduce_sum(tf.pow(gradients, 2.0), axis=1)
+                    del gradients
 
                     # If the change to the mean approximation is insignificant (to all outputs)
                     # we stop the calculation.
@@ -134,6 +137,7 @@ class WeightsTraceHessianCalculatorKeras(TraceHessianCalculatorKeras):
 
         # Free gradient tape
         del tape
+        gc.collect()
 
         if self.hessian_request.granularity == HessianInfoGranularity.PER_TENSOR:
             if final_approx.shape != (1,):
