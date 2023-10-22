@@ -40,8 +40,7 @@ class BaseNode:
                  reuse: bool = False,
                  reuse_group: str = None,
                  quantization_attr: Dict[str, Any] = None,
-                 has_activation: bool = True,
-                 is_custom: bool = False
+                 has_activation: bool = True
                  ):
         """
         Init a Node object.
@@ -57,7 +56,6 @@ class BaseNode:
             reuse_group: Name of group of nodes from the same reused layer.
             quantization_attr: Attributes the node holds regarding how it should be quantized.
             has_activation: Whether the node has activations that we might want to quantize.
-            is_custom: Whether the node is custom layer or not.
         """
         self.name = name
         self.framework_attr = framework_attr
@@ -73,7 +71,6 @@ class BaseNode:
         self.candidates_quantization_cfg = None
         self.prior_info = None
         self.has_activation = has_activation
-        self.is_custom = is_custom
 
     @property
     def type(self):
@@ -458,6 +455,7 @@ class BaseNode:
             return tpc.layer2qco.get(self.type)
         return tpc.tp_model.default_qco
 
+
     def is_match_filter_params(self, layer_filter_params: LayerFilterParams) -> bool:
         """
         Check if the node matches a LayerFilterParams according to its
@@ -469,10 +467,6 @@ class BaseNode:
         Returns:
             Whether the node matches to the LayerFilterParams properties.
         """
-        # check if provided argument is of type LayerFilterParams
-        if not isinstance(layer_filter_params, LayerFilterParams):
-            return False
-
         # Check the node has the same type as the layer in LayerFilterParams
         if layer_filter_params.layer != self.type:
             return False

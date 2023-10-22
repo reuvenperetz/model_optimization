@@ -58,6 +58,12 @@ def build_node(node: KerasNode,
     op_call_args = node.call_args
     op_call_kwargs = node.call_kwargs
     layer_class = type(keras_layer)  # class path to instantiating it in back2framework.
+
+    # Validate the layer is not a custom layer
+    if is_keras_custom_layer(layer_class):
+        Logger.error(f'MCT does not support optimizing Keras custom layers, but found layer of type {layer_class}. '
+                     f'Please file a feature request or an issue if you believe this is an issue.')
+
     weights = {v.name: v.numpy() for v in keras_layer.weights}  # layer's weights
 
     # If it's a node representing a reused layer, several nodes will contain the same layer instance.
@@ -109,8 +115,7 @@ def build_node(node: KerasNode,
                         weights,
                         layer_class,
                         is_reused,
-                        reuse_group,
-                        is_custom=is_keras_custom_layer(layer_class))
+                        reuse_group)
 
     node_name_to_node[node_name] = node
     return node
