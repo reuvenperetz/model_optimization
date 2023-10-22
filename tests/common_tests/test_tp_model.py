@@ -31,9 +31,8 @@ TEST_QC = tp.OpQuantizationConfig(enable_activation_quantization=True,
                                    quantization_preserving=False,
                                    fixed_scale=None,
                                    fixed_zero_point=None,
-                                   weights_multiplier_nbits=None,
-                                   simd_size=None)
-
+                                   weights_multiplier_nbits=None
+                                   )
 TEST_QCO = tp.QuantizationConfigOptions([TEST_QC])
 
 

@@ -68,8 +68,7 @@ class LUTWeightsQuantizerTest(BaseKerasFeatureNetworkTest):
                                      quantization_preserving=False,
                                      fixed_scale=None,
                                      fixed_zero_point=None,
-                                     weights_multiplier_nbits=None,
-                                     simd_size=None
+                                     weights_multiplier_nbits=None
                                      )])
         return tp.TargetPlatformCapabilities(tp.TargetPlatformModel(qco))
 
@@ -122,8 +121,7 @@ class LUTActivationQuantizerTest(BaseKerasFeatureNetworkTest):
                                      quantization_preserving=False,
                                      fixed_scale=None,
                                      fixed_zero_point=None,
-                                     weights_multiplier_nbits=None,
-                                     simd_size=None
+                                     weights_multiplier_nbits=None
                                      )])
         return tp.TargetPlatformCapabilities(tp.TargetPlatformModel(qco))
 
