@@ -15,5 +15,3 @@
 
 import model_compression_toolkit.qat.keras.quantizer.ste_rounding.symmetric_ste
 import model_compression_toolkit.qat.keras.quantizer.ste_rounding.uniform_ste
-import model_compression_toolkit.qat.keras.quantizer.lsq.symmetric_lsq
-import model_compression_toolkit.qat.keras.quantizer.lsq.uniform_lsq
