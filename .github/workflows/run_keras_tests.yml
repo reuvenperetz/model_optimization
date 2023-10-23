@@ -26,6 +26,9 @@ jobs:
           pip install tensorflow==${{ inputs.tf-version }}
       - name: Run unittests
         run: |
+          python -m unittest discover tests/keras_tests/tb_writer_problem -v
+          echo "Finished tb_writer_problem"
+          
           python -m unittest discover tests/keras_tests/problem_keras_tp_model -v
           echo "Finished problem_keras_tp_model"
           
