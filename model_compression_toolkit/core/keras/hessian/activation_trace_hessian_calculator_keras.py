@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-import gc
 
 from typing import List, Tuple, Dict, Any
 
@@ -139,7 +138,6 @@ class ActivationTraceHessianCalculatorKeras(TraceHessianCalculatorKeras):
 
             # Free gradient tape
             del g
-            gc.collect()
 
             return trace_approx_by_node.numpy().tolist()
 
