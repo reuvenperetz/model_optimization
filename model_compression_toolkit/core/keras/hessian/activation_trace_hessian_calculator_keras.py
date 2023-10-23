@@ -85,7 +85,6 @@ class ActivationTraceHessianCalculatorKeras(TraceHessianCalculatorKeras):
                         # Getting a random vector with normal distribution
                         v = tf.random.normal(shape=output.shape)
                         f_v = tf.reduce_sum(v * output)
-                        gc.collect()
 
                         with g.stop_recording():
                             # Computing the approximation by getting the gradient of (output * v)
@@ -104,7 +103,6 @@ class ActivationTraceHessianCalculatorKeras(TraceHessianCalculatorKeras):
 
                             del grad
                             del gradients
-                            gc.collect()
 
                             # If the change to the mean approximation is insignificant (to all outputs)
                             # we stop the calculation.

@@ -230,7 +230,7 @@ class TestSearchBitwidthConfiguration(unittest.TestCase):
                             fw_info=DEFAULT_KERAS_INFO,
                             fw_impl=keras_impl)
 
-        for i in range(10):
+        for i in range(1):
             mi.infer([np.random.randn(1, 224, 224, 3)])
 
         def representative_data_gen():

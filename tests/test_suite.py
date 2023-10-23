@@ -18,8 +18,6 @@
 import importlib
 import unittest
 
-from packaging import version
-
 from tests.common_tests.function_tests.test_collectors_manipulation import TestCollectorsManipulations
 from tests.common_tests.function_tests.test_folder_image_loader import TestFolderLoader
 #  ----------------  Individual test suites
@@ -38,7 +36,6 @@ found_pytorch = importlib.util.find_spec("torch") is not None and importlib.util
     "torchvision") is not None
 
 if found_tf:
-    import tensorflow as tf
     from tests.keras_tests.function_tests.test_hessian_info_calculator_weights import TestHessianInfoCalculatorWeights
     from tests.keras_tests.function_tests.test_hessian_service import TestHessianService
     from tests.keras_tests.feature_networks_tests.test_features_runner import FeatureNetworkTest
@@ -57,7 +54,7 @@ if found_tf:
         TestSymmetricThresholdSelectionWeights
     from tests.keras_tests.function_tests.test_uniform_quantize_tensor import TestUniformQuantizeTensor
     from tests.keras_tests.function_tests.test_uniform_range_selection_weights import TestUniformRangeSelectionWeights
-    from tests.keras_tests.function_tests.test_keras_tp_model import TestKerasTPModel
+    from tests.keras_tests.problem_keras_tp_model.test_keras_tp_model import TestKerasTPModel
     from tests.keras_tests.function_tests.test_sensitivity_metric_interest_points import \
         TestSensitivityMetricInterestPoints
     from tests.keras_tests.function_tests.test_weights_activation_split_substitution import TestWeightsActivationSplit

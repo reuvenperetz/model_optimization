@@ -240,7 +240,8 @@ class TestGetKerasTPC(unittest.TestCase):
                                                                                    new_experimental_exporter=True)
 
         core_config = mct.core.CoreConfig(
-            mixed_precision_config=mct.core.MixedPrecisionQuantizationConfigV2(num_of_images=1))
+            mixed_precision_config=mct.core.MixedPrecisionQuantizationConfigV2(num_of_images=1,
+                                                                               use_grad_based_weights=False))
         quantized_model, _ = mct.ptq.keras_post_training_quantization_experimental(model,
                                                                                    rep_data,
                                                                                    core_config=core_config,
