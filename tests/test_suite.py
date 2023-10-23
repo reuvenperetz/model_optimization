@@ -40,7 +40,7 @@ if found_tf:
     from tests.keras_tests.function_tests.test_hessian_service import TestHessianService
     from tests.keras_tests.feature_networks_tests.test_features_runner import FeatureNetworkTest
     from tests.keras_tests.function_tests.test_quantization_configurations import TestQuantizationConfigurations
-    from tests.keras_tests.tb_writer_problem.test_tensorboard_writer import TestFileLogger
+    from tests.keras_tests.function_tests.test_tensorboard_writer import TestFileLogger
     from tests.keras_tests.function_tests.test_lut_quanitzer_params import TestLUTQuantizerParams
     from tests.keras_tests.function_tests.test_lut_activation_quanitzer_params import TestLUTActivationsQuantizerParams
     from tests.keras_tests.function_tests.test_lut_activation_quanitzer_fake_quant import TestLUTQuantizerFakeQuant
@@ -54,7 +54,7 @@ if found_tf:
         TestSymmetricThresholdSelectionWeights
     from tests.keras_tests.function_tests.test_uniform_quantize_tensor import TestUniformQuantizeTensor
     from tests.keras_tests.function_tests.test_uniform_range_selection_weights import TestUniformRangeSelectionWeights
-    from tests.keras_tests.problem_keras_tp_model.test_keras_tp_model import TestKerasTPModel
+    from tests.keras_tests.function_tests.test_keras_tp_model import TestKerasTPModel
     from tests.keras_tests.function_tests.test_sensitivity_metric_interest_points import \
         TestSensitivityMetricInterestPoints
     from tests.keras_tests.function_tests.test_weights_activation_split_substitution import TestWeightsActivationSplit
