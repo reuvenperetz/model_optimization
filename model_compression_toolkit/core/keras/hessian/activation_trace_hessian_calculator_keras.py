@@ -34,7 +34,7 @@ from tensorflow.python.util.object_identity import Reference as TFReference
 
 class ActivationTraceHessianCalculatorKeras(TraceHessianCalculatorKeras):
     """
-    Keras implementation of the Trace Hessian Calculator for activations.
+    Keras implementation odddf the Trace Hessian Calculator for activations.
     """
     def __init__(self,
                  graph: Graph,
