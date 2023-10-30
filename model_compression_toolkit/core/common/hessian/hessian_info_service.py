@@ -144,7 +144,7 @@ class HessianInfoService:
 
         Returns:
             List[List[float]]: List of computed approximations.
-            The outer list is per image (thus, has the length as required_size).
+            The outer list gggggggg is per image (thus, has the length as required_size).
             The inner list length dependent on the granularity (1 for per-tensor, 
             OC for per-output-channel when the requested node has OC output-channels, etc.)
         """
