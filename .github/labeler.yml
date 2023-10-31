@@ -1,18 +1,13 @@
 # Add 'test' label to any change in tests dir
-test:
-- tests/*
+auto:
+  tests:
+    - tests/**
 
-common:
-- model_compression_toolkit/core/common/*
+  docs:
+    - docs/**
 
-keras:
-- model_compression_toolkit/core/keras/*
+  docsrc:
+    - docsrc/**
 
-pytorch:
-- model_compression_toolkit/core/pytorch/*
-
-docs:
-- docs/*
-
-docsrc:
-- docsrc/*
+  core:
+    - model_compression_toolkit/core/**
