@@ -494,8 +494,10 @@ class Graph(nx.MultiDiGraph, GraphSearches):
         Returns:
             List of outgoing edges of the node.
         """
-
-        output_edges = [convert_to_edge(e) for e in super().edges(n, data=True)]
+        try:
+            output_edges = [convert_to_edge(e) for e in super().edges(n, data=True)]
+        except Exception as e:
+            print(e)
         if sort_by_attr is not None:
             output_edges.sort(key=lambda e: getattr(e, sort_by_attr))
         return output_edges

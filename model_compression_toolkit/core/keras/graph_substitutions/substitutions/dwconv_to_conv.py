@@ -78,8 +78,8 @@ class DwconvToConv(common.BaseSubstitution):
         """
 
         # Skip in case mult depth_multiplier=1
-        if dwconv_node.framework_attr[DEPTH_MULTIPLIER] == 1:
-            return graph
+        # if dwconv_node.framework_attr[DEPTH_MULTIPLIER] == 1:
+        #     return graph
 
         # Build the new node
         k = self._get_weight_by_name(dwconv_node, KERNEL).copy()

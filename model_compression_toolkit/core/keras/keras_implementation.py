@@ -27,6 +27,8 @@ from model_compression_toolkit.core.keras.hessian.activation_trace_hessian_calcu
     ActivationTraceHessianCalculatorKeras
 from model_compression_toolkit.core.keras.hessian.trace_hessian_calculator_keras import TraceHessianCalculatorKeras
 from model_compression_toolkit.core.keras.hessian.weights_trace_hessian_calculator_keras import WeightsTraceHessianCalculatorKeras
+
+from model_compression_toolkit.core.keras.pruning.prune_keras_node import prune_keras_node
 from model_compression_toolkit.logger import Logger
 from model_compression_toolkit.trainable_infrastructure.keras.quantize_wrapper import KerasTrainableQuantizationWrapper
 from model_compression_toolkit.core.common.mixed_precision.sensitivity_evaluation import SensitivityEvaluation
@@ -593,3 +595,10 @@ class KerasImplementation(FrameworkImplementation):
         """
 
         return model(inputs)
+
+    def prune_node(self,node,mask,fw_info, prune_input_channels):
+        return prune_keras_node(node,
+                                mask,
+                                fw_info,
+                                prune_input_channels)
+
