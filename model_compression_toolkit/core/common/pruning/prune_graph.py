@@ -4,7 +4,7 @@ import copy
 import numpy as np
 
 from model_compression_toolkit.core.common import BaseNode
-from model_compression_toolkit.core.common.pruning.prunable_nodes import get_prunable_nodes
+# from model_compression_toolkit.core.common.pruning.prunable_nodes import get_prunable_nodes
 
 
 def build_pruned_graph(graph,
