@@ -4,8 +4,7 @@ from typing import List, Dict
 from model_compression_toolkit.core.common import BaseNode
 from model_compression_toolkit.core.common.framework_info import FrameworkInfo
 from model_compression_toolkit.core.common.mixed_precision.kpi_tools.kpi import KPI
-from model_compression_toolkit.core.common.pruning.memory_helper import MemoryHelper
-# from model_compression_toolkit.core.common.pruning.memory_utils import get_pruned_graph_memory
+from model_compression_toolkit.core.common.pruning.memory_utils import get_pruned_graph_memory
 from model_compression_toolkit.logger import Logger
 
 
@@ -65,9 +64,9 @@ class GreedyMaskCalculator:
                                   group_index=0,
                                   value=1)
 
-        current_memory = MemoryHelper.get_pruned_graph_memory(graph=self.graph,
-                                                              fw_info=self.fw_info,
-                                                              masks=self.mask)
+        current_memory = get_pruned_graph_memory(graph=self.graph,
+                                                 fw_info=self.fw_info,
+                                                 masks=self.mask)
 
         if current_memory > self.target_kpi.weights_memory:
             Logger.error(f"Minimal required memory is {current_memory} but target KPI"
@@ -79,9 +78,9 @@ class GreedyMaskCalculator:
             self.update_simd_mask(node=node_to_remain,
                                   group_index=group_to_remain_idx,
                                   value=1)
-            current_memory = MemoryHelper.get_pruned_graph_memory(self.graph,
-                                                                  self.mask,
-                                                                  self.fw_info)
+            current_memory = get_pruned_graph_memory(self.graph,
+                                                     self.mask,
+                                                     self.fw_info)
 
         if current_memory > self.target_kpi.weights_memory:
             self.update_simd_mask(node=node_to_remain,

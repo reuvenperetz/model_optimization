@@ -6,9 +6,8 @@ from model_compression_toolkit.core.common.framework_implementation import Frame
 from model_compression_toolkit.core.common.framework_info import FrameworkInfo
 from model_compression_toolkit.core.common.hessian import HessianInfoService, HessianMode, HessianInfoGranularity
 from model_compression_toolkit.core.common.mixed_precision.kpi_tools.kpi import KPI
-# from model_compression_toolkit.core.common.pruning.graph_helper import GraphHelper
 from model_compression_toolkit.core.common.pruning.greedy_mask_calculator import GreedyMaskCalculator
-# from model_compression_toolkit.core.common.pruning.prunable_nodes import get_prunable_nodes
+from model_compression_toolkit.core.common.pruning.prunable_nodes import get_prunable_nodes
 from model_compression_toolkit.core.common.pruning.prune_graph import build_pruned_graph
 from model_compression_toolkit.core.common.pruning.pruning_config import PruningConfig, ChannelsFilteringStrategy, \
     ImportanceMetric
@@ -44,8 +43,8 @@ class Pruner:
         self.mask_by_simd_group_per_prunable_node = []
 
         # Get all nodes that will be pruned
-        self.prunable_nodes = GraphHelper.get_prunable_nodes(float_graph=float_graph,
-                                                             fw_info=fw_info)
+        self.prunable_nodes = get_prunable_nodes(float_graph=float_graph,
+                                                 fw_info=fw_info)
 
     def get_pruned_graph(self):
 
