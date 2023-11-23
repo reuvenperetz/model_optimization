@@ -596,9 +596,9 @@ class KerasImplementation(FrameworkImplementation):
 
         return model(inputs)
 
-    def prune_node(self,node,mask,fw_info, prune_input_channels):
+    def prune_node(self,node,mask,fw_info, last_section_node):
         return prune_keras_node(node,
                                 mask,
                                 fw_info,
-                                prune_input_channels)
+                                last_section_node)
 

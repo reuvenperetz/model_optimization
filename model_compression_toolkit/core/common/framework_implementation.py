@@ -68,7 +68,7 @@ class FrameworkImplementation(ABC):
                              f'framework\'s get_trace_hessian_calculator method.')  # pragma: no cover
 
     @abstractmethod
-    def prune_node(self,node,mask,fw_info, prune_input_channels):
+    def prune_node(self,node,mask,fw_info, last_section_node):
         raise NotImplemented(f'{self.__class__.__name__} have to implement the '
                              f'framework\'s prune_node method.')  # pragma: no cover
 

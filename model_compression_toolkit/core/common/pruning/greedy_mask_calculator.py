@@ -4,7 +4,7 @@ from typing import List, Dict
 from model_compression_toolkit.core.common import BaseNode
 from model_compression_toolkit.core.common.framework_info import FrameworkInfo
 from model_compression_toolkit.core.common.mixed_precision.kpi_tools.kpi import KPI
-from model_compression_toolkit.core.common.pruning.memory_utils import get_pruned_graph_memory
+from model_compression_toolkit.core.common.pruning.memory_calculator import MemoryCalculator
 from model_compression_toolkit.logger import Logger
 
 
@@ -24,10 +24,15 @@ class GreedyMaskCalculator:
         self.graph = graph
         self.fw_impl = fw_impl
 
-        self.mask_simd = {}
         self.simd_groups_indices = {}
         self.simd_groups_scores = {}
-        self.mask = {}
+        self.mask_simd = None
+        self.mask = None
+
+        self.memory_calculator = MemoryCalculator(graph=graph,
+                                                  fw_info=fw_info)
+
+
 
     def update_simd_mask(self,
                          node: BaseNode,
@@ -38,8 +43,14 @@ class GreedyMaskCalculator:
         node_mask_indices = self.simd_groups_indices[node][group_index]
         self.mask[node][node_mask_indices] = value
 
+    def get_mask(self):
+        if not self.mask:
+            self.compute_mask()
+        return self.mask
 
-    def get_greedy_channels_filtering_mask(self):
+    def compute_mask(self):
+        self.mask = {}
+        self.mask_simd = {}
 
         # init mask for each layer where each layer has at least one group of
         # SIMD output-channels.
@@ -64,23 +75,19 @@ class GreedyMaskCalculator:
                                   group_index=0,
                                   value=1)
 
-        current_memory = get_pruned_graph_memory(graph=self.graph,
-                                                 fw_info=self.fw_info,
-                                                 masks=self.mask)
+        current_memory = self.memory_calculator.get_pruned_graph_memory(masks=self.mask)
 
         if current_memory > self.target_kpi.weights_memory:
             Logger.error(f"Minimal required memory is {current_memory} but target KPI"
                          f" is {self.target_kpi.weights_memory}")
 
         while current_memory < self.target_kpi.weights_memory and self.is_there_pruned_channel():
-            print(f"Current memory: {current_memory}")
+            # print(f"Current memory: {current_memory}")
             node_to_remain, group_to_remain_idx = self._get_best_simd_group_candidate()
             self.update_simd_mask(node=node_to_remain,
                                   group_index=group_to_remain_idx,
                                   value=1)
-            current_memory = get_pruned_graph_memory(self.graph,
-                                                     self.mask,
-                                                     self.fw_info)
+            current_memory = self.memory_calculator.get_pruned_graph_memory(masks=self.mask)
 
         if current_memory > self.target_kpi.weights_memory:
             self.update_simd_mask(node=node_to_remain,

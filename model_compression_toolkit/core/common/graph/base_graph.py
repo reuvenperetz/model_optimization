@@ -29,6 +29,7 @@ from model_compression_toolkit.core.common.graph.graph_searches import GraphSear
 from model_compression_toolkit.core.common.graph.base_node import BaseNode
 from model_compression_toolkit.core.common.collectors.statistics_collector import BaseStatsCollector
 from model_compression_toolkit.core.common.collectors.statistics_collector import scale_statistics, shift_statistics
+from model_compression_toolkit.core.common.pruning.pruning_section import PruningSection
 from model_compression_toolkit.core.common.user_info import UserInformation
 from model_compression_toolkit.logger import Logger
 from model_compression_toolkit.target_platform_capabilities.target_platform.targetplatform2framework import \
@@ -494,10 +495,7 @@ class Graph(nx.MultiDiGraph, GraphSearches):
         Returns:
             List of outgoing edges of the node.
         """
-        try:
-            output_edges = [convert_to_edge(e) for e in super().edges(n, data=True)]
-        except Exception as e:
-            print(e)
+        output_edges = [convert_to_edge(e) for e in super().edges(n, data=True)]
         if sort_by_attr is not None:
             output_edges.sort(key=lambda e: getattr(e, sort_by_attr))
         return output_edges
@@ -707,3 +705,53 @@ class Graph(nx.MultiDiGraph, GraphSearches):
 
         """
         return all([n.is_all_activation_candidates_equal() for n in self.nodes])
+
+    def get_pruning_sections(self, fw_info) -> List[PruningSection]:
+        input_sections_nodes = self.get_pruning_sections_input_nodes(fw_info)
+        pruning_sections = []
+
+        # Iterate over each prunable node and find its corresponding section
+        for prunable_node in input_sections_nodes:
+            input_section_node, intermediate_nodes, output_section_node = self.get_section_nodes(prunable_node, fw_info)
+            pruning_sections.append(PruningSection(input_node=input_section_node,
+                                                   intermediate_nodes=intermediate_nodes,
+                                                   output_node=output_section_node))
+
+        return pruning_sections
+
+    def get_pruning_sections_input_nodes(self, fw_info):
+        prunable_nodes = []
+        for n in list(topological_sort(self)):
+            if self.is_node_topology_prunable(n, fw_info):
+                prunable_nodes.append(n)
+        return prunable_nodes
+
+
+    def is_node_topology_prunable(self,
+                                  node: BaseNode,
+                                  fw_info):
+        if fw_info.is_kernel_op(node.type):
+            next_node = node
+            while len(self.out_edges(next_node)) == 1 and len(self.in_edges(next_node)) == 1:
+                next_node = self.out_edges(next_node)[0].sink_node
+                if fw_info.is_kernel_op(next_node.type):
+                    return True
+        return False
+
+    def get_section_nodes(self,
+                          start_node: BaseNode,
+                          fw_info):
+
+        intermediate_nodes = []
+
+        # Follow the graph from the start_node to find the section's end
+        next_node = self.out_edges(start_node)[0].sink_node
+        while not fw_info.is_kernel_op(next_node.type):
+            intermediate_nodes.append(next_node)
+            # Move to the next node in the section
+            next_node = self.out_edges(next_node)[0].sink_node
+
+        assert fw_info.is_kernel_op(next_node.type)
+        conv_nodes = [start_node, next_node]
+
+        return conv_nodes[0], intermediate_nodes, conv_nodes[1]

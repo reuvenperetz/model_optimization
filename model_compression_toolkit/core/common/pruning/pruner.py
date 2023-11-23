@@ -7,7 +7,6 @@ from model_compression_toolkit.core.common.framework_info import FrameworkInfo
 from model_compression_toolkit.core.common.hessian import HessianInfoService, HessianMode, HessianInfoGranularity
 from model_compression_toolkit.core.common.mixed_precision.kpi_tools.kpi import KPI
 from model_compression_toolkit.core.common.pruning.greedy_mask_calculator import GreedyMaskCalculator
-from model_compression_toolkit.core.common.pruning.prunable_nodes import get_prunable_nodes
 from model_compression_toolkit.core.common.pruning.prune_graph import build_pruned_graph
 from model_compression_toolkit.core.common.pruning.pruning_config import PruningConfig, ChannelsFilteringStrategy, \
     ImportanceMetric
@@ -40,33 +39,31 @@ class Pruner:
                                                        fw_impl=fw_impl)
 
         self.mask_per_prunable_node = []
-        self.mask_by_simd_group_per_prunable_node = []
 
         # Get all nodes that will be pruned
-        self.prunable_nodes = get_prunable_nodes(float_graph=float_graph,
-                                                 fw_info=fw_info)
+        # self.prunable_nodes = GraphHelper.get_prunable_nodes(float_graph=float_graph,
+        #                                                      fw_info=fw_info)
 
     def get_pruned_graph(self):
-
         mean_score_per_prunable_node = None
+        sections_input_nodes = self.float_graph.get_pruning_sections_input_nodes(self.fw_info)
         if self.pruning_config.importance_metric == ImportanceMetric.LFH:
             # Step 3: Compute LFH score for each channel that may be pruned.
             scores_per_prunable_node = self.hessian_info_service.fetch_scores_for_multiple_nodes(mode=HessianMode.WEIGHTS,
                                                                                                  granularity=HessianInfoGranularity.PER_OUTPUT_CHANNEL,
-                                                                                                 nodes=self.prunable_nodes,
+                                                                                                 nodes=sections_input_nodes,
                                                                                                  required_size=self.pruning_config.num_score_approximations)
-            # mean_score_per_prunable_node = [np.mean(node_scores, axis=0) for node_scores in scores_per_prunable_node]
-            mean_score_per_prunable_node = {k:np.mean(v, axis=0) for k,v in zip(self.prunable_nodes, scores_per_prunable_node)}
+            mean_score_per_prunable_node = {k:np.mean(v, axis=0) for k,v in zip(sections_input_nodes, scores_per_prunable_node)}
 
         elif self.pruning_config.importance_metric == ImportanceMetric.RANDOM:
             tmp=[]
-            for n in self.prunable_nodes:
+            for n in sections_input_nodes:
                 axis = self.fw_info.kernel_channels_mapping.get(n.type)[0]
                 num_scores = n.get_weights_by_keys('kernel').shape[axis]
                 tmp.append(np.random.random(num_scores))
 
             mean_score_per_prunable_node = {}
-            for k,v in zip(self.prunable_nodes, tmp):
+            for k,v in zip(sections_input_nodes, tmp):
                 mean_score_per_prunable_node[k]=v
 
         else:
@@ -77,17 +74,17 @@ class Pruner:
         # highest LFH of output channels simd-groups.
         assert mean_score_per_prunable_node is not None
         if self.pruning_config.channels_filtering_strategy == ChannelsFilteringStrategy.GREEDY:
-            start = time.time()
-            mask_calculator = GreedyMaskCalculator(self.prunable_nodes,
+            # start = time.time()
+            mask_calculator = GreedyMaskCalculator(sections_input_nodes,
                                                    self.fw_info,
                                                    mean_score_per_prunable_node,
                                                    self.target_kpi,
                                                    self.float_graph,
                                                    self.fw_impl)
 
-            self.mask_per_prunable_node = mask_calculator.get_greedy_channels_filtering_mask()
-            end = time.time()
-            print(f"Time for mask search: {end - start} seconds")
+            self.mask_per_prunable_node = mask_calculator.get_mask()
+            # end = time.time()
+            # print(f"Time for mask search: {end - start} seconds")
         else:
             Logger.error(f"Currently, ChannelsFilteringStrategy.GREEDY is supported only")
 
