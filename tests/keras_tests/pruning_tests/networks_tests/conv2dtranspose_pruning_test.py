@@ -11,9 +11,9 @@ keras = tf.keras
 layers = keras.layers
 
 
-class Conv2DPruningTest(PruningKerasFeatureTest):
+class Conv2DTransposePruningTest(PruningKerasFeatureTest):
     """
-    Test a network with two adjacent conv2d and check it's pruned for a target compression ratio.
+    Test a network with two adjacent dense and check it's pruned for a target compression ratio.
     """
 
     def __init__(self,
@@ -33,14 +33,14 @@ class Conv2DPruningTest(PruningKerasFeatureTest):
 
     def create_networks(self):
         inputs = layers.Input(shape=self.get_input_shapes()[0][1:])
-        x = layers.Conv2D(filters=7, kernel_size=1)(inputs)
+        x = layers.Conv2DTranspose(filters=3, kernel_size=1)(inputs)
         if self.use_bn:
             x = layers.BatchNormalization()(x)
         if self.activation_layer:
             x = self.activation_layer(x)
-        x = layers.Conv2D(filters=6, kernel_size=2)(x)
-        outputs = layers.Conv2D(filters=1, kernel_size=3)(x)
-        model = keras.Model(inputs=inputs, outputs=outputs)
+        x = layers.Conv2DTranspose(filters=4, kernel_size=1)(x)
+        x = layers.Conv2DTranspose(filters=4, kernel_size=1)(x)
+        model = keras.Model(inputs=inputs, outputs=x)
         return model
 
     def get_kpi(self):

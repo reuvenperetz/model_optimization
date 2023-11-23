@@ -4,7 +4,7 @@ from typing import List, Dict
 from model_compression_toolkit.core.common import BaseNode
 from model_compression_toolkit.core.common.framework_info import FrameworkInfo
 from model_compression_toolkit.core.common.mixed_precision.kpi_tools.kpi import KPI
-from model_compression_toolkit.core.common.pruning.memory_utils import get_pruned_graph_memory
+from model_compression_toolkit.core.common.pruning.memory_calculator import MemoryCalculator
 from model_compression_toolkit.logger import Logger
 
 
@@ -24,22 +24,32 @@ class GreedyMaskCalculator:
         self.graph = graph
         self.fw_impl = fw_impl
 
-        self.mask_simd = {}
         self.simd_groups_indices = {}
         self.simd_groups_scores = {}
-        self.mask = {}
+        self.mask_simd = None
+        self.mask = None
 
-    def update_simd_mask(self,
-                         node: BaseNode,
-                         group_index: int,
-                         value: int):
+        self.memory_calculator = MemoryCalculator(graph=graph,
+                                                  fw_info=fw_info,
+                                                  fw_impl=fw_impl)
+
+    def get_mask(self):
+        if not self.mask:
+            self._compute_mask()
+        return self.mask
+
+    def _update_simd_mask(self,
+                          node: BaseNode,
+                          group_index: int,
+                          value: int):
         assert value in [0,1]
         self.mask_simd[node][group_index] = value
         node_mask_indices = self.simd_groups_indices[node][group_index]
         self.mask[node][node_mask_indices] = value
 
-
-    def get_greedy_channels_filtering_mask(self):
+    def _compute_mask(self):
+        self.mask = {}
+        self.mask_simd = {}
 
         # init mask for each layer where each layer has at least one group of
         # SIMD output-channels.
@@ -56,43 +66,40 @@ class GreedyMaskCalculator:
             self.mask[prunable_node] = layer_mask
 
         for prunable_node, node_scores in self.score_by_node.items():
-            self.simd_groups_scores[prunable_node], self.simd_groups_indices[prunable_node] = self.sort_and_group(
+            self.simd_groups_scores[prunable_node], self.simd_groups_indices[prunable_node] = self._group_scores_by_simd_size(
                 node_scores,
                 prunable_node.get_simd())
 
-            self.update_simd_mask(node=prunable_node,
-                                  group_index=0,
-                                  value=1)
+            self._update_simd_mask(node=prunable_node,
+                                   group_index=0,
+                                   value=1)
 
-        current_memory = get_pruned_graph_memory(graph=self.graph,
-                                                 fw_info=self.fw_info,
-                                                 masks=self.mask)
+        current_memory = self.memory_calculator.get_pruned_graph_memory(masks=self.mask,
+                                                                        fw_impl=self.fw_impl)
 
         if current_memory > self.target_kpi.weights_memory:
             Logger.error(f"Minimal required memory is {current_memory} but target KPI"
                          f" is {self.target_kpi.weights_memory}")
 
         while current_memory < self.target_kpi.weights_memory and self.is_there_pruned_channel():
-            print(f"Current memory: {current_memory}")
+            # print(f"Current memory: {current_memory}, Target KPI: {self.target_kpi.weights_memory}")
             node_to_remain, group_to_remain_idx = self._get_best_simd_group_candidate()
-            self.update_simd_mask(node=node_to_remain,
-                                  group_index=group_to_remain_idx,
-                                  value=1)
-            current_memory = get_pruned_graph_memory(self.graph,
-                                                     self.mask,
-                                                     self.fw_info)
+            self._update_simd_mask(node=node_to_remain,
+                                   group_index=group_to_remain_idx,
+                                   value=1)
+            current_memory = self.memory_calculator.get_pruned_graph_memory(masks=self.mask, fw_impl=self.fw_impl)
 
         if current_memory > self.target_kpi.weights_memory:
-            self.update_simd_mask(node=node_to_remain,
-                                  group_index=group_to_remain_idx,
-                                  value=0)
+            self._update_simd_mask(node=node_to_remain,
+                                   group_index=group_to_remain_idx,
+                                   value=0)
 
         return self.mask
 
-    def sort_and_group(self, array, simd):
+    def _group_scores_by_simd_size(self, scores, simd):
         # Get the indices that would sort the array in descending order
-        sorted_indices = np.argsort(array)[::-1]
-        sorted_array = array[sorted_indices]
+        sorted_indices = np.argsort(scores)[::-1]
+        sorted_array = scores[sorted_indices]
         # Calculate the number of groups
         num_groups = len(sorted_array) // simd + (1 if len(sorted_array) % simd else 0)
         # Split the indices and values into groups

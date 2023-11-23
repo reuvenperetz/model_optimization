@@ -16,7 +16,7 @@ class ChannelsFilteringStrategy(Enum):
 class PruningConfig:
     def __init__(self,
                  num_score_approximations: int = PRUNING_NUM_SCORE_APPROXIMATIONS,
-                 importance_metric: ImportanceMetric = ImportanceMetric.RANDOM,
+                 importance_metric: ImportanceMetric = ImportanceMetric.LFH,
                  channels_filtering_strategy: ChannelsFilteringStrategy = ChannelsFilteringStrategy.GREEDY):
 
         self.num_score_approximations = num_score_approximations

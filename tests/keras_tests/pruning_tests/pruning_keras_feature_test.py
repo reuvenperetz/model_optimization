@@ -15,7 +15,7 @@
 import model_compression_toolkit as mct
 from model_compression_toolkit.core.common.pruning.pruning_config import PruningConfig
 from tests.keras_tests.feature_networks_tests.base_keras_feature_test import BaseKerasFeatureNetworkTest
-
+import numpy as np
 
 class PruningKerasFeatureTest(BaseKerasFeatureNetworkTest):
     def __init__(self,
@@ -31,21 +31,37 @@ class PruningKerasFeatureTest(BaseKerasFeatureNetworkTest):
                          num_of_inputs=num_of_inputs,
                          input_shape=input_shape)
 
+        self.dense_model_num_params = None
+
     def get_pruning_config(self):
-        return PruningConfig()
+        return PruningConfig(num_score_approximations=1)
 
     def run_test(self):
         feature_networks = self.create_networks()
         feature_networks = feature_networks if isinstance(feature_networks, list) else [feature_networks]
         for model_float in feature_networks:
+            self.dense_model_num_params=sum([l.count_params() for l in model_float.layers])
             pruned_model, pruning_info = mct.pruning.keras_pruning_experimental(model=model_float,
                                                                                 target_kpi=self.get_kpi(),
                                                                                 representative_data_gen=self.representative_data_gen_experimental,
                                                                                 pruning_config=self.get_pruning_config(),
                                                                                 target_platform_capabilities=self.get_tpc())
 
+            self.pruned_model_num_params=sum([l.count_params() for l in pruned_model.layers])
+
+            ### Test inference ##
+            input_tensor = self.representative_data_gen()
+            pruned_outputs = pruned_model(input_tensor)
+            if self.pruned_model_num_params == self.dense_model_num_params:
+                dense_outputs = model_float(input_tensor)
+                assert np.sum(np.abs(dense_outputs-pruned_outputs))==0
+
+            assert pruned_model.output_shape==model_float.output_shape
+            for dense_layer, pruned_layer in zip(model_float.layers, pruned_model.layers):
+                assert type(pruned_layer)==type(dense_layer)
+
             self.compare(pruned_model,
                          model_float,
-                         input_x=self.representative_data_gen(),
+                         input_x=input_tensor,
                          quantization_info=pruning_info)
 

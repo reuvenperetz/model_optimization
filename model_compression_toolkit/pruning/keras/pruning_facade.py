@@ -60,11 +60,6 @@ if FOUND_TF:
                                           DEFAULT_KERAS_INFO,
                                           fw_impl)
 
-        ######################################
-        # Graph substitution (prepare graph)
-        ######################################
-        float_graph = substitute(float_graph, fw_impl.get_substitutions_prepare_graph(DEFAULT_KERAS_INFO))
-
         float_graph_with_compression_config = set_quantization_configuration_to_graph(float_graph,
                                                                                       quant_config=DEFAULTCONFIG,
                                                                                       mixed_precision_enable=False)
