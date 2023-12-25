@@ -29,5 +29,5 @@ GPTQHessianWeightsConfig Class
 
 **The following API can be used to create a GPTQHessianWeightsConfig instance which can be used to define necessary parameters for computing Hessian weights for the GPTQ loss function.**
 
-.. autoclass:: model_compression_toolkit.gptq.GPTQHessianWeightsConfig
+.. autoclass:: model_compression_toolkit.gptq.GPTQHessianScoresConfig
     :members:
