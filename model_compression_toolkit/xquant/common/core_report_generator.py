@@ -12,14 +12,20 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #  ==============================================================================
+import json
+
+import os
+
 from tqdm import tqdm
 from typing import Callable, Any, Dict
 
 from model_compression_toolkit.core.common.model_collector import ModelCollector
+from model_compression_toolkit.logger import Logger
 from model_compression_toolkit.xquant import XQuantConfig
 from model_compression_toolkit.xquant.common.constants import OUTPUT_SIMILARITY_METRICS_REPR, OUTPUT_SIMILARITY_METRICS_VAL, INTERMEDIATE_SIMILARITY_METRICS_REPR, \
     INTERMEDIATE_SIMILARITY_METRICS_VAL
 from model_compression_toolkit.xquant.common.framework_report_utils import FrameworkReportUtils
+from model_compression_toolkit.xquant.common.graph_to_json import GraphToJsonConverter
 
 
 def core_report_generator(float_model: Any,
@@ -79,5 +85,16 @@ def core_report_generator(float_model: Any,
     # Save data to a json file.
     fw_report_utils.dump_report_to_json(report_dir=xquant_config.report_dir,
                                         collected_data=similarity_metrics)
+
+    model_insights_graph = fw_report_utils.tb_utils.get_graph_for_tensorboard_display(quantized_model=quantized_model,
+                                                                                      similarity_metrics=similarity_metrics,
+                                                                                      repr_dataset=repr_dataset)
+
+    insight_json = GraphToJsonConverter(graph=model_insights_graph).convert()
+    report_file_name = os.path.join(xquant_config.report_dir, 'model_insight.json')
+    report_file_name = os.path.abspath(report_file_name)
+    Logger.info(f"Dumping model insight json data to: {report_file_name}")
+    with open(report_file_name, 'w') as f:
+        json.dump(insight_json, f, indent=4)
 
     return similarity_metrics
