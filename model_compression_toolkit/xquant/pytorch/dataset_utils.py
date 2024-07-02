@@ -70,7 +70,7 @@ class PytorchDatasetUtils(DatasetUtils):
             else:
                 data = [transfer_to_device(t) for t in data]
 
-            return data
+            return [data[0].to(torch.float32)]
 
         for x in dataset():
             yield process_data(x, is_validation, device)

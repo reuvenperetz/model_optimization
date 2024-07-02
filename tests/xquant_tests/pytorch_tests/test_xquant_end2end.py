@@ -211,5 +211,36 @@ class TestXQuantReportModelMBv3(BaseTestEnd2EndPytorchXQuant):
         return mobilenet_v3_small()
 
 
+
+
+class TestXQuantReportModelInsightsTrigger(BaseTestEnd2EndPytorchXQuant):
+
+    def get_input_shape(self):
+        return (3, 224, 224)
+    def get_model_to_test(self):
+        class Model(nn.Module):
+            def __init__(self):
+                super(Model, self).__init__()
+                self.conv1 = nn.Conv2d(3, 3, kernel_size=3, padding=1)
+                self.silu = nn.SiLU()
+                self.conv2 = nn.Conv2d(3, 3, kernel_size=3, padding=1)
+                self.conv3 = nn.Conv2d(3, 3, kernel_size=3, padding=1)
+                self.conv4 = nn.Conv2d(3, 3, kernel_size=3, padding=1)
+                self.conv5 = nn.Conv2d(3, 3, kernel_size=3, padding=1)
+
+            def forward(self, x):
+                x = self.conv1(x)
+                x = self.silu(x)
+                x = self.conv2(x)
+                x1 = self.conv3(x)
+                x = self.conv4(x1)
+                x = x1 + x
+                x = self.conv5(x)
+                return x
+
+        return Model()
+
+
+
 if __name__ == '__main__':
     unittest.main()

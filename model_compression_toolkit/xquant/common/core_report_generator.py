@@ -90,7 +90,8 @@ def core_report_generator(float_model: Any,
                                                                                       similarity_metrics=similarity_metrics,
                                                                                       repr_dataset=repr_dataset)
 
-    insight_json = GraphToJsonConverter(graph=model_insights_graph).convert()
+    insight_json = GraphToJsonConverter(graph=model_insights_graph,
+                                        similarity_metrics=similarity_metrics).convert()
     report_file_name = os.path.join(xquant_config.report_dir, 'model_insight.json')
     report_file_name = os.path.abspath(report_file_name)
     Logger.info(f"Dumping model insight json data to: {report_file_name}")

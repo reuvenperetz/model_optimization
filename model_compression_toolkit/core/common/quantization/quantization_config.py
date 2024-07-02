@@ -61,8 +61,8 @@ class QuantizationConfig:
                  z_threshold: float = math.inf,
                  min_threshold: float = MIN_THRESHOLD,
                  l_p_value: int = 2,
-                 linear_collapsing: bool = True,
-                 residual_collapsing: bool = True,
+                 linear_collapsing: bool = False,
+                 residual_collapsing: bool = False,
                  shift_negative_ratio: float = 0.05,
                  shift_negative_threshold_recalculation: bool = False,
                  shift_negative_params_search: bool = False,
@@ -113,7 +113,7 @@ class QuantizationConfig:
         self.input_scaling = input_scaling
         self.softmax_shift = softmax_shift
         self.min_threshold = min_threshold
-        self.shift_negative_activation_correction = shift_negative_activation_correction
+        self.shift_negative_activation_correction = False #shift_negative_activation_correction
         self.z_threshold = z_threshold
         self.l_p_value = l_p_value
         self.linear_collapsing = linear_collapsing
@@ -129,6 +129,10 @@ class QuantizationConfig:
 
 
 # Default quantization configuration the library use.
-DEFAULTCONFIG = QuantizationConfig(QuantizationErrorMethod.MSE, QuantizationErrorMethod.MSE,
-                                   relu_bound_to_power_of_2=False, weights_bias_correction=True,
-                                   weights_second_moment_correction=False, input_scaling=False, softmax_shift=False)
+DEFAULTCONFIG = QuantizationConfig(QuantizationErrorMethod.MSE,
+                                   QuantizationErrorMethod.MSE,
+                                   relu_bound_to_power_of_2=False,
+                                   weights_bias_correction=True,
+                                   weights_second_moment_correction=False,
+                                   input_scaling=False,
+                                   softmax_shift=False)
