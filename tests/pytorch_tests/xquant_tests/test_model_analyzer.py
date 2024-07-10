@@ -56,9 +56,8 @@ class TestPytorchModelAnalyzer(unittest.TestCase):
         return Model()
 
     def test_extract_model_activations(self):
-        float_activations, quant_activations = self.analyzer.extract_model_activations(
-            self.float_model, self.quantized_model, self.float_name2quant_name, to_torch_tensor(next(self.repr_dataset()))
-        )
+        float_activations = self.analyzer.extract_model_activations(self.float_model, list(self.float_name2quant_name.keys()), to_torch_tensor(next(self.repr_dataset())))
+        quant_activations = self.analyzer.extract_model_activations(self.quantized_model, list(self.float_name2quant_name.values()), to_torch_tensor(next(self.repr_dataset())))
         self.assertIsInstance(float_activations, dict)
         self.assertIsInstance(quant_activations, dict)
         self.assertEqual(len(float_activations), 2) # conv + output

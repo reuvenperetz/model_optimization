@@ -27,24 +27,9 @@ class ModelAnalyzer(ABC):
 
     @abstractmethod
     def extract_model_activations(self,
-                                  float_model: Any,
-                                  quantized_model: Any,
-                                  float_name2quant_name: Dict[str, str],
-                                  data: List[Any]) -> Tuple[Dict[str, Any], Dict[str, Any]]:
-        """
-        Extracts activations from both the float and quantized models.
-
-        Args:
-            float_model: The float model.
-            quantized_model: The quantized model.
-            float_name2quant_name: A mapping from float model layer names to quantized model layer
-            names.
-            data: Input data for which to compute activations.
-
-        Returns:
-                - Dictionary of activations for the float model.
-                - Dictionary of activations for the quantized model.
-        """
+                                  model: Any,
+                                  layers_names: List[str],
+                                  data: List[Any]) -> Dict[str, Any]:
         Logger.critical("This method should be implemented by the framework-specific ModelAnalyzer.")  # pragma: no cover
 
 

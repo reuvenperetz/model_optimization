@@ -15,6 +15,7 @@
 
 from typing import Any, Callable
 
+from model_compression_toolkit.core.pytorch.utils import to_torch_tensor
 from model_compression_toolkit.xquant.common.dataset_utils import DatasetUtils
 import numpy as np
 
@@ -58,7 +59,7 @@ class PytorchDatasetUtils(DatasetUtils):
 
             def transfer_to_device(_data):
                 if isinstance(_data, np.ndarray):
-                    return torch.from_numpy(_data).to(device)
+                    return torch.from_numpy(_data.astype(np.float32)).to(device)
                 return _data.to(device)
 
             if is_validation:

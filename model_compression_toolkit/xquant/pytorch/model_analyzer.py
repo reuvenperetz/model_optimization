@@ -28,25 +28,9 @@ class PytorchModelAnalyzer(ModelAnalyzer):
     """
 
     def extract_model_activations(self,
-                                  float_model: torch.nn.Module,
-                                  quantized_model: torch.nn.Module,
-                                  float_name2quant_name: Dict[str, str],
-                                  data: List[torch.Tensor]) -> Tuple[Dict[str, torch.Tensor], Dict[str, torch.Tensor]]:
-        """
-        Extracts activations from both the float and quantized models.
-
-        Args:
-            float_model (torch.nn.Module): The float model.
-            quantized_model (torch.nn.Module): The quantized model.
-            float_name2quant_name (Dict[str, str]): A mapping from float model layer names to quantized model layer
-            names.
-            data (List[torch.Tensor]): Input data for which to compute activations.
-
-        Returns:
-            Tuple[Dict[str, torch.Tensor], Dict[str, torch.Tensor]]:
-                - Dictionary of activations for the float model.
-                - Dictionary of activations for the quantized model.
-        """
+                                  model: torch.nn.Module,
+                                  layers_names: Dict[str, str],
+                                  data: List[torch.Tensor]) -> Dict[str, torch.Tensor]:
 
         def _compute_activations(name: str, activations: dict):
             """
@@ -61,32 +45,21 @@ class PytorchModelAnalyzer(ModelAnalyzer):
             """
             def hook(model, input, output):
                 activations[name] = output.detach()
-
             return hook
 
-        # Initialize dictionaries to store activations for both models
-        activations_float = {}
-        activations_quant = {}
+        _activations = {}
 
-        # Register hooks for all layers in the float model
-        for layer_name in float_name2quant_name.keys():
-            layer = dict([*float_model.named_modules()])[layer_name]
-            layer.register_forward_hook(_compute_activations(layer_name, activations_float))
-
-        # Register hooks for all layers in the quantized model
-        for layer_name in float_name2quant_name.values():
-            layer = dict([*quantized_model.named_modules()])[layer_name]
-            layer.register_forward_hook(_compute_activations(layer_name, activations_quant))
+        # Register hooks for all layers in the model
+        for layer_name in layers_names:
+            layer = dict([*model.named_modules()])[layer_name]
+            layer.register_forward_hook(_compute_activations(layer_name, _activations))
 
         # Perform a forward pass with the input data and capture activations
         with torch.no_grad():
-            float_predictions = float_model(*data)
-            quant_predictions = quantized_model(*data)
+            _predictions = model(*data)
 
-        activations_float[MODEL_OUTPUT_KEY] = float_predictions
-        activations_quant[MODEL_OUTPUT_KEY] = quant_predictions
-
-        return activations_float, activations_quant
+        _activations[MODEL_OUTPUT_KEY] = _predictions
+        return _activations
 
     def identify_quantized_compare_points(self,
                                           quantized_model: torch.nn.Module) -> List[str]:

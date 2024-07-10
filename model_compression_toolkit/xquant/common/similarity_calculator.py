@@ -159,9 +159,12 @@ class SimilarityCalculator:
         # Iterate over the dataset and compute similarity metrics.
         for x in dataset():
             # Extract activations and predictions from both models.
-            float_activations, quant_activations = (
-                self.model_analyzer_utils.extract_model_activations(
-                float_model, quantized_model, float_name2quant_name, x))
+            float_activations = self.model_analyzer_utils.extract_model_activations(float_model,
+                                                                                    list(float_name2quant_name.keys()),
+                                                                                    x)
+            quant_activations = self.model_analyzer_utils.extract_model_activations(quantized_model,
+                                                                                    list(float_name2quant_name.values()),
+                                                                                    x)
 
             float_predictions = float_activations[MODEL_OUTPUT_KEY]
             quant_predictions = quant_activations[MODEL_OUTPUT_KEY]
