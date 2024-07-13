@@ -29,7 +29,7 @@ class PytorchModelAnalyzer(ModelAnalyzer):
 
     def extract_model_activations(self,
                                   model: torch.nn.Module,
-                                  layers_names: Dict[str, str],
+                                  layers_names: List[str],
                                   data: List[torch.Tensor]) -> Dict[str, torch.Tensor]:
 
         def _compute_activations(name: str, activations: dict):

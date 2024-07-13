@@ -24,8 +24,7 @@ from model_compression_toolkit.core.common.framework_info import FrameworkInfo
 
 from model_compression_toolkit.core.keras.reader.reader import model_reader
 
-from model_compression_toolkit.xquant.common.constants import XQUANT_REPR, INTERMEDIATE_SIMILARITY_METRICS_REPR, \
-    XQUANT_VAL, INTERMEDIATE_SIMILARITY_METRICS_VAL, CUT_MEMORY_ELEMENTS, CUT_TOTAL_SIZE
+from model_compression_toolkit.xquant.common.constants import XQUANT_REPR, XQUANT_VAL, CUT_MEMORY_ELEMENTS, CUT_TOTAL_SIZE
 from model_compression_toolkit.xquant.common.tensorboard_utils import TensorboardUtils
 
 NODES_WITHOUT_CUT_INFO = [KerasActivationQuantizationHolder]
@@ -56,7 +55,8 @@ class KerasTensorboardUtils(TensorboardUtils):
 
     def get_graph_for_tensorboard_display(self,
                                           quantized_model: keras.Model,
-                                          similarity_metrics: Dict[str, Dict[str, float]],
+                                          repr_similarity,
+                                          val_similarity,
                                           repr_dataset: Callable,
                                           quantized_model_metadata: Dict) -> Graph:
         """
@@ -82,14 +82,14 @@ class KerasTensorboardUtils(TensorboardUtils):
         # Iterate over each node in the graph.
         for node in quant_graph.nodes:
             # Check if the node's name is in the similarity metrics for intermediate representation.
-            if node.name in similarity_metrics[INTERMEDIATE_SIMILARITY_METRICS_REPR].keys():
+            if node.name in repr_similarity['quant_intermediate_similarity'].keys():
                 # If so, add the similarity metric for intermediate representation to the node's attributes.
-                node.framework_attr[XQUANT_REPR] = similarity_metrics[INTERMEDIATE_SIMILARITY_METRICS_REPR][node.name]
+                node.framework_attr[XQUANT_REPR] = repr_similarity['quant_intermediate_similarity'][node.name]
 
             # Check if the node's name is in the similarity metrics for validation.
-            if node.name in similarity_metrics[INTERMEDIATE_SIMILARITY_METRICS_VAL].keys():
+            if node.name in val_similarity['quant_intermediate_similarity'].keys():
                 # If so, add the similarity metric for validation to the node's attributes.
-                node.framework_attr[XQUANT_VAL] = similarity_metrics[INTERMEDIATE_SIMILARITY_METRICS_VAL][node.name]
+                node.framework_attr[XQUANT_VAL] = val_similarity['quant_intermediate_similarity'][node.name]
 
         return quant_graph
 

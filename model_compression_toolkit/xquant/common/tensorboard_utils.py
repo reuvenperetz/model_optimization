@@ -19,14 +19,11 @@ from model_compression_toolkit.core.common.framework_info import FrameworkInfo
 
 
 from model_compression_toolkit.core.common.visualization.tensorboard_writer import TensorboardWriter
-from model_compression_toolkit.xquant.common.constants import TENSORBOARD_DEFAULT_TAG, OUTPUT_SIMILARITY_METRICS_REPR, \
-    OUTPUT_SIMILARITY_METRICS_VAL
+from model_compression_toolkit.xquant.common.constants import TENSORBOARD_DEFAULT_TAG
 from model_compression_toolkit.logger import Logger
 
 
 from typing import Any, Dict, Callable
-from mct_quantizers.keras.metadata import get_metadata
-
 
 class TensorboardUtils:
     """
@@ -53,7 +50,8 @@ class TensorboardUtils:
 
     def get_graph_for_tensorboard_display(self,
                                           quantized_model: Any,
-                                          similarity_metrics: Dict[str, Any],
+                                          repr_similarity,
+                                          val_similarity,
                                           repr_dataset: Callable,
                                           quantized_model_metadata: Dict) -> Graph:
         """
@@ -84,7 +82,8 @@ class TensorboardUtils:
 
     def add_graph_to_tensorboard(self,
                                  quantized_model: Any,
-                                 similarity_metrics: Dict[str, Any],
+                                 repr_similarity,
+                                 val_similarity,
                                  repr_dataset: Callable,
                                  quantized_model_metadata: Dict):
         """
@@ -99,14 +98,16 @@ class TensorboardUtils:
         """
         # Generate the quantized graph with similarity metrics.
         tb_graph = self.get_graph_for_tensorboard_display(quantized_model=quantized_model,
-                                                          similarity_metrics=similarity_metrics,
+                                                          repr_similarity=repr_similarity,
+                                                          val_similarity=val_similarity,
                                                           repr_dataset=repr_dataset,
                                                           quantized_model_metadata=quantized_model_metadata)
 
         self.tb_writer.add_graph(tb_graph, TENSORBOARD_DEFAULT_TAG)
 
     def add_text_information(self,
-                             similarity_metrics: Dict[str, Dict[str, float]],
+                             repr_similarity,
+                             val_similarity,
                              quantized_model_metadata: Dict[str, Any]):
         """
         Adds text information (like max cut and output similarity metrics) to the tensorboard writer.
@@ -116,8 +117,8 @@ class TensorboardUtils:
             quantized_model_metadata (Dict): Metadata from the quantized model.
         """
         # Add output similarity between quantized and float models on representative and validation datasets
-        output_similarity_repr = f"Similarity Metrics on outputs using representative dataset: \n" + "\n".join([f"{key}: {value:.4f}" for key, value in similarity_metrics[OUTPUT_SIMILARITY_METRICS_REPR].items()])
-        output_similarity_val = f"Similarity Metrics on outputs using validation dataset: \n" + "\n".join([f"{key}: {value:.4f}" for key, value in similarity_metrics[OUTPUT_SIMILARITY_METRICS_VAL].items()])
+        output_similarity_repr = f"Similarity Metrics on outputs using representative dataset: \n" + "\n".join([f"{key}: {value:.4f}" for key, value in repr_similarity['quant_output_similarity'].items()])
+        output_similarity_val = f"Similarity Metrics on outputs using validation dataset: \n" + "\n".join([f"{key}: {value:.4f}" for key, value in val_similarity['quant_output_similarity'].items()])
         self.tb_writer.add_text(output_similarity_repr, OUTPUT_SIMILARITY_METRICS_REPR)
         self.tb_writer.add_text(output_similarity_val, OUTPUT_SIMILARITY_METRICS_VAL)
 

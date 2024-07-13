@@ -16,9 +16,8 @@ from tqdm import tqdm
 from typing import Callable, Any, Dict
 
 from model_compression_toolkit.core.common.model_collector import ModelCollector
-from model_compression_toolkit.xquant import XQuantConfig
-from model_compression_toolkit.xquant.common.constants import OUTPUT_SIMILARITY_METRICS_REPR, OUTPUT_SIMILARITY_METRICS_VAL, INTERMEDIATE_SIMILARITY_METRICS_REPR, \
-    INTERMEDIATE_SIMILARITY_METRICS_VAL
+from model_compression_toolkit.xquant.common.xquant_config import XQuantConfig
+from model_compression_toolkit.xquant.common.constants import SIMILARITY_REPR, SIMILARITY_VAL
 from model_compression_toolkit.xquant.common.framework_report_utils import FrameworkReportUtils
 
 
@@ -62,26 +61,26 @@ def core_report_generator(float_model: Any,
                                                                                        quantized_model=quantized_model,
                                                                                        dataset=repr_dataset,
                                                                                        custom_similarity_metrics=xquant_config.custom_similarity_metrics)
+
     val_similarity = fw_report_utils.similarity_calculator.compute_similarity_metrics(float_model=float_model,
                                                                                       quantized_model=quantized_model,
                                                                                       dataset=validation_dataset,
                                                                                       custom_similarity_metrics=xquant_config.custom_similarity_metrics,
                                                                                       is_validation=True)
-    similarity_metrics = {
-        OUTPUT_SIMILARITY_METRICS_REPR: repr_similarity[0],
-        OUTPUT_SIMILARITY_METRICS_VAL: val_similarity[0],
-        INTERMEDIATE_SIMILARITY_METRICS_REPR: repr_similarity[1],
-        INTERMEDIATE_SIMILARITY_METRICS_VAL: val_similarity[1]
-    }
+
+    similarity_metrics = {SIMILARITY_REPR: repr_similarity,
+                          SIMILARITY_VAL: val_similarity}
 
     # Add a graph of the quantized model with the similarity metrics to TensorBoard for visualization.
     fw_report_utils.tb_utils.add_graph_to_tensorboard(quantized_model,
-                                                      similarity_metrics,
+                                                      repr_similarity,
+                                                      val_similarity,
                                                       repr_dataset,
                                                       quantized_model_metadata)
 
     # Adds text information (like max cut and output similarity metrics) to the tensorboard writer.
-    fw_report_utils.tb_utils.add_text_information(similarity_metrics,
+    fw_report_utils.tb_utils.add_text_information(repr_similarity,
+                                                  val_similarity,
                                                   quantized_model_metadata)
 
     # Save data to a json file.

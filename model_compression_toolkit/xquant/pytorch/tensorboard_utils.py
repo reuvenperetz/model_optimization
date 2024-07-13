@@ -57,7 +57,8 @@ class PytorchTensorboardUtils(TensorboardUtils):
 
     def get_graph_for_tensorboard_display(self,
                                           quantized_model: torch.nn.Module,
-                                          similarity_metrics: Dict[str, Any],
+                                          repr_similarity,
+                                          val_similarity,
                                           repr_dataset: Callable,
                                           quantized_model_metadata: Dict):
         """

@@ -28,39 +28,12 @@ class KerasModelAnalyzer(ModelAnalyzer):
     """
 
     def extract_model_activations(self,
-                                  float_model: keras.Model,
-                                  quantized_model: keras.Model,
-                                  float_name2quant_name: Dict[str, str],
-                                  data: List[np.ndarray]) -> Tuple[Dict[str, np.ndarray], Dict[str, np.ndarray]]:
-        """
-        Extracts activations from both the float and quantized models.
-
-        Args:
-            float_model (keras.Model): The float model.
-            quantized_model (keras.Model): The quantized model.
-            float_name2quant_name (Dict[str, str]): A mapping from float model layer names to quantized model layer
-            names.
-            data (List[np.ndarray]): Input data for which to compute activations.
-
-        Returns:
-            Tuple[Dict[str, np.ndarray], Dict[str, np.ndarray]]:
-                - Dictionary of activations for the float model.
-                - Dictionary of activations for the quantized model.
-        """
+                                  model: keras.Model,
+                                  layer_names: List[str],
+                                  data: List[np.ndarray]) -> Dict[str, np.ndarray]:
 
         def _compute_activations(model: keras.Model, layer_names: List[str], data: List[np.ndarray]) -> Dict[str, np.ndarray]:
-            """
-            Computes the activations for the specified layers of the model, and the model's output.
 
-            Args:
-                model (keras.Model): The model from which to extract activations.
-                layer_names (List[str]): Names of the layers for which to compute activations.
-                data (List[np.ndarray]): Input data for the model.
-
-            Returns:
-                Dict[str, np.ndarray]:
-                    - Dictionary mapping layer names to their corresponding activations. The model's output is stored using the key MODEL_OUTPUT_KEY.
-            """
             # Extract the outputs of the specified layers plus the model output
             _model_outputs = [model.get_layer(name).output for name in layer_names] + [model.output]
 
@@ -73,22 +46,16 @@ class KerasModelAnalyzer(ModelAnalyzer):
             activation_tensors.update({MODEL_OUTPUT_KEY: predictions[-1].numpy()})
             return activation_tensors
 
-        # Compute activations for the quantized model
-        quant_activations = _compute_activations(quantized_model,
-                                                 list(float_name2quant_name.values()),
-                                                 data)
+
         # Compute activations for the float model
-        float_activations = _compute_activations(float_model,
-                                                 list(float_name2quant_name.keys()),
+        float_activations = _compute_activations(model,
+                                                 layer_names,
                                                  data)
 
-        # Concatenate predictions if they are lists.
-        if isinstance(quant_activations[MODEL_OUTPUT_KEY], list):
-            quant_activations[MODEL_OUTPUT_KEY] = np.concatenate(quant_activations[MODEL_OUTPUT_KEY])
         if isinstance(float_activations[MODEL_OUTPUT_KEY], list):
             float_activations[MODEL_OUTPUT_KEY] = np.concatenate(float_activations[MODEL_OUTPUT_KEY])
 
-        return float_activations, quant_activations
+        return float_activations
 
     def identify_quantized_compare_points(self, quantized_model: keras.Model) -> List[str]:
         """

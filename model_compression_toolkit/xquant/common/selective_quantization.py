@@ -17,9 +17,9 @@ from abc import ABC, abstractmethod
 
 class SelectiveQuantization(ABC):
     @abstractmethod
-    def disable_weights_quantization(self):
+    def disable_weights_quantization(self, float_model, quantized_model):
         raise NotImplemented
 
     @abstractmethod
-    def disable_activations_quantization(self):
+    def disable_activations_quantization(self, float_model, quantized_model):
         raise NotImplemented

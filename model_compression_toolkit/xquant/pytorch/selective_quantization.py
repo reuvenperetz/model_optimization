@@ -20,8 +20,8 @@ from model_compression_toolkit.xquant.common.selective_quantization import Selec
 
 class PytorchSelectiveQuantization(SelectiveQuantization):
 
-    def disable_weights_quantization(self):
+    def disable_weights_quantization(self, float_model, quantized_model):
         raise NotImplemented
 
-    def disable_activations_quantization(self):
+    def disable_activations_quantization(self, float_model, quantized_model):
         raise NotImplemented

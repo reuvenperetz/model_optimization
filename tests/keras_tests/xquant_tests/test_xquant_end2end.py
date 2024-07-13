@@ -37,9 +37,7 @@ import tensorflow as tf
 import keras
 import numpy as np
 
-from model_compression_toolkit.xquant.common.constants import OUTPUT_SIMILARITY_METRICS_REPR, \
-    OUTPUT_SIMILARITY_METRICS_VAL, INTERMEDIATE_SIMILARITY_METRICS_REPR, \
-    INTERMEDIATE_SIMILARITY_METRICS_VAL, XQUANT_REPR, XQUANT_VAL, CUT_MEMORY_ELEMENTS, CUT_TOTAL_SIZE
+from model_compression_toolkit.xquant.common.constants import XQUANT_REPR, XQUANT_VAL, CUT_MEMORY_ELEMENTS, CUT_TOTAL_SIZE
 
 from model_compression_toolkit.xquant.keras.facade_xquant_report import xquant_report_keras_experimental
 
@@ -161,6 +159,21 @@ class BaseTestEnd2EndKerasXQuant(unittest.TestCase):
                 self.assertIn(XQUANT_VAL, str(node))
                 self.assertIn(CUT_MEMORY_ELEMENTS, str(node))
                 self.assertIn(CUT_TOTAL_SIZE, str(node))
+
+    def test_selective_quantization_info(self):
+        self.xquant_config.custom_similarity_metrics = None
+        result = xquant_report_keras_experimental(
+            self.float_model,
+            self.quantized_model,
+            self.repr_dataset,
+            self.validation_dataset,
+            self.xquant_config
+        )
+
+        self.assertIn(DISABLED_WEIGHTS_QUANT_OUTPUT_SIMILARITY_METRICS_REPR, result)
+        self.assertIn(DISABLED_WEIGHTS_QUANT_OUTPUT_SIMILARITY_METRICS_VAL, result)
+        self.assertIn(DISABLED_ACTIVATION_QUANT_OUTPUT_SIMILARITY_METRICS_REPR, result)
+        self.assertIn(DISABLED_ACTIVATION_QUANT_OUTPUT_SIMILARITY_METRICS_VAL, result)
 
 
 # Test with Conv2D without BatchNormalization and without Activation

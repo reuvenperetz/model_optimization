@@ -18,11 +18,34 @@ CS_SIMILARITY_METRIC_NAME = 'cs'
 SQNR_SIMILARITY_METRIC_NAME = 'sqnr'
 MSE_SIMILARITY_METRIC_NAME = 'mse'
 
-# Report components names:
-OUTPUT_SIMILARITY_METRICS_REPR = 'output_similarity_metrics_repr'
-OUTPUT_SIMILARITY_METRICS_VAL = 'output_similarity_metrics_val'
-INTERMEDIATE_SIMILARITY_METRICS_REPR = 'intermediate_similarity_metrics_repr'
-INTERMEDIATE_SIMILARITY_METRICS_VAL = 'intermediate_similarity_metrics_val'
+# # Report components names:
+# OUTPUT_SIMILARITY_METRICS_REPR = 'output_similarity_metrics_repr'
+# OUTPUT_SIMILARITY_METRICS_VAL = 'output_similarity_metrics_val'
+# INTERMEDIATE_SIMILARITY_METRICS_REPR = 'intermediate_similarity_metrics_repr'
+# INTERMEDIATE_SIMILARITY_METRICS_VAL = 'intermediate_similarity_metrics_val'
+#
+# # Selective quantization attributes:
+# DISABLED_WEIGHTS_QUANT_OUTPUT_SIMILARITY_METRICS_REPR = 'disabled_weights_quant_output_similarity_metrics_repr'
+# DISABLED_WEIGHTS_QUANT_OUTPUT_SIMILARITY_METRICS_VAL = 'disabled_weights_quant_output_similarity_metrics_val'
+# DISABLED_WEIGHTS_QUANT_INTERMEDIATE_SIMILARITY_METRICS_REPR = 'disabled_weights_quant_intermediate_similarity_metrics_repr'
+# DISABLED_WEIGHTS_QUANT_INTERMEDIATE_SIMILARITY_METRICS_VAL = 'disabled_weights_quant_intermediate_similarity_metrics_val'
+#
+# DISABLED_ACTIVATION_QUANT_OUTPUT_SIMILARITY_METRICS_REPR = 'disabled_activation_quant_output_similarity_metrics_repr'
+# DISABLED_ACTIVATION_QUANT_OUTPUT_SIMILARITY_METRICS_VAL = 'disabled_activation_quant_output_similarity_metrics_val'
+# DISABLED_ACTIVATION_QUANT_INTERMEDIATE_SIMILARITY_METRICS_REPR = 'disabled_activation_quant_intermediate_similarity_metrics_repr'
+# DISABLED_ACTIVATION_QUANT_INTERMEDIATE_SIMILARITY_METRICS_VAL = 'disabled_activation_quant_intermediate_similarity_metrics_val'
+
+SIMILARITY_REPR = 'similarity_repr'
+SIMILARITY_VAL = 'similarity_val'
+
+SIMILARITY_OUTPUT = 'similarity_output'
+SIMILARITY_INTERMEDIATE = 'similarity_intermediate'
+
+SIMILARITY_FULLQUANT = 'similarity_fullquant'
+SIMILARITY_DISABLED_WEIGHTS_QUANT = 'similarity_disabled_weights_quant'
+SIMILARITY_DISABLED_ACTIVATIONS_QUANT = 'similarity_disabled_activations_quant'
+
+
 
 # Graph attribute names:
 XQUANT_REPR = 'xquant_repr'
