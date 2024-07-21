@@ -13,8 +13,8 @@
 # limitations under the License.
 # ==============================================================================
 import copy
-from typing import Any, List
-from model_compression_toolkit.core.common.graph.base_graph import Graph
+from typing import Any, List, Dict
+from model_compression_toolkit.core.common.graph.base_graph import Graph, OutTensor
 from model_compression_toolkit.core.common.graph.base_node import BaseNode
 from model_compression_toolkit.target_platform_capabilities.target_platform.targetplatform2framework import TargetPlatformCapabilities
 from model_compression_toolkit.target_platform_capabilities.target_platform.targetplatform2framework.layer_filter_params import LayerFilterParams
@@ -128,3 +128,89 @@ def fusion(graph: Graph, tpc: TargetPlatformCapabilities) -> Graph:
             fused_graph.update_fused_nodes(fusing_nodes)
 
     return fused_graph
+
+class FusedLayerType:
+    def __init__(self):
+        self.__name__ = 'FusedLayer'
+
+def create_fused_graph(graph: Graph) -> Dict[str, str]:
+    fused_nodes_mapping = {}
+    for fused_nodes_list in graph.fused_nodes:
+        new_fused_node = create_fused_node(fused_nodes_list)
+        replace_nodes_with_fused_node(graph, fused_nodes_list, new_fused_node)
+        for node in fused_nodes_list:
+            fused_nodes_mapping[node.name] = new_fused_node.name
+    return fused_nodes_mapping
+
+
+def create_fused_node(nodes: List[BaseNode]) -> BaseNode:
+    """
+    Create a new node that represents the fusion of the given nodes.
+    Args:
+        nodes: nodes to be fused
+    Returns:
+        a new node representing the fused nodes
+    """
+    # Placeholder implementation for creating a fused node.
+    # This function should create a new node object that combines the functionality
+    # of the nodes in the 'nodes' list.
+
+    fused_node = BaseNode(name='FusedNode_' + '_'.join([node.name for node in nodes]),
+                          framework_attr={},
+                          input_shape=nodes[0].input_shape,
+                          output_shape=nodes[-1].output_shape,
+                          weights={},
+                          layer_class=FusedLayerType)
+    fused_node.final_activation_quantization_cfg = nodes[-1].final_activation_quantization_cfg
+    # Copy the properties from the original nodes to the fused node as needed.
+    return fused_node
+
+def replace_nodes_with_fused_node(graph: Graph, nodes_to_fuse: List[BaseNode], fused_node: BaseNode):
+    """
+    Replace the specified nodes in the graph with a new fused node.
+    Args:
+        graph: The graph containing the nodes to be replaced.
+        nodes_to_fuse: The list of nodes to be fused and replaced.
+        fused_node: The new node that represents the fused nodes.
+    """
+    if not nodes_to_fuse:
+        return
+
+    # Assume nodes are topologically sorted and connected in sequence
+    first_node = nodes_to_fuse[0]
+    last_node = nodes_to_fuse[-1]
+
+    # Update the fused node's predecessors to be the predecessors of the first node
+    for predecessor in graph.get_prev_nodes(first_node):
+        e_attr = graph.get_edge_data(predecessor, first_node)
+        graph.add_edge(predecessor, fused_node, **(e_attr[0]))
+        graph.remove_edge(predecessor, first_node)
+
+    # Update the fused node's successors to be the successors of the last node
+    for successor in graph.get_next_nodes(last_node):
+        e_attr = graph.get_edge_data(last_node, successor)
+        graph.add_edge(fused_node, successor, **(e_attr[0]))
+        graph.remove_edge(last_node, successor)
+
+    # Remove edges between nodes that are fused
+    for current_node in nodes_to_fuse[:-1]:
+        subsequent_nodes = graph.get_next_nodes(current_node)
+        # Ensure no connections are outside the fusion
+        for next_node in subsequent_nodes:
+            assert next_node in nodes_to_fuse
+            graph.remove_edge(current_node, next_node)
+
+    # Remove the original nodes from the graph
+    graph_output_tensors = graph.get_outputs()
+    graph_output_nodes = [ot.node for ot in graph_output_tensors]
+    for node in nodes_to_fuse:
+        if node in graph_output_nodes:
+            node_to_remove_index = graph_output_nodes.index(node)
+            graph_output_tensors[node_to_remove_index] = OutTensor(node=fused_node, node_out_index=graph_output_tensors[node_to_remove_index].node_out_index)
+            graph.remove_node(node, new_graph_outputs=graph_output_tensors)
+        else:
+            graph.remove_node(node)
+
+    # Add the fused node to the graph
+    graph.add_node(fused_node)
+

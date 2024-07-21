@@ -12,13 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-
+import copy
 
 from typing import Callable, Tuple, Any, List, Dict
 
 import numpy as np
 
 from model_compression_toolkit.core.common import FrameworkInfo
+
+from model_compression_toolkit.core.common.fusion.layer_fusing import create_fused_graph
+from model_compression_toolkit.core.common.graph.memory_graph.compute_graph_max_cut import compute_graph_max_cut
+from model_compression_toolkit.core.common.graph.memory_graph.memory_graph import MemoryGraph
 from model_compression_toolkit.core.common.hessian.hessian_info_service import HessianInfoService
 from model_compression_toolkit.core.common.mixed_precision.resource_utilization_tools.resource_utilization_data import \
     requires_mixed_precision
@@ -174,7 +178,18 @@ def core_runner(in_model: Any,
         if tb_w is not None:
             finalize_bitwidth_in_tb(tb_w, weights_conf_nodes_bitwidth, activation_conf_nodes_bitwidth)
 
-    return tg, bit_widths_config, hessian_info_service
+    scheduler_info = {}
+    if core_config.debug_config.compute_max_cut:
+        fused_graph = copy.deepcopy(tg)
+        fused_nodes_mapping = create_fused_graph(graph=fused_graph)
+        memory_graph = MemoryGraph(fused_graph)
+        scheduler_info = compute_graph_max_cut(memory_graph)
+        scheduler_info = {'schedule': scheduler_info[0],
+                          'max_cut': scheduler_info[1],
+                          'cuts': scheduler_info[2],
+                          'fused_nodes_mapping': fused_nodes_mapping}
+
+    return tg, bit_widths_config, hessian_info_service, scheduler_info
 
 
 def _set_final_resource_utilization(graph: Graph,

@@ -21,7 +21,12 @@ class ActivationMemoryTensor:
     A representation of an activation output tensor of a model's layer.
     """
 
-    def __init__(self, shape: Tuple[Any], node_name: str, node_output_index: int, init_size_to_zero: bool = False):
+    def __init__(self,
+                 shape: Tuple[Any],
+                 node_name: str,
+                 node_output_index: int,
+                 nbits: int,
+                 init_size_to_zero: bool = False):
         """
         Args:
             shape: The shape of the activation tensor.
@@ -30,9 +35,12 @@ class ActivationMemoryTensor:
             init_size_to_zero: Whether to initialize the memory tensor size to 0 or not.
         """
 
+        # self.nbits = nbits
         self.shape = shape[1:]  # remove batch size (first element) from output shape
-        # The total size of a tensor is considered to be the number of elements in the tensor
+
+        # The total size of a tensor is considered to be the number of bytes in the tensor
         self.total_size = self._get_tensor_total_size() if not init_size_to_zero else 0
+        # self.total_size *= nbits / 8
 
         self.node_name = node_name
         self.node_output_index = node_output_index

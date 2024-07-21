@@ -16,15 +16,19 @@ from typing import Dict, Callable
 
 import keras
 
+import mct_quantizers
+from mct_quantizers import KerasActivationQuantizationHolder, KerasQuantizationWrapper
 from model_compression_toolkit.core.common import Graph
 from model_compression_toolkit.core.common.framework_implementation import FrameworkImplementation
 from model_compression_toolkit.core.common.framework_info import FrameworkInfo
 
 from model_compression_toolkit.core.keras.reader.reader import model_reader
+from model_compression_toolkit.logger import Logger
 
 from model_compression_toolkit.xquant.common.constants import XQUANT_REPR, INTERMEDIATE_SIMILARITY_METRICS_REPR, XQUANT_VAL, INTERMEDIATE_SIMILARITY_METRICS_VAL
 from model_compression_toolkit.xquant.common.tensorboard_utils import TensorboardUtils
 
+NODES_WITHOUT_CUT_INFO = [KerasActivationQuantizationHolder]
 
 class KerasTensorboardUtils(TensorboardUtils):
     """
@@ -68,6 +72,29 @@ class KerasTensorboardUtils(TensorboardUtils):
         """
         # Read the quantized model into a graph structure.
         quant_graph = model_reader(quantized_model)
+        from mct_quantizers.keras.metadata import get_metadata
+        _metadata = get_metadata(quantized_model)
+
+        fused_node_to_memory_elements = {}
+        for cut in _metadata['scheduling_info']['cuts']:
+            fused_node = cut['op_order'][-1]
+            if not fused_node.startswith('DummyType'):
+                fused_node_to_memory_elements[fused_node] = cut['mem_elements']
+
+        for node in quant_graph.nodes:
+            if node.type not in NODES_WITHOUT_CUT_INFO:
+                if node.name in fused_node_to_memory_elements:
+                    node.framework_attr['cut_memory_elements'] = [f"{mem_element['node_name']}_outTensor_{mem_element['node_output_index']}" for mem_element in fused_node_to_memory_elements[node.name]]
+                elif node.name in _metadata['scheduling_info']['fused_nodes_mapping']:
+                    node.framework_attr['cut_memory_elements'] = [
+                        f"{mem_element['node_name']}_outTensor_{mem_element['node_output_index']}" for mem_element in
+                        fused_node_to_memory_elements[_metadata['scheduling_info']['fused_nodes_mapping'][node.name]]]
+                elif node.type == KerasQuantizationWrapper and node.framework_attr['layer']['config']['name'] in _metadata['scheduling_info']['fused_nodes_mapping']:
+                    node.framework_attr['cut_memory_elements'] = [
+                        f"{mem_element['node_name']}_outTensor_{mem_element['node_output_index']}" for mem_element in
+                        fused_node_to_memory_elements[_metadata['scheduling_info']['fused_nodes_mapping'][node.framework_attr['layer']['config']['name']]]]
+                else:
+                    Logger.critical(f"Node {node.name} has no cut tensors information")
 
         # Iterate over each node in the graph.
         for node in quant_graph.nodes:

@@ -67,6 +67,7 @@ class DummyActivationMemoryTensorGenerator:
             yield ActivationMemoryTensor(shape=tuple(),
                                          node_name=f"{DUMMY_TENSOR}_{self.counter}",
                                          node_output_index=0,
+                                         nbits=8,
                                          init_size_to_zero=True)
 
             self.counter += 1

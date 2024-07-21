@@ -25,7 +25,8 @@ class DebugConfig:
     """
     def __init__(self,
                  analyze_similarity: bool = False,
-                 network_editor: List[EditRule] = []):
+                 network_editor: List[EditRule] = [],
+                 compute_max_cut: bool = False):
         """
 
         Args:
@@ -36,3 +37,4 @@ class DebugConfig:
         """
         self.analyze_similarity = analyze_similarity
         self.network_editor = network_editor
+        self.compute_max_cut = compute_max_cut

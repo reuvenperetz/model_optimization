@@ -23,7 +23,7 @@ from model_compression_toolkit.core.common.graph.memory_graph.memory_graph impor
 def compute_graph_max_cut(memory_graph: MemoryGraph,
                           n_iter: int = 50,
                           astar_n_iter: int = 500,
-                          eps: float = 1e-2) -> Tuple[List[BaseNode], float, List[Cut]]:
+                          eps: float = 1e-16) -> Tuple[List[BaseNode], float, List[Cut]]:
     """
     A wrapper function to compute max cut and schedule for a given model.
     It runs iterations of AStar search on the given memory graph with a dynamically updating estimation bound.

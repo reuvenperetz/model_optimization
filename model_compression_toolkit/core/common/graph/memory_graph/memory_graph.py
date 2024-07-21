@@ -37,6 +37,21 @@ class MemoryGraph(DirectedBipartiteGraph):
             model_graph: A graph representation of a model.
         """
 
+        node_to_remove = model_graph.find_node_by_name("getattr_2")
+        if len(node_to_remove)==1:
+            node_to_remove=node_to_remove[0]
+            prev_node = model_graph.get_prev_nodes(node_to_remove)[0]
+            next_node = model_graph.get_next_nodes(node_to_remove)[0]
+            e_attr = model_graph.get_edge_data(prev_node, node_to_remove)[0]
+
+            model_graph.remove_edge(prev_node, node_to_remove)
+            model_graph.remove_edge(node_to_remove, next_node)
+            model_graph.remove_node(node_to_remove)
+
+            model_graph.add_edge(prev_node, next_node, **e_attr)
+
+
+
         self.model_graph = model_graph
 
         nodes = list(model_graph.nodes)
@@ -49,7 +64,7 @@ class MemoryGraph(DirectedBipartiteGraph):
             out_edges = model_graph.out_edges(n, sort_by_attr=EDGE_SOURCE_INDEX)
 
             for i, ot in enumerate(n_outputs):
-                memory_tensor = ActivationMemoryTensor(ot, n.name, i)
+                memory_tensor = ActivationMemoryTensor(ot, n.name, i, n.final_activation_quantization_cfg.activation_n_bits)
                 memory_tensors.append(memory_tensor)
                 # Add memory tensor as current node's output
                 node_to_tensor.append((n, memory_tensor))
@@ -87,6 +102,7 @@ class MemoryGraph(DirectedBipartiteGraph):
         self.sinks_b = None
         self.update_sinks_b()
         assert self.sinks_b is not None, "the memory graph variable sinks_b should have been initialized."
+        print([n for n in self.a_nodes if len(list(self.successors(n))) == 0])
         assert len([n for n in self.a_nodes if len(list(self.successors(n))) == 0]) == 0, \
             "All operations should have an activation tensor, so there are no supposed to be sink nodes in side A," \
             "of the bipartite memory graph."
