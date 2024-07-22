@@ -29,6 +29,8 @@ from tensorboard.compat.proto.graph_pb2 import GraphDef
 
 import model_compression_toolkit as mct
 from mct_quantizers import PytorchQuantizationWrapper
+from model_compression_toolkit.constants import PYTORCH
+from model_compression_toolkit.target_platform_capabilities.constants import IMX500_TP_MODEL
 from model_compression_toolkit.xquant.common.similarity_functions import DEFAULT_SIMILARITY_METRICS_NAMES
 from model_compression_toolkit.xquant.common.xquant_config import XQuantConfig
 from model_compression_toolkit.xquant.pytorch.facade_xquant_report import xquant_report_pytorch_experimental
@@ -51,7 +53,9 @@ class BaseTestEnd2EndPytorchXQuant(unittest.TestCase):
         self.float_model = self.get_model_to_test()
         self.repr_dataset = partial(random_data_gen, shape=self.get_input_shape())
         self.quantized_model, _ = mct.ptq.pytorch_post_training_quantization(in_module=self.float_model,
-                                                                             representative_data_gen=self.repr_dataset)
+                                                                             representative_data_gen=self.repr_dataset,
+                                                                             target_platform_capabilities=self.get_tpc(),
+                                                                             core_config=self.get_core_config())
 
         self.validation_dataset = partial(random_data_gen, use_labels=True)
         self.tmpdir = tempfile.mkdtemp()
@@ -59,6 +63,12 @@ class BaseTestEnd2EndPytorchXQuant(unittest.TestCase):
 
     def get_input_shape(self):
         return (3, 8, 8)
+
+    def get_core_config(self):
+        return mct.core.CoreConfig(debug_config=mct.core.DebugConfig(compute_max_cut=True))
+
+    def get_tpc(self):
+        return mct.get_target_platform_capabilities(PYTORCH, IMX500_TP_MODEL, "v2")
 
     def get_model_to_test(self):
         class BaseModelTest(torch.nn.Module):
