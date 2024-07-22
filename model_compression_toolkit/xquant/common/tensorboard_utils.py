@@ -97,8 +97,12 @@ class TensorboardUtils:
                                                           repr_dataset=repr_dataset)
         from mct_quantizers.keras.metadata import get_metadata
         _metadata = get_metadata(quantized_model)
+        s1 = f"Similarity Metrics on outputs using representative dataset: \n" + "\n".join([f"{key}: {value:.4f}" for key, value in similarity_metrics['output_similarity_metrics_repr'].items()])
+        s2 = f"Similarity Metrics on outputs using validation dataset: \n" + "\n".join([f"{key}: {value:.4f}" for key, value in similarity_metrics['output_similarity_metrics_val'].items()])
         maxcut_str = f"MaxCut: {_metadata['scheduling_info']['max_cut']}"
-        self.tb_writer.add_text(maxcut_str, 'xquant')
+        self.tb_writer.add_text(maxcut_str, 'max_cut')
+        self.tb_writer.add_text(s1, 'output_similarity_repr')
+        self.tb_writer.add_text(s2, 'output_similarity_val')
         self.tb_writer.add_graph(tb_graph, TENSORBOARD_DEFAULT_TAG)
 
 
