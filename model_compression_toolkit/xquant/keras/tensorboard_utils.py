@@ -89,29 +89,31 @@ class KerasTensorboardUtils(TensorboardUtils):
                     node.framework_attr['cut_memory_elements'] = [
                         f"{mem_element['node_name']}_outTensor_{mem_element['node_output_index']}" for mem_element in
                         fused_node_to_memory_elements[node.name]]
+                    node.framework_attr['cut_total_size'] = sum([mem_element['total_size'] for mem_element in fused_node_to_memory_elements[node.name]])
+
                 elif node.type == KerasQuantizationWrapper and node.framework_attr['layer']['config'][
                     'name'] in fused_node_to_memory_elements:
                     node.framework_attr['cut_memory_elements'] = [
                         f"{mem_element['node_name']}_outTensor_{mem_element['node_output_index']}" for mem_element in
                         fused_node_to_memory_elements[node.framework_attr['layer']['config']['name']]]
+                    node.framework_attr['cut_total_size'] = sum([mem_element['total_size'] for mem_element in
+                        fused_node_to_memory_elements[node.framework_attr['layer']['config']['name']]])
 
                 elif node.name in _metadata['scheduling_info']['fused_nodes_mapping']:
                     node.framework_attr['cut_memory_elements'] = [
                         f"{mem_element['node_name']}_outTensor_{mem_element['node_output_index']}" for mem_element in
                         fused_node_to_memory_elements[_metadata['scheduling_info']['fused_nodes_mapping'][node.name]]]
+                    node.framework_attr['cut_total_size'] = sum([mem_element['total_size'] for mem_element in fused_node_to_memory_elements[_metadata['scheduling_info']['fused_nodes_mapping'][node.name]]])
+
                 elif node.type == KerasQuantizationWrapper and node.framework_attr['layer']['config']['name'] in \
                         _metadata['scheduling_info']['fused_nodes_mapping']:
                     node.framework_attr['cut_memory_elements'] = [
                         f"{mem_element['node_name']}_outTensor_{mem_element['node_output_index']}" for mem_element in
                         fused_node_to_memory_elements[_metadata['scheduling_info']['fused_nodes_mapping'][
                             node.framework_attr['layer']['config']['name']]]]
-                #
-                # elif node.type == KerasQuantizationWrapper and node.framework_attr['layer']['config']['name'] in
-                # fused_node_to_memory_elements:
-                #     node.framework_attr['cut_memory_elements'] = [
-                #         f"{mem_element['node_name']}_outTensor_{mem_element['node_output_index']}" for mem_element in
-                #         fused_node_to_memory_elements[fused_node_to_memory_elements[node.framework_attr['layer'][
-                #         'config']['name']]]]
+                    node.framework_attr['cut_total_size'] = sum([mem_element['total_size'] for mem_element in
+                        fused_node_to_memory_elements[_metadata['scheduling_info']['fused_nodes_mapping'][
+                            node.framework_attr['layer']['config']['name']]]])
 
                 else:
                     Logger.critical(f"Node {node.name} has no cut tensors information")
