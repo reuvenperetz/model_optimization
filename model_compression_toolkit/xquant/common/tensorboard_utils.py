@@ -95,7 +95,10 @@ class TensorboardUtils:
         tb_graph = self.get_graph_for_tensorboard_display(quantized_model=quantized_model,
                                                           similarity_metrics=similarity_metrics,
                                                           repr_dataset=repr_dataset)
-
+        from mct_quantizers.keras.metadata import get_metadata
+        _metadata = get_metadata(quantized_model)
+        maxcut_str = f"MaxCut: {_metadata['scheduling_info']['max_cut']}"
+        self.tb_writer.add_text(maxcut_str, 'xquant')
         self.tb_writer.add_graph(tb_graph, TENSORBOARD_DEFAULT_TAG)
 
 
