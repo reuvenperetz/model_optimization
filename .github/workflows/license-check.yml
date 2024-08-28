@@ -19,31 +19,60 @@ jobs:
         java-version: '11'
         distribution: 'adopt'
 
-    - name: Install ORT
+    - name: Install Git
       run: |
-        wget https://github.com/oss-review-toolkit/ort/releases/download/v2.4.0/ort-2.4.0.jar
-        echo '#!/bin/sh' > ort
-        echo 'java -jar ort-2.4.0.jar "$@"' >> ort
-        chmod +x ort
+        sudo apt-get update
+        sudo apt-get install -y git
+
+    - name: Install Node.js and npm
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+
+    - name: Install Yarn
+      run: |
+        npm install -g yarn
+
+    - name: Clone and Build ORT
+      run: |
+        git clone --recurse-submodules https://github.com/oss-review-toolkit/ort.git
+        cd ort
+        ./gradlew installDist
 
     - name: Run ORT analyzer
-      run: ./ort analyze -i . -o analyzer-output
+      run: |
+        cd ort
+        ./cli/build/install/ort/bin/ort analyze -i ${{ github.workspace }} -o analyzer-output
+
+    - name: Run ORT scanner
+      run: |
+        cd ort
+        ./cli/build/install/ort/bin/ort scan -i analyzer-output/analyzer-result.yml -o scanner-output
 
     - name: Run ORT evaluator
-      run: ./ort evaluate -i analyzer-output/analyzer-result.yml -o evaluator-output
+      run: |
+        cd ort
+        ./cli/build/install/ort/bin/ort evaluate \
+          -i scanner-output/scan-result.yml \
+          -o evaluator-output
 
     - name: Generate report
-      run: ./ort report -i evaluator-output/evaluation-result.yml -o report-output -f StaticHtml
+      run: |
+        cd ort
+        ./cli/build/install/ort/bin/ort report \
+          -f StaticHtml \
+          -i evaluator-output/evaluation-result.yml \
+          -o report-output
 
     - name: Upload report
       uses: actions/upload-artifact@v2
       with:
         name: ort-report
-        path: report-output/evaluation-report.html
+        path: ort/report-output/scan-report.html
 
     - name: Check for rule violations
       run: |
-        if grep -q "Rule violation" report-output/evaluation-report.html; then
+        if grep -q "Rule violation" ort/report-output/scan-report.html; then
           echo "License violations found. Check the report for details."
           exit 1
         else
