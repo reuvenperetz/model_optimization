@@ -36,10 +36,7 @@ jobs:
     - name: Install pnpm
       run: |
         npm install -g pnpm
-
-    - name: Add pnpm to PATH
-      run: |
-        echo "::add-path::$(npm bin -g)"
+        echo "$(npm bin -g)" >> $GITHUB_PATH
 
     - name: Set up Python
       uses: actions/setup-python@v2
