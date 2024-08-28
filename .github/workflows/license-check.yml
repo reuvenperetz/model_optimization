@@ -43,6 +43,14 @@ jobs:
         python -m pip install --upgrade pip
         pip install pipenv
 
+    - name: Install CocoaPods
+      run: |
+        sudo gem install cocoapods
+
+    - name: Install Bower
+      run: |
+        npm install -g bower
+
     - name: Clone and Build ORT
       run: |
         git clone --recurse-submodules https://github.com/oss-review-toolkit/ort.git
@@ -52,12 +60,16 @@ jobs:
     - name: Run ORT analyzer
       run: |
         cd ort
-        ./cli/build/install/ort/bin/ort analyze -i ${{ github.workspace }} -o analyzer-output
+        ./cli/build/install/ort/bin/ort -P ort.analyzer.allowDynamicVersions=true analyze \
+          -i ${{ github.workspace }} \
+          -o analyzer-output
 
     - name: Run ORT scanner
       run: |
         cd ort
-        ./cli/build/install/ort/bin/ort scan -i analyzer-output/analyzer-result.yml -o scanner-output
+        ./cli/build/install/ort/bin/ort scan \
+          -i analyzer-output/analyzer-result.yml \
+          -o scanner-output
 
     - name: Run ORT evaluator
       run: |
