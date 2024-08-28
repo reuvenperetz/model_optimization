@@ -33,6 +33,14 @@ jobs:
       run: |
         npm install -g yarn
 
+    - name: Install pnpm
+      run: |
+        npm install -g pnpm
+
+    - name: Add pnpm to PATH
+      run: |
+        echo "::add-path::$(npm bin -g)"
+
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
