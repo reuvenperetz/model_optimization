@@ -56,6 +56,29 @@ jobs:
       run: |
         npm install -g bower
 
+    - name: Create .ort.yml file
+      run: |
+        cat <<EOL > .ort.yml
+        excludes:
+          scopes:
+            - name: "harp-fetch"
+              reason: "DUPLICATE_PACKAGE"
+              comment: "Excluding due to duplicate identifiers in harp-fetch."
+            - name: "node-fetch"
+              reason: "DUPLICATE_PACKAGE"
+              comment: "Excluding due to duplicate identifiers in node-fetch."
+          packages:
+            - id: "NPM::@here/harp-fetch:0.11.0"
+              reason: "DUPLICATE_PACKAGE"
+              comment: "Excluding due to duplicate identifier with version 0.11.0."
+            - id: "NPM::@here/harp-fetch:0.3.6"
+              reason: "DUPLICATE_PACKAGE"
+              comment: "Excluding due to duplicate identifier with version 0.3.6."
+            - id: "NPM::node-fetch:2.6.0"
+              reason: "DUPLICATE_PACKAGE"
+              comment: "Excluding due to duplicate identifier with version 2.6.0."
+        EOL
+
     - name: Clone and Build ORT
       run: |
         git clone --recurse-submodules https://github.com/oss-review-toolkit/ort.git
