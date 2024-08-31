@@ -61,10 +61,10 @@ jobs:
         cat <<EOL > .ort.yml
         excludes:
           scopes:
-            - name: "harp-fetch"
+            - pattern: "harp-fetch"
               reason: "DEV_DEPENDENCY_OF"
               comment: "Excluding due to duplicate identifiers in harp-fetch."
-            - name: "node-fetch"
+            - pattern: "node-fetch"
               reason: "DEV_DEPENDENCY_OF"
               comment: "Excluding due to duplicate identifiers in node-fetch."
           packages:
