@@ -60,20 +60,16 @@ jobs:
       run: |
         cat <<EOL > .ort.yml
         excludes:
-          scopes:
-            - pattern: "harp-fetch"
-              reason: "DEV_DEPENDENCY_OF"
-              comment: "Excluding due to duplicate identifiers in harp-fetch."
-            - pattern: "node-fetch"
-              reason: "DEV_DEPENDENCY_OF"
-              comment: "Excluding due to duplicate identifiers in node-fetch."
-          paths:
-            - pattern: "**/node_modules/@here/harp-fetch"
+          projects:
+            - id: "Gradle:org.ossreviewtoolkit.gradle.example:lib:1.0.0"
               reason: "OTHER"
-              comment: "Excluding due to duplicate identifier with version 0.11.0 and 0.3.6."
-            - pattern: "**/node_modules/node-fetch"
+              comment: "Excluding due to duplicate identifier found in multiple Gradle projects."
+            - id: "Gradle:org.ossreviewtoolkit.gradle.example:app:1.0.0"
               reason: "OTHER"
-              comment: "Excluding due to duplicate identifier with version 2.6.0."
+              comment: "Excluding due to duplicate identifier found in multiple Gradle projects."
+            - id: "Gradle:org.ossreviewtoolkit.gradle.example:Gradle-Android-Example:1.0.0"
+              reason: "OTHER"
+              comment: "Excluding due to duplicate identifier found in multiple Gradle projects."
         EOL
 
     - name: Clone and Build ORT
