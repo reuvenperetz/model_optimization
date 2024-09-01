@@ -60,17 +60,18 @@ jobs:
       run: |
         cat <<EOL > .ort.yml
         excludes:
-          projects:
-            - id: "Gradle:org.ossreviewtoolkit.gradle.example:lib:1.0.0"
+          paths:
+            - pattern: "**/gradle-android/lib/build.gradle"
               reason: "OTHER"
-              comment: "Excluding due to duplicate identifier found in multiple Gradle projects."
-            - id: "Gradle:org.ossreviewtoolkit.gradle.example:app:1.0.0"
+              comment: "Excluding due to duplicate project ID in gradle-android/lib/build.gradle."
+            - pattern: "**/gradle-android/app/build.gradle"
               reason: "OTHER"
-              comment: "Excluding due to duplicate identifier found in multiple Gradle projects."
-            - id: "Gradle:org.ossreviewtoolkit.gradle.example:Gradle-Android-Example:1.0.0"
+              comment: "Excluding due to duplicate project ID in gradle-android/app/build.gradle."
+            - pattern: "**/gradle-android-cyclic/build.gradle"
               reason: "OTHER"
-              comment: "Excluding due to duplicate identifier found in multiple Gradle projects."
+              comment: "Excluding due to duplicate project ID in gradle-android-cyclic/build.gradle."
         EOL
+
 
     - name: Clone and Build ORT
       run: |
