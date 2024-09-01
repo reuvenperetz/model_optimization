@@ -69,10 +69,10 @@ jobs:
               comment: "Excluding due to duplicate identifiers in node-fetch."
           paths:
             - pattern: "**/node_modules/@here/harp-fetch"
-              reason: "DEV_DEPENDENCY_OF"
+              reason: "OTHER"
               comment: "Excluding due to duplicate identifier with version 0.11.0 and 0.3.6."
             - pattern: "**/node_modules/node-fetch"
-              reason: "DEV_DEPENDENCY_OF"
+              reason: "OTHER"
               comment: "Excluding due to duplicate identifier with version 2.6.0."
         EOL
 
