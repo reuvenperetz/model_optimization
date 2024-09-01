@@ -67,14 +67,11 @@ jobs:
             - pattern: "node-fetch"
               reason: "DEV_DEPENDENCY_OF"
               comment: "Excluding due to duplicate identifiers in node-fetch."
-          packages:
-            - id: "NPM::@here/harp-fetch:0.11.0"
+          paths:
+            - pattern: "**/node_modules/@here/harp-fetch"
               reason: "DEV_DEPENDENCY_OF"
-              comment: "Excluding due to duplicate identifier with version 0.11.0."
-            - id: "NPM::@here/harp-fetch:0.3.6"
-              reason: "DEV_DEPENDENCY_OF"
-              comment: "Excluding due to duplicate identifier with version 0.3.6."
-            - id: "NPM::node-fetch:2.6.0"
+              comment: "Excluding due to duplicate identifier with version 0.11.0 and 0.3.6."
+            - pattern: "**/node_modules/node-fetch"
               reason: "DEV_DEPENDENCY_OF"
               comment: "Excluding due to duplicate identifier with version 2.6.0."
         EOL
