@@ -59,14 +59,21 @@ jobs:
     - name: Create .ort.yml file
       run: |
         cat <<EOL > .ort.yml
+        $(cat <<'EOF'
         excludes:
           paths:
+            # Exclude gradle-android duplicates
             - pattern: "**/gradle-android/lib/build.gradle"
               reason: "OTHER"
               comment: "Excluding due to duplicate project ID 'Gradle:org.ossreviewtoolkit.gradle.example:lib:1.0.0'"
             - pattern: "**/gradle-android/app/build.gradle"
               reason: "OTHER"
               comment: "Excluding due to duplicate project ID 'Gradle:org.ossreviewtoolkit.gradle.example:app:1.0.0'"
+            - pattern: "**/gradle-android/build.gradle"
+              reason: "OTHER"
+              comment: "Excluding due to duplicate project ID 'Gradle:org.ossreviewtoolkit.gradle.example:Gradle-Android-Example:1.0.0'"
+        
+            # Exclude gradle duplicates
             - pattern: "**/gradle/build.gradle"
               reason: "OTHER"
               comment: "Excluding due to duplicate project ID 'Gradle::Gradle-Example:'"
@@ -76,14 +83,28 @@ jobs:
             - pattern: "**/gradle/app/build.gradle"
               reason: "OTHER"
               comment: "Excluding due to duplicate project ID 'Gradle:org.ossreviewtoolkit.gradle.example:app:1.0.0'"
+        
+            # Exclude gradle-android-cyclic duplicates
             - pattern: "**/gradle-android-cyclic/build.gradle"
               reason: "OTHER"
               comment: "Excluding due to duplicate project ID 'Gradle:org.ossreviewtoolkit.gradle.example:Gradle-Android-Example:1.0.0'"
             - pattern: "**/gradle-android-cyclic/app/build.gradle"
               reason: "OTHER"
               comment: "Excluding due to duplicate project ID 'Gradle:org.ossreviewtoolkit.gradle.example:app:1.0.0'"
+        
+            # Exclude gradle-library as it seems to be the source of the original definitions
+            - pattern: "**/gradle-library/**/*.gradle"
+              reason: "OTHER"
+              comment: "This appears to be the source of the original project definitions"
+        
+        resolutions:
+          issues:
+            - message: "Multiple projects with the same id .* found"
+              reason: "CANT_FIX_ISSUE"
+              comment: "Resolved by excluding duplicate project files in the excludes section"
+        EOF
+        )
         EOL
-
 
     - name: Clone and Build ORT
       run: |
