@@ -59,6 +59,7 @@ jobs:
 
     - name: Clone and Build ORT
       run: |
+        cd ..
         git clone --recurse-submodules https://github.com/oss-review-toolkit/ort.git
         cd ort
         ./gradlew installDist
@@ -69,28 +70,30 @@ jobs:
 
     - name: Run ORT analyzer
       run: |
-        cd ort
+        cd ../ort
         ./cli/build/install/ort/bin/ort --debug --stacktrace analyze \
           -i ${{ github.workspace }}/model_compression_toolkit \
           -o analyzer-output
 
     - name: Run ORT scanner
       run: |
-        cd ort
+        cd ../ort
         ./cli/build/install/ort/bin/ort scan \
           -i analyzer-output/analyzer-result.yml \
           -o scanner-output
 
     - name: Run ORT evaluator
       run: |
-        cd ort
+        cd ../ort
         ./cli/build/install/ort/bin/ort evaluate \
+          --package-curations-file examples/curations.yml --rules-file examples/evaluator.rules.kts --license-classifications-file examples/license-classifications.yml \
           -i scanner-output/scan-result.yml \
           -o evaluator-output
 
+
     - name: Generate report
       run: |
-        cd ort
+        cd ../ort
         ./cli/build/install/ort/bin/ort report \
           -f StaticHtml \
           -i evaluator-output/evaluation-result.yml \
