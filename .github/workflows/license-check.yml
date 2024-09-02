@@ -72,7 +72,7 @@ jobs:
       run: |
         cd ../ort
         ./cli/build/install/ort/bin/ort --debug --stacktrace analyze \
-          -i ${{ github.workspace }}/model_compression_toolkit \
+          -i ${{ github.workspace }} \
           -o analyzer-output
 
     - name: Run ORT scanner
