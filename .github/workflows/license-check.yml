@@ -75,6 +75,12 @@ jobs:
           -i ${{ github.workspace }} \
           -o analyzer-output
 
+    - name: Run ORT scanner
+      run: |
+        cd ../ort
+        ./cli/build/install/ort/bin/ort scan \
+          -i analyzer-output/analyzer-result.yml \
+          -o scanner-output
 
     - name: Run ORT evaluator
       run: |
@@ -83,6 +89,7 @@ jobs:
         ls -l ./examples
         ./cli/build/install/ort/bin/ort evaluate \
           --package-curations-file ./examples/curations.yml --rules-file ./examples/example.rules.kts --license-classifications-file ./examples/license-classifications.yml \
+          -i scanner-output/scan-result.yml \
           -o evaluator-output
 
 
