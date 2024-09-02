@@ -82,7 +82,7 @@ jobs:
         ls -l
         ls -l ./examples
         ./cli/build/install/ort/bin/ort evaluate \
-          --package-curations-file ./examples/curations.yml --rules-file ./example.rules.kts --license-classifications-file ./examples/license-classifications.yml \
+          --package-curations-file ./examples/curations.yml --rules-file ./examples/example.rules.kts --license-classifications-file ./examples/license-classifications.yml \
           -o evaluator-output
 
 
