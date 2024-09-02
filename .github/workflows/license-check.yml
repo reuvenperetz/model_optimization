@@ -63,6 +63,10 @@ jobs:
         cd ort
         ./gradlew installDist
 
+    - name: Show github workspace
+      run: |
+        ls -l ${{ github.workspace }}
+
     - name: Run ORT analyzer
       run: |
         cd ort
