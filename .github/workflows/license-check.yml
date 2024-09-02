@@ -46,7 +46,8 @@ jobs:
     - name: Install Pipenv and Conan
       run: |
         python -m pip install --upgrade pip
-        pip install pipenv conan
+        pip install --upgrade pip setuptools wheel
+        pip install pipenv conan scancode-toolkit
 
     - name: Install CocoaPods
       run: |
