@@ -65,8 +65,8 @@ jobs:
     - name: Run ORT analyzer
       run: |
         cd ort
-        ./cli/build/install/ort/bin/ort --info analyze \
-          -i ${{ github.workspace }} \
+        ./cli/build/install/ort/bin/ort --debug --stacktrace analyze \
+          -i ${{ github.workspace }}/model_compression_toolkit \
           -o analyzer-output
 
     - name: Run ORT scanner
