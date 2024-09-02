@@ -75,11 +75,6 @@ jobs:
           -i ${{ github.workspace }} \
           -o analyzer-output
 
-    - name: Run ORT advisor
-      run: |
-        cd ../ort
-        ./cli/build/install/ort/bin/ort advisor -a OssIndex -i analyzer-output/analyzer-result.yml -o advisor-output 
-      
 
     - name: Run ORT evaluator
       run: |
@@ -87,7 +82,7 @@ jobs:
         ls -l
         ls -l ./examples
         ./cli/build/install/ort/bin/ort evaluate \
-          --package-curations-file ./examples/curations.yml --rules-file ./examples/evaluator.rules.kts --license-classifications-file ./examples/license-classifications.yml \
+          --package-curations-file ./examples/curations.yml --rules-file ./example.rules.kts --license-classifications-file ./examples/license-classifications.yml \
           -o evaluator-output
 
 
