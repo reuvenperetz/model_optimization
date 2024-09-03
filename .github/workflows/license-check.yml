@@ -62,6 +62,7 @@ jobs:
         cd ..
         git clone --recurse-submodules https://github.com/oss-review-toolkit/ort.git
         cd ort
+        git checkout 2ddc3d4c32ec5e0bb26e3d30ba97220384f9419b
         ./gradlew installDist
 
     - name: Show github workspace
