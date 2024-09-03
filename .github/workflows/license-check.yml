@@ -85,8 +85,6 @@ jobs:
     - name: Run ORT scanner
       run: |
         cd ../ort
-        timeout 400s ./cli/build/install/ort/bin/ort -P ort.scanner.skipExcluded=true scan -i analyzer-output/analyzer-result.yml -o scanner-output || true
-        ls -l /home/runner/.ort/scanner/file-lists/
         ./cli/build/install/ort/bin/ort -P ort.scanner.skipExcluded=true scan -i analyzer-output/analyzer-result.yml -o scanner-output
 
     - name: Run ORT evaluator
