@@ -84,7 +84,9 @@ jobs:
     - name: Run ORT scanner
       run: |
         cd ../ort
+        ls -l /home/runner/.ort/scanner/file-lists/
         timeout 400s ./cli/build/install/ort/bin/ort scan -i analyzer-output/analyzer-result.yml -o scanner-output || true
+        ls -l /home/runner/.ort/scanner/file-lists/
         ./cli/build/install/ort/bin/ort scan -i analyzer-output/analyzer-result.yml -o scanner-output
 
     - name: Run ORT evaluator
