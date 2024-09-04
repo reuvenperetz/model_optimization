@@ -26,7 +26,7 @@ jobs:
 
     - name: Run scancode
       run: |
-        scancode -clpeui -n 2 --json-pp scan.json ${{ github.workspace }}  
+        scancode -clpeui -n 2 --json-pp scan.json ${{ github.workspace }} --classify --license-clarity-score --summary --license-clarity-score --license-references  
 
 
     - name: Upload json as artifact
