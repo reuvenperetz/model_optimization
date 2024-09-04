@@ -75,12 +75,6 @@ jobs:
           -i ${{ github.workspace }} \
           -o analyzer-output
 
-    - name: Run ORT advisor
-      run: |
-        cd ../ort
-        ./cli/build/install/ort/bin/ort advise --advisors OssIndex -i analyzer-output/analyzer-result.yml -o advisor-output 
-
-
     - name: Run ORT scanner
       run: |
         cd ../ort
