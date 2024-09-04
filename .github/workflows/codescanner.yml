@@ -26,5 +26,13 @@ jobs:
 
     - name: Run scancode
       run: |
-        scancode -clpeui -n 2 --json-pp sample.json ${{ github.workspace }}  
+        scancode -clpeui -n 2 --json-pp scan.json ${{ github.workspace }}  
+
+
+    - name: Upload json as artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: scan-json
+        path: scan.json
+
 
