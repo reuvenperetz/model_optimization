@@ -1,0 +1,30 @@
+name: CodeScanner Check
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  license-check:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: Install Pipenv and Conan
+      run: |
+        pip install --upgrade pip setuptools wheel
+        pip install pipenv scancode-toolkit
+
+
+    - name: Run scancode
+      run: |
+        scancode -clpeui -n 2 --json-pp sample.json ${{ github.workspace }}  
+
