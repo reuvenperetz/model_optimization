@@ -78,7 +78,7 @@ jobs:
     - name: Run ORT scanner
       run: |
         cd ../ort
-        ./cli/build/install/ort/bin/ort -P ort.scanner.skipExcluded=true scan -i analyzer-output/analyzer-result.yml -o scanner-output
+        ./cli/build/install/ort/bin/ort --debug -P ort.scanner.skipExcluded=true scan -i analyzer-output/analyzer-result.yml -o scanner-output
 
     - name: Run ORT evaluator
       run: |
