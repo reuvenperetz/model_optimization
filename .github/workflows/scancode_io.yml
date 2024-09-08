@@ -10,8 +10,14 @@ jobs:
     name: Scan codebase with ScanCode.io
     steps:
       - uses: actions/checkout@v4
-        with:
-          path: scancode-inputs
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+
+      - name: Install aboutcode-toolkit
+        run: |
+          pip install aboutcode-toolkit
+
       - uses: nexB/scancode-action@alpha
         with:
           pipelines: "scan_codebase,find_vulnerabilities"
