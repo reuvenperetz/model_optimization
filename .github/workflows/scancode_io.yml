@@ -4,25 +4,16 @@ on: [pull_request]
 
 permissions:
   contents: read
-
 jobs:
-  scancode-io:
-    runs-on: ubuntu-latest
+  scan-codebase:
+    runs-on: ubuntu-22.04
+    name: Scan codebase with ScanCode.io
     steps:
       - uses: actions/checkout@v4
         with:
           path: scancode-inputs
-
-      # Install Python and aboutcode-toolkit
-      - name: Set up Python
-        uses: actions/setup-python@v4
-
-      - name: Install aboutcode-toolkit
-        run: |
-          pip install aboutcode-toolkit
-
-      # Run the ScanCode action
       - uses: nexB/scancode-action@alpha
         with:
-          pipelines: 'scan_codebase'
-          output-formats: 'json xlsx spdx cyclonedx'
+          pipelines: "scan_codebase,find_vulnerabilities"
+        env:
+          VULNERABLECODE_URL: https://public.vulnerablecode.io/
