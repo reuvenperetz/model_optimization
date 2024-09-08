@@ -13,13 +13,15 @@ jobs:
         with:
           path: scancode-inputs
 
-      # Install the necessary dependencies
+      # Install Python and aboutcode-toolkit
       - name: Set up Python
         uses: actions/setup-python@v4
 
       - name: Install aboutcode-toolkit
-        run: pip install aboutcode-toolkit
+        run: |
+          pip install aboutcode-toolkit
 
+      # Run the ScanCode action
       - uses: nexB/scancode-action@alpha
         with:
           pipelines: 'scan_codebase'
