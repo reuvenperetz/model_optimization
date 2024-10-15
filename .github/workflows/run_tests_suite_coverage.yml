@@ -31,7 +31,7 @@ jobs:
         run: coverage run --parallel-mode -m --omit "*__init__.py" --include "model_compression_toolkit/**/*.py" pytest tests_pytest/keras
 
       - name: Clear pytest cache
-        run: pytest --cache-clear
+        run: pytest tests_pytest/keras --cache-clear
 
 
       - name: Prepare Torch env
