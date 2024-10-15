@@ -30,28 +30,15 @@ jobs:
       - name: Run keras pytest
         run: coverage run --parallel-mode -m --omit "*__init__.py" --include "model_compression_toolkit/**/*.py" pytest tests_pytest/keras
 
-      - name: Check FOUND_TF before uninstall
-        run: |
-          python -c "
-          from mct_quantizers.common.constants import FOUND_TF
-          print(f'FOUND_TF before uninstall: {FOUND_TF}')
-          "
+      - name: Clear pytest cache
+        run: pytest --cache-clear
+
 
       - name: Prepare Torch env
         run: |
           pip uninstall tensorflow -y
           pip list
           pip install torch==2.0.* torchvision onnx onnxruntime onnxruntime-extensions
-
-      - name: Clear pytest cache
-        run: pytest --cache-clear
-
-      - name: Check FOUND_TF before uninstall
-        run: |
-          python -c "
-          from mct_quantizers.common.constants import FOUND_TF
-          print(f'FOUND_TF before uninstall: {FOUND_TF}')
-          "
 
       - name: Run torch testsuite
         run: coverage run --parallel-mode -m --omit "*__init__.py" --include "model_compression_toolkit/**/*.py" unittest tests/test_suite.py -v
