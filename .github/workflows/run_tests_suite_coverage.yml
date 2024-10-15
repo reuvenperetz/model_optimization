@@ -30,6 +30,9 @@ jobs:
       - name: Run keras pytest
         run: coverage run --parallel-mode -m --omit "*__init__.py" --include "model_compression_toolkit/**/*.py" pytest tests_pytest/keras
 
+      - name: Clear pytest cache
+        run: pytest --cache-clear
+
       - name: Check FOUND_TF before uninstall
         run: |
           python -c "
