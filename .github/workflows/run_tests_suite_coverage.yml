@@ -38,7 +38,10 @@ jobs:
           "
 
       - name: Prepare Torch env
-        run: pip uninstall tensorflow -y && pip install torch==2.0.* torchvision onnx onnxruntime onnxruntime-extensions
+        run: |
+          pip uninstall tensorflow -y
+          pip list
+          pip install torch==2.0.* torchvision onnx onnxruntime onnxruntime-extensions
 
       - name: Check FOUND_TF before uninstall
         run: |
