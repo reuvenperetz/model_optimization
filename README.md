@@ -80,7 +80,7 @@ MCT offers a range of powerful features to optimize models for efficient edge de
 🏆 **Mixed-precision search** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/sony/model_optimization/blob/main/tutorials/notebooks/mct_features_notebooks/pytorch/example_pytorch_mixed_precision_ptq.ipynb). Assigning optimal quantization bit-width per layer (for weights/activations) 
 
 📈 **Graph optimizations**. 
-Transforming the model to be best fitted for quantization process.
+Transforming the model    to be best fitted for quantization process.
 
 🔎 **Quantization parameter search** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/sony/model_optimization/blob/main/tutorials/notebooks/mct_features_notebooks/keras/example_keras_activation_threshold_search.ipynb). Minimizing expected quantization-noise during thresholds search using methods such as MSE, No-Clipping and MAE.
 
