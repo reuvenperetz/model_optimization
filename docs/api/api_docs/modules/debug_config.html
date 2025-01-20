@@ -48,15 +48,15 @@
 <p><strong>Class to configure params for debugging purposes:</strong></p>
 <dl class="py class">
 <dt class="sig sig-object py" id="model_compression_toolkit.core.DebugConfig">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">model_compression_toolkit.core.</span></span><span class="sig-name descname"><span class="pre">DebugConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">analyze_similarity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network_editor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simulate_scheduler</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#model_compression_toolkit.core.DebugConfig" title="Permalink to this definition">¶</a></dt>
-<dd><p>A class for MCT core debug information.</p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">model_compression_toolkit.core.</span></span><span class="sig-name descname"><span class="pre">DebugConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">analyze_similarity=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network_editor=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simulate_scheduler=False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#model_compression_toolkit.core.DebugConfig" title="Permalink to this definition">¶</a></dt>
+<dd><p>A dataclass for MCT core debug information.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>analyze_similarity</strong> (<em>bool</em>) – Whether to plot similarity figures within TensorBoard (when logger is
 enabled) or not. Can be used to pinpoint problematic layers in the quantization process.</p></li>
 <li><p><strong>network_editor</strong> (<em>List</em><em>[</em><a class="reference internal" href="network_editor.html#model_compression_toolkit.core.network_editor.EditRule" title="model_compression_toolkit.core.network_editor.EditRule"><em>EditRule</em></a><em>]</em>) – A list of rules and actions to edit the network for quantization.</p></li>
-<li><p><strong>simulate_scheduler</strong> (<em>bool</em>) – Simulate scheduler behaviour to compute operators order and cuts.</p></li>
+<li><p><strong>simulate_scheduler</strong> (<em>bool</em>) – Simulate scheduler behavior to compute operators’ order and cuts.</p></li>
 </ul>
 </dd>
 </dl>
