@@ -110,7 +110,6 @@ if FOUND_TORCH:
              User information that may be needed to handle the quantized model.
 
          Examples:
-
              Import MCT:
 
              >>> import model_compression_toolkit as mct
@@ -120,13 +119,13 @@ if FOUND_TORCH:
              >>> from torchvision.models import mobilenet_v2
              >>> model = mobilenet_v2(pretrained=True)
 
-            Create a random dataset generator, for required number of calibration iterations (num_calibration_batches). In this example, a random dataset of 10 batches each containing 4 images is used:
+             Create a random dataset generator, for required number of calibration iterations (num_calibration_batches). In this example, a random dataset of 10 batches each containing 4 images is used:
 
-            >>> import numpy as np
-            >>> num_calibration_batches = 10
-            >>> def repr_datagen():
-            >>>     for _ in range(num_calibration_batches):
-            >>>         yield [np.random.random((4, 3, 224, 224))]
+             >>> import numpy as np
+             >>> num_calibration_batches = 10
+             >>> def repr_datagen():
+             >>>     for _ in range(num_calibration_batches):
+             >>>         yield [np.random.random((4, 3, 224, 224))]
 
              Create a MCT core config, containing the quantization configuration:
 
