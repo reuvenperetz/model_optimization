@@ -120,8 +120,7 @@ if FOUND_TORCH:
              >>> from torchvision.models import mobilenet_v2
              >>> model = mobilenet_v2(pretrained=True)
 
-            Create a random dataset generator, for required number of calibration iterations (num_calibration_batches):
-            In this example a random dataset of 10 batches each containing 4 images is used.
+            Create a random dataset generator, for required number of calibration iterations (num_calibration_batches). In this example, a random dataset of 10 batches each containing 4 images is used:
 
             >>> import numpy as np
             >>> num_calibration_batches = 10
@@ -133,8 +132,7 @@ if FOUND_TORCH:
 
              >>> config = mct.core.CoreConfig()
 
-             Pass the model, the representative dataset generator, the configuration and the target resource utilization to get a
-             quantized model. Now the model contains quantizer wrappers for fine tunning the weights:
+             Pass the model, the representative dataset generator, the configuration and the target resource utilization to get a quantized model. Now the model contains quantizer wrappers for fine tunning the weights:
 
              >>> quantized_model, quantization_info = mct.qat.pytorch_quantization_aware_training_init_experimental(model, repr_datagen, core_config=config)
 
@@ -149,8 +147,8 @@ if FOUND_TORCH:
         if core_config.is_mixed_precision_enabled:
             if not isinstance(core_config.mixed_precision_config, MixedPrecisionQuantizationConfig):
                 Logger.critical("Given quantization config to mixed-precision facade is not of type "
-                             "MixedPrecisionQuantizationConfig. Please use pytorch_post_training_quantization API,"
-                             "or pass a valid mixed precision configuration.")
+                                "MixedPrecisionQuantizationConfig. Please use pytorch_post_training_quantization API,"
+                                "or pass a valid mixed precision configuration.")
 
         tb_w = init_tensorboard_writer(DEFAULT_PYTORCH_INFO)
         fw_impl = PytorchImplementation()
