@@ -59,6 +59,7 @@
 <li><p><strong>regularization_factor</strong> (<em>float</em>) – A floating point number that defines the regularization factor.</p></li>
 <li><p><strong>hessian_batch_size</strong> (<em>int</em>) – Batch size for Hessian computation in Hessian-based weights GPTQ.</p></li>
 <li><p><strong>use_hessian_sample_attention</strong> (<em>bool</em>) – whether to use Sample-Layer Attention score for weighted loss.</p></li>
+<li><p><strong>gradual_activation_quantization</strong> (<em>bool</em><em>, </em><a class="reference internal" href="../classes/GradientPTQConfig.html#model_compression_toolkit.gptq.GradualActivationQuantizationConfig" title="model_compression_toolkit.gptq.GradualActivationQuantizationConfig"><em>GradualActivationQuantizationConfig</em></a>) – If False, GradualActivationQuantization is disabled. If True, GradualActivationQuantization is enabled with the default settings. GradualActivationQuantizationConfig object can be passed to use non-default settings.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
