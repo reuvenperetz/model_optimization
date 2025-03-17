@@ -1,7 +1,7 @@
 networkx!=2.8.1
 tqdm
 Pillow
-numpy<2.0
+numpy<3.0
 scikit-image
 scikit-learn
 tensorboard
@@ -9,5 +9,5 @@ PuLP
 matplotlib<3.10.0
 scipy
 protobuf
-mct-quantizers==1.5.2
+mct-quantizers-nightly
 pydantic<2.0
