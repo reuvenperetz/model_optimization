@@ -1,19 +1,13 @@
-from dataclasses import dataclass
 from typing import Optional, Dict
 from model_compression_toolkit.core.common import Graph
+from dataclasses import dataclass
+
 from model_compression_toolkit.graph_builder.common.graph_refinement_config import GraphRefinementConfig
 
 
-@dataclass
-class KerasGraphRefinementConfig(GraphRefinementConfig):
-    separable_decomposition: bool = True
-
-
-# TODO: change transform
-def refine_keras_graph(
-    graph: Graph,
-    graph_refinement_config: KerasGraphRefinementConfig = None
-) -> Graph:
+def transform_keras_graph(graph: Graph,
+                          linear_collapsing: bool = True,
+                          residual_collapsing: bool = True) -> Graph:
     """
     Applies a series of structural simplifications to a graph.
 
@@ -21,8 +15,9 @@ def refine_keras_graph(
     These transformations are aimed at simplifying the graph for optimization without altering the model's functionality.
 
     Args:
-        graph (Graph): The input graph to refine.
-        graph_refinement_config (Optional[Dict[str, bool]]): An optional dictionary to enable/disable specific refinements.
+        graph (Graph): The input graph to transform.
+        linear_collapsing:
+        residual_collapsing:
 
     Returns:
         Graph: A refined graph with structural transformations applied.
