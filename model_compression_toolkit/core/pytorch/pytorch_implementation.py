@@ -276,23 +276,23 @@ class PytorchImplementation(FrameworkImplementation):
                                        ScaleEqualizationWithPad(quant_config)])
         return substitutions_list
 
-    def get_substitutions_prepare_graph(self) -> List[common.BaseSubstitution]:
-        """
-
-        Returns: A list of the framework substitutions used before we collect the prior information.
-
-        """
-        return [ReshapeWithStaticShapes(),
-                MultiHeadAttentionDecomposition(),
-                ScaledDotProductDecomposition(),
-                MatMulDecomposition(),
-                TransformFunctionCallMethod(),
-                FunctionalConvSubstitution(),
-                FunctionalBatchNorm(),
-                FunctionalLayerNorm(),
-                FunctionalLinear(),
-                RemoveIdentity(),
-                ConvtransposeDynamicPadding()]
+    # def get_substitutions_prepare_graph(self) -> List[common.BaseSubstitution]:
+    #     """
+    #
+    #     Returns: A list of the framework substitutions used before we collect the prior information.
+    #
+    #     """
+    #     return [ReshapeWithStaticShapes(),
+    #             MultiHeadAttentionDecomposition(),
+    #             ScaledDotProductDecomposition(),
+    #             MatMulDecomposition(),
+    #             TransformFunctionCallMethod(),
+    #             FunctionalConvSubstitution(),
+    #             FunctionalBatchNorm(),
+    #             FunctionalLayerNorm(),
+    #             FunctionalLinear(),
+    #             RemoveIdentity(),
+    #             ConvtransposeDynamicPadding()]
 
     def get_substitutions_pre_statistics_collection(self,
                                                     quant_config: QuantizationConfig
@@ -387,20 +387,20 @@ class PytorchImplementation(FrameworkImplementation):
             substitutions_list.append(pytorch_batchnorm_refusing())
         return substitutions_list
 
-    def get_node_prior_info(self,
-                            node: BaseNode,
-                            graph: Graph) -> NodePriorInfo:
-        """
-        Get a NodePriorInfo object for a node that represents a Pytorch layer.
-        Args:
-            node: Node to get its prior info.
-            graph: Graph to check the next node type.
-        Returns:
-            NodePriorInfo with information about the node.
-        """
-
-        return create_node_prior_info(node=node,
-                                      graph=graph)
+    # def get_node_prior_info(self,
+    #                         node: BaseNode,
+    #                         graph: Graph) -> NodePriorInfo:
+    #     """
+    #     Get a NodePriorInfo object for a node that represents a Pytorch layer.
+    #     Args:
+    #         node: Node to get its prior info.
+    #         graph: Graph to check the next node type.
+    #     Returns:
+    #         NodePriorInfo with information about the node.
+    #     """
+    #
+    #     return create_node_prior_info(node=node,
+    #                                   graph=graph)
 
     def count_node_for_mixed_precision_interest_points(self, node: BaseNode) -> bool:
         """

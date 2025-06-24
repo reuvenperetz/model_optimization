@@ -1,3 +1,4 @@
+from model_compression_toolkit.core.pytorch.pytorch_node_prior_info import create_node_prior_info
 
 from model_compression_toolkit.core.common import Graph
 from model_compression_toolkit.core.pytorch.graph_substitutions.substitutions.batchnorm_folding import \
@@ -70,4 +71,6 @@ def transform_pytorch_graph(graph: Graph,
                                    RemoveIdentity(),
                                    ConvtransposeDynamicPadding()]
     graph = substitute(graph, prepare_graph_substitutions)
+    for node in graph.nodes:
+        node.prior_info = create_node_prior_info(node=node, graph=graph)
     return graph
