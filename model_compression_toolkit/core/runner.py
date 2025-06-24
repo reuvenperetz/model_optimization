@@ -16,6 +16,8 @@
 import copy
 from typing import Callable, Any, List, Optional
 
+from model_compression_toolkit.core.graph_prep_runner import get_finalized_graph
+
 from model_compression_toolkit.core.common.framework_implementation import FrameworkImplementation
 from model_compression_toolkit.core.common.fusion.graph_fuser import GraphFuser
 from model_compression_toolkit.core.common.graph.base_graph import Graph
@@ -35,7 +37,7 @@ from model_compression_toolkit.core.common.network_editors.edit_network import e
 from model_compression_toolkit.core.common.quantization.core_config import CoreConfig
 from model_compression_toolkit.core.common.visualization.tensorboard_writer import TensorboardWriter, \
     finalize_bitwidth_in_tb
-from model_compression_toolkit.core.graph_prep_runner import graph_preparation_runner
+# from model_compression_toolkit.core.graph_prep_runner import graph_preparation_runner
 from model_compression_toolkit.core.quantization_prep_runner import quantization_preparation_runner
 from model_compression_toolkit.logger import Logger
 from model_compression_toolkit.target_platform_capabilities.targetplatform2framework.framework_quantization_capabilities import \
@@ -93,18 +95,24 @@ def core_runner(graph: Graph,
         core_config.mixed_precision_config.set_mixed_precision_enable()
         Logger.info('Mixed precision enabled.')
 
+    graph = get_finalized_graph(graph,
+                                fqc,
+                                core_config.quantization_config,
+                                core_config.bit_width_config,
+                                tb_w,
+                                fw_impl,
+                                core_config.is_mixed_precision_enabled,
+                                running_gptq)
 
-
-
-    graph = graph_preparation_runner(graph,
-                                     representative_data_gen,
-                                     core_config.quantization_config,
-                                     fw_impl,
-                                     fqc,
-                                     core_config.bit_width_config,
-                                     tb_w,
-                                     mixed_precision_enable=core_config.is_mixed_precision_enabled,
-                                     running_gptq=running_gptq)
+    # graph = graph_preparation_runner(graph,
+    #                                  representative_data_gen,
+    #                                  core_config.quantization_config,
+    #                                  fw_impl,
+    #                                  fqc,
+    #                                  core_config.bit_width_config,
+    #                                  tb_w,
+    #                                  mixed_precision_enable=core_config.is_mixed_precision_enabled,
+    #                                  running_gptq=running_gptq)
 
     hessian_info_service = HessianInfoService(graph=graph, fw_impl=fw_impl)
 

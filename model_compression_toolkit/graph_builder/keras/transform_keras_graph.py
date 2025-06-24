@@ -3,7 +3,8 @@ from model_compression_toolkit.core.common import Graph
 
 def transform_keras_graph(graph: Graph,
                           linear_collapsing: bool = True,
-                          residual_collapsing: bool = True) -> Graph:
+                          residual_collapsing: bool = True,
+                          relu_bound_to_power_of_2: bool = False) -> Graph:
     """
     Applies a series of structural simplifications to a graph.
 
@@ -15,6 +16,7 @@ def transform_keras_graph(graph: Graph,
         graph (Graph): The input graph to transform.
         linear_collapsing:
         residual_collapsing:
+        relu_bound_to_power_of_2:
 
     Returns:
         Graph: A refined graph with structural transformations applied.
