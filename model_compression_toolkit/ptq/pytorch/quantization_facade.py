@@ -125,6 +125,7 @@ if FOUND_TORCH:
         #TODO: remove the necessary of instanciating the graph builder
         graph = PytorchGraphBuilder().build_graph(model=in_module,
                                                   representative_dataset=representative_data_gen,
+                                                  fqc=framework_platform_capabilities,
                                                   linear_collapsing=core_config.quantization_config.linear_collapsing,
                                                   residual_collapsing=core_config.quantization_config.residual_collapsing,
                                                   relu_bound_to_power_of_2=core_config.quantization_config.relu_bound_to_power_of_2)

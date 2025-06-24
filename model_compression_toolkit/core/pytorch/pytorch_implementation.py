@@ -97,7 +97,7 @@ from model_compression_toolkit.core.pytorch.statistics_correction.apply_second_m
     pytorch_apply_second_moment_correction
 from model_compression_toolkit.core.pytorch.statistics_correction.pytorch_compute_activation_bias_correction_of_graph import \
     pytorch_compute_activation_bias_correction_of_graph
-from model_compression_toolkit.core.pytorch.utils import to_torch_tensor, torch_tensor_to_numpy, set_model
+from model_compression_toolkit.core.pytorch.utils import to_torch_tensor, torch_tensor_to_numpy
 from model_compression_toolkit.exporter.model_wrapper.fw_agnostic.get_inferable_quantizers import \
     get_inferable_quantizers
 from model_compression_toolkit.exporter.model_wrapper.pytorch.builder.node_to_quantizer import \

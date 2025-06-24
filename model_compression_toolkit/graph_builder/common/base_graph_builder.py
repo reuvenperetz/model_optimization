@@ -9,11 +9,16 @@ class BaseGraphBuilder(ABC):
     def build_graph(self,
                     model,
                     representative_dataset=None,
+                    fqc = None,
                     linear_collapsing: bool = True,
                     residual_collapsing: bool = True,
-                    relu_bound_to_power_of_2=False):
+                    relu_bound_to_power_of_2: bool = False):
         graph = self._convert_model_to_graph(model, representative_dataset)
-        transformed_graph = self._transform_graph(graph, linear_collapsing, residual_collapsing)
+        transformed_graph = self._transform_graph(graph, linear_collapsing, residual_collapsing, relu_bound_to_power_of_2)
+
+        # TODO: Temporary until it can be removed from the graph
+        transformed_graph.fqc = fqc
+
         return transformed_graph
 
     @abstractmethod
@@ -23,5 +28,6 @@ class BaseGraphBuilder(ABC):
     @abstractmethod
     def _transform_graph(self, graph: Graph,
                          linear_collapsing: bool = True,
-                         residual_collapsing: bool = True) -> Graph:
+                         residual_collapsing: bool = True,
+                         relu_bound_to_power_of_2: bool = False) -> Graph:
         raise Exception

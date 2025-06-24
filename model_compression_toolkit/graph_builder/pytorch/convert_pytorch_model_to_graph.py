@@ -1,4 +1,9 @@
-from typing import Iterable, TYPE_CHECKING
+import copy
+from typing import Iterable, TYPE_CHECKING, Callable
+
+from model_compression_toolkit.core.pytorch.utils import torch_tensor_to_numpy, to_torch_tensor
+
+from model_compression_toolkit.core.pytorch.reader.reader import model_reader
 
 from model_compression_toolkit.core.common import Graph
 
@@ -6,7 +11,7 @@ if TYPE_CHECKING:
     import torch
 
 def convert_pytorch_model_to_graph(model: "torch.nn.Module",
-                                   representative_dataset: Iterable) -> Graph:
+                                   representative_dataset: Callable) -> Graph:
     """
     Converts a PyTorch model into a computational graph using tracing.
 
@@ -14,11 +19,16 @@ def convert_pytorch_model_to_graph(model: "torch.nn.Module",
     execution of the model and build a corresponding graph.
 
     Args:
-        model (torch.nn.Module): The PyTorch model to convert.
-        representative_dataset (Iterable): An iterable yielding sample inputs for tracing the model.
+        model: The PyTorch model to convert.
+        representative_dataset: An iterable yielding sample inputs for tracing the model.
 
     Returns:
         Graph: A graph containing nodes and edges representing the model.
 
     """
-    raise Exception
+    _module = copy.deepcopy(model)
+    _module.eval()
+    return model_reader(_module,
+                        representative_dataset,
+                        torch_tensor_to_numpy,
+                        to_torch_tensor)
