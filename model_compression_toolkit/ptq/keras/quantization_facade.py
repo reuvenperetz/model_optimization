@@ -21,6 +21,7 @@ from model_compression_toolkit.core.analyzer import analyzer_model_quantization
 from model_compression_toolkit.core.common.quantization.quantize_graph_weights import quantize_graph_weights
 from model_compression_toolkit.core.common.user_info import UserInformation
 from model_compression_toolkit.core.common.visualization.tensorboard_writer import init_tensorboard_writer
+from model_compression_toolkit.graph_builder.keras.keras_graph_builder import KerasGraphBuilder
 from model_compression_toolkit.logger import Logger
 from model_compression_toolkit.constants import TENSORFLOW
 from model_compression_toolkit.target_platform_capabilities.schema.mct_current_schema import TargetPlatformCapabilities
@@ -147,8 +148,15 @@ if FOUND_TF:
             target_platform_capabilities,
             custom_opset2layer=core_config.quantization_config.custom_tpc_opset_to_layer)
 
+        #TODO: remove the necessary of instanciating the graph builder
+        graph = KerasGraphBuilder().build_graph(model=in_model,
+                                                representative_dataset=representative_data_gen,
+                                                linear_collapsing=core_config.quantization_config.linear_collapsing,
+                                                residual_collapsing=core_config.quantization_config.residual_collapsing,
+                                                relu_bound_to_power_of_2=core_config.quantization_config.relu_bound_to_power_of_2)
+
         # Ignore returned hessian service as PTQ does not use it
-        tg, bit_widths_config, _, scheduling_info = core_runner(in_model=in_model,
+        tg, bit_widths_config, _, scheduling_info = core_runner(graph=graph,
                                                                 representative_data_gen=representative_data_gen,
                                                                 core_config=core_config,
                                                                 fw_impl=fw_impl,

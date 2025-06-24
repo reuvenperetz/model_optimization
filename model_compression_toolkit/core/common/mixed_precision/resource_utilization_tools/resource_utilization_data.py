@@ -15,16 +15,18 @@
 import copy
 from typing import Callable, Any
 
+from model_compression_toolkit.core.graph_prep_runner import get_finalized_graph
+
 from model_compression_toolkit.core import ResourceUtilization, CoreConfig, QuantizationErrorMethod
+from model_compression_toolkit.core.common import Graph
 from model_compression_toolkit.core.common.framework_implementation import FrameworkImplementation
 from model_compression_toolkit.core.common.mixed_precision.resource_utilization_tools.resource_utilization_calculator import \
     ResourceUtilizationCalculator, BitwidthMode, TargetInclusionCriterion
-from model_compression_toolkit.core.graph_prep_runner import graph_preparation_runner
+# from model_compression_toolkit.core.graph_prep_runner import graph_preparation_runner
 from model_compression_toolkit.target_platform_capabilities import FrameworkQuantizationCapabilities
 
 
-def compute_resource_utilization_data(in_model: Any,
-                                      representative_data_gen: Callable,
+def compute_resource_utilization_data(graph: Graph,
                                       core_config: CoreConfig,
                                       fqc: FrameworkQuantizationCapabilities,
                                       fw_impl: FrameworkImplementation) -> ResourceUtilization:
@@ -34,7 +36,6 @@ def compute_resource_utilization_data(in_model: Any,
 
     Args:
         in_model:  Model to build graph from (the model that intended to be quantized).
-        representative_data_gen: Dataset used for calibration.
         core_config: CoreConfig containing parameters of how the model should be quantized.
         fqc: FrameworkQuantizationCapabilities object that models the inference target platform and
                                               the attached framework operator's information.
@@ -44,20 +45,36 @@ def compute_resource_utilization_data(in_model: Any,
         ResourceUtilization: An object encapsulating the calculated resource utilization computations.
 
     """
+    # core_config = copy.deepcopy(core_config)
+    # # For resource utilization graph_preparation_runner runs with gptq=False (the default value). HMSE is not supported
+    # # without GPTQ and will raise an error later so we replace it with MSE.
+    # if core_config.quantization_config.weights_error_method == QuantizationErrorMethod.HMSE:
+    #     core_config.quantization_config.weights_error_method = QuantizationErrorMethod.MSE
+    #
+    # transformed_graph = graph_preparation_runner(in_model,
+    #                                              representative_data_gen=representative_data_gen,
+    #                                              quantization_config=core_config.quantization_config,
+    #                                              fw_impl=fw_impl,
+    #                                              fqc=fqc,
+    #                                              bit_width_config=core_config.bit_width_config,
+    #                                              mixed_precision_enable=False,
+    #                                              running_gptq=False)
+    #
+
     core_config = copy.deepcopy(core_config)
     # For resource utilization graph_preparation_runner runs with gptq=False (the default value). HMSE is not supported
     # without GPTQ and will raise an error later so we replace it with MSE.
     if core_config.quantization_config.weights_error_method == QuantizationErrorMethod.HMSE:
         core_config.quantization_config.weights_error_method = QuantizationErrorMethod.MSE
 
-    transformed_graph = graph_preparation_runner(in_model,
-                                                 representative_data_gen=representative_data_gen,
-                                                 quantization_config=core_config.quantization_config,
-                                                 fw_impl=fw_impl,
-                                                 fqc=fqc,
-                                                 bit_width_config=core_config.bit_width_config,
-                                                 mixed_precision_enable=False,
-                                                 running_gptq=False)
+    graph = get_finalized_graph(graph,
+                                fqc,
+                                core_config.quantization_config,
+                                core_config.bit_width_config,
+                                tb_w=None,
+                                fw_impl=fw_impl,
+                                mixed_precision_enable=False,
+                                running_gptq=False)
 
-    ru_calculator = ResourceUtilizationCalculator(transformed_graph, fw_impl)
+    ru_calculator = ResourceUtilizationCalculator(graph, fw_impl)
     return ru_calculator.compute_resource_utilization(TargetInclusionCriterion.AnyQuantizedNonFused, BitwidthMode.QDefaultSP)

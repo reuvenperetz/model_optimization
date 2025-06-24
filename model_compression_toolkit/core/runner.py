@@ -42,7 +42,7 @@ from model_compression_toolkit.target_platform_capabilities.targetplatform2frame
     FrameworkQuantizationCapabilities
 
 
-def core_runner(in_model: Any,
+def core_runner(graph: Graph,
                 representative_data_gen: Callable,
                 core_config: CoreConfig,
                 fw_impl: FrameworkImplementation,
@@ -96,7 +96,7 @@ def core_runner(in_model: Any,
 
 
 
-    graph = graph_preparation_runner(in_model,
+    graph = graph_preparation_runner(graph,
                                      representative_data_gen,
                                      core_config.quantization_config,
                                      fw_impl,

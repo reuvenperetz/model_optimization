@@ -44,7 +44,6 @@ class TestResourceUtilizationData:
 
         _current_framework_info = fw_info_mock
         compute_resource_utilization_data(model_mock,
-                                          data_gen_mock,
                                           core_cfg,
                                           fqc_mock,
                                           fw_impl_mock)
