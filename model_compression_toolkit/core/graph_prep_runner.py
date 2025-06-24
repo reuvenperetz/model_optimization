@@ -67,10 +67,11 @@ def graph_preparation_runner(in_model: Any,
         An internal graph representation of the input model.
     """
 
-    graph = read_model_to_graph(in_model,
-                                representative_data_gen,
-                                fqc,
-                                fw_impl)
+    # graph = read_model_to_graph(in_model,
+    #                             representative_data_gen,
+    #                             fqc,
+    #                             fw_impl)
+    graph=None
 
     if tb_w is not None:
         tb_w.add_graph(graph, 'initial_graph')
@@ -116,7 +117,8 @@ def get_finalized_graph(initial_graph: Graph,
     ######################################
     # Graph substitution (prepare graph)
     ######################################
-    graph = substitute(initial_graph, fw_impl.get_substitutions_prepare_graph())
+    # graph = substitute(initial_graph, fw_impl.get_substitutions_prepare_graph())
+    graph = None
 
     if tb_w is not None:
         tb_w.add_graph(graph, 'after_graph_preparation')
@@ -131,12 +133,12 @@ def get_finalized_graph(initial_graph: Graph,
     ##################################################
     # Graph substitution (pre statistics collection)
     ##################################################
-    transformed_graph = substitute(graph, fw_impl.get_substitutions_pre_statistics_collection(quant_config))
-    if quant_config.linear_collapsing:
-        transformed_graph = linear_collapsing_substitute(transformed_graph, fw_impl.get_linear_collapsing_substitution())
-        transformed_graph = linear_collapsing_substitute(transformed_graph, fw_impl.get_op2d_add_const_collapsing_substitution())
-    if quant_config.residual_collapsing:
-        transformed_graph = substitute(transformed_graph, fw_impl.get_residual_collapsing_substitution())
+    # transformed_graph = substitute(graph, fw_impl.get_substitutions_pre_statistics_collection(quant_config))
+    # if quant_config.linear_collapsing:
+    #     transformed_graph = linear_collapsing_substitute(transformed_graph, fw_impl.get_linear_collapsing_substitution())
+    #     transformed_graph = linear_collapsing_substitute(transformed_graph, fw_impl.get_op2d_add_const_collapsing_substitution())
+    # if quant_config.residual_collapsing:
+    #     transformed_graph = substitute(transformed_graph, fw_impl.get_residual_collapsing_substitution())
 
     if tb_w is not None:
         tb_w.add_graph(transformed_graph, 'pre_statistics_collection_substitutions')

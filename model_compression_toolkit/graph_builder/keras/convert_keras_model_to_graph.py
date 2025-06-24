@@ -5,8 +5,6 @@ from model_compression_toolkit.core.common import Graph
 if TYPE_CHECKING:
     import tensorflow as tf
 
-#TODO: wrap the entire graph building logic in an abstract class that each framewrok implement
-#TODO: maybe just skip the configuration and do it all hard-coded except for the flags the user has access to
 def convert_keras_model_to_graph(model: "tf.keras.Model") -> Graph:
     """
     Converts a Keras model into a computational graph.
@@ -20,4 +18,4 @@ def convert_keras_model_to_graph(model: "tf.keras.Model") -> Graph:
     Returns:
         ComputationalGraph: A graph containing nodes and edges representing the model.
     """
-    pass
+    raise Exception

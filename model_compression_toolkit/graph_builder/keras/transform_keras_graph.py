@@ -23,4 +23,4 @@ def transform_keras_graph(graph: Graph,
         This function does not perform numerical optimizations (e.g., quantization),
         nor does it alter weights or model accuracy. It is purely structural.
     """
-    pass
+    raise Exception

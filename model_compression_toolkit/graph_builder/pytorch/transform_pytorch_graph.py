@@ -5,9 +5,9 @@ from dataclasses import dataclass
 from model_compression_toolkit.graph_builder.common.graph_refinement_config import GraphRefinementConfig
 
 
-def transform_keras_graph(graph: Graph,
-                          linear_collapsing: bool = True,
-                          residual_collapsing: bool = True) -> Graph:
+def transform_pytorch_graph(graph: Graph,
+                            linear_collapsing: bool = True,
+                            residual_collapsing: bool = True) -> Graph:
     """
     Applies a series of structural simplifications to a graph.
 
@@ -26,4 +26,4 @@ def transform_keras_graph(graph: Graph,
         This function does not perform numerical optimizations (e.g., quantization),
         nor does it alter weights or model accuracy. It is purely structural.
     """
-    pass
+    raise Exception

@@ -21,4 +21,4 @@ def convert_pytorch_model_to_graph(model: "torch.nn.Module",
         Graph: A graph containing nodes and edges representing the model.
 
     """
-    pass
+    raise Exception
