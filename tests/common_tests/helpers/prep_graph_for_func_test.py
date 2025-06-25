@@ -47,16 +47,6 @@ def prepare_graph_with_configs(in_model,
 
     fqc = attach2fw.attach(tpc, qc.custom_tpc_opset_to_layer)
 
-    # Read Model
-    # graph = graph_preparation_runner(in_model,
-    #                                  representative_data_gen=representative_dataset,
-    #                                  quantization_config=qc,
-    #                                  fw_impl=fw_impl,
-    #                                  fqc=fqc,
-    #                                  mixed_precision_enable=mixed_precision_enabled,
-    #                                  running_gptq=running_gptq)
-
-    # TODO: remove the necessary of instanciating the graph builder
     graph = PytorchGraphBuilder().build_graph(model=in_model,
                                               representative_dataset=representative_dataset,
                                               fqc=fqc,

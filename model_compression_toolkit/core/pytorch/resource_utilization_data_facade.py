@@ -91,7 +91,6 @@ if FOUND_TORCH:
             attach2pytorch.attach(target_platform_capabilities,
                                   custom_opset2layer=core_config.quantization_config.custom_tpc_opset_to_layer))
 
-        #TODO: remove the necessary of instanciating the graph builder
         graph = PytorchGraphBuilder().build_graph(model=in_model,
                                                   representative_dataset=representative_data_gen,
                                                   linear_collapsing=core_config.quantization_config.linear_collapsing,

@@ -97,15 +97,13 @@ def core_runner(in_model: Any,
         core_config.mixed_precision_config.set_mixed_precision_enable()
         Logger.info('Mixed precision enabled.')
 
-    # TODO: remove the necessary of instanciating the graph builder
-    graph = fw_graph_builder().build_graph(model=in_model,
-                                           representative_dataset=representative_data_gen,
-                                           fqc=fqc,
-                                           tensorboard_writer=tb_w,
-                                           linear_collapsing=core_config.quantization_config.linear_collapsing,
-                                           residual_collapsing=core_config.quantization_config.residual_collapsing,
-                                           relu_bound_to_power_of_2=core_config.quantization_config.relu_bound_to_power_of_2)
-
+    graph = fw_graph_builder.build_graph(model=in_model,
+                                         representative_dataset=representative_data_gen,
+                                         fqc=fqc,
+                                         tensorboard_writer=tb_w,
+                                         linear_collapsing=core_config.quantization_config.linear_collapsing,
+                                         residual_collapsing=core_config.quantization_config.residual_collapsing,
+                                         relu_bound_to_power_of_2=core_config.quantization_config.relu_bound_to_power_of_2)
 
     graph = get_finalized_graph(graph,
                                 fqc,
@@ -115,16 +113,6 @@ def core_runner(in_model: Any,
                                 fw_impl,
                                 core_config.is_mixed_precision_enabled,
                                 running_gptq)
-
-    # graph = graph_preparation_runner(graph,
-    #                                  representative_data_gen,
-    #                                  core_config.quantization_config,
-    #                                  fw_impl,
-    #                                  fqc,
-    #                                  core_config.bit_width_config,
-    #                                  tb_w,
-    #                                  mixed_precision_enable=core_config.is_mixed_precision_enabled,
-    #                                  running_gptq=running_gptq)
 
     hessian_info_service = HessianInfoService(graph=graph, fw_impl=fw_impl)
 

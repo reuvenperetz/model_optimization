@@ -240,7 +240,7 @@ if FOUND_TORCH:
                                                                                       target_resource_utilization=target_resource_utilization,
                                                                                       tb_w=tb_w,
                                                                                       running_gptq=True,
-                                                                                      fw_graph_builder=PytorchGraphBuilder)
+                                                                                      fw_graph_builder=PytorchGraphBuilder())
 
         float_graph = copy.deepcopy(graph)
 

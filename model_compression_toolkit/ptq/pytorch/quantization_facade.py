@@ -129,7 +129,7 @@ if FOUND_TORCH:
                                                                 fqc=framework_platform_capabilities,
                                                                 target_resource_utilization=target_resource_utilization,
                                                                 tb_w=tb_w,
-                                                                fw_graph_builder=PytorchGraphBuilder)
+                                                                fw_graph_builder=PytorchGraphBuilder())
 
         # At this point, tg is a graph that went through substitutions (such as BN folding) and is
         # ready for quantization (namely, it holds quantization params, etc.) but the weights are

@@ -168,7 +168,7 @@ if FOUND_TORCH:
                                                   fqc=framework_platform_capabilities,
                                                   target_resource_utilization=target_resource_utilization,
                                                   tb_w=tb_w,
-                                                  fw_graph_builder=PytorchGraphBuilder)
+                                                  fw_graph_builder=PytorchGraphBuilder())
 
         tg = ptq_runner(tg, representative_data_gen, core_config, fw_impl, tb_w)
 
