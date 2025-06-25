@@ -10,10 +10,13 @@ class BaseGraphBuilder(ABC):
                     model,
                     representative_dataset=None,
                     fqc = None,
+                    tensorboard_writer = None,
                     linear_collapsing: bool = True,
                     residual_collapsing: bool = True,
                     relu_bound_to_power_of_2: bool = False):
         graph = self._convert_model_to_graph(model, representative_dataset)
+        if tensorboard_writer is not None:
+            tensorboard_writer.add_graph(graph, 'initial_graph')
 
         # TODO: Temporary until it can be removed from the graph
         # Some tests do not use the fqc, so we set only if it is passed.
@@ -24,6 +27,9 @@ class BaseGraphBuilder(ABC):
                                                   linear_collapsing,
                                                   residual_collapsing,
                                                   relu_bound_to_power_of_2)
+        if tensorboard_writer is not None:
+            tensorboard_writer.add_graph(transformed_graph, 'after_graph_preparation')
+
         return transformed_graph
 
     @abstractmethod

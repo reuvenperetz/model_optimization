@@ -36,60 +36,6 @@ from model_compression_toolkit.target_platform_capabilities.targetplatform2frame
 
 # TODO: whoever calls graph_preparation_runner should now call get_finalized_graph directly after
 #  going through the graph builder module
-# def graph_preparation_runner(graph:Graph,
-#                              representative_data_gen: Callable,
-#                              quantization_config: QuantizationConfig,
-#                              fw_impl: FrameworkImplementation,
-#                              fqc: FrameworkQuantizationCapabilities,
-#                              bit_width_config: BitWidthConfig = None,
-#                              tb_w: TensorboardWriter = None,
-#                              mixed_precision_enable: bool = False,
-#                              running_gptq: bool = False) -> Graph:
-#     """
-#     Runs all required preparations in order to build a quantization graph from the given model,
-#     quantization configuration and target platform specifications.
-#     This runner include the following steps:
-#         - Reading and building a graph from the given model.
-#         - Setting quantization config to each relevant node in the graph.
-#         - Apply all necessary substitutions to finalize the graph for quantization.
-#
-#     Args:
-#         in_model (Any): Model to quantize.
-#         representative_data_gen (Callable): Dataset used for calibration.
-#         quantization_config (QuantizationConfig): QuantizationConfig containing parameters of how the model should be quantized.
-#         fw_impl (FrameworkImplementation): FrameworkImplementation object with a specific framework methods implementation.
-#         fqc (FrameworkQuantizationCapabilities): FrameworkQuantizationCapabilities object that models the inference target platform and
-#             the attached framework operator's information.
-#         bit_width_config (BitWidthConfig): Config for bit-width selection. Defaults to None.
-#         tb_w (TensorboardWriter): TensorboardWriter object for logging.
-#         mixed_precision_enable (bool): is mixed precision enabled.
-#         running_gptq (bool): Whether or not a GPTQ optimization is planned to run after the PTQ process.
-#
-#     Returns:
-#         An internal graph representation of the input model.
-#     """
-#
-#     # graph = read_model_to_graph(in_model,
-#     #                             representative_data_gen,
-#     #                             fqc,
-#     #                             fw_impl)
-#     # graph=None
-#     #
-#     # TODO: handle tb writer
-#     # if tb_w is not None:
-#     #     tb_w.add_graph(graph, 'initial_graph')
-#
-#     transformed_graph = get_finalized_graph(graph,
-#                                             fqc,
-#                                             quantization_config,
-#                                             bit_width_config,
-#                                             tb_w,
-#                                             fw_impl,
-#                                             mixed_precision_enable=mixed_precision_enable,
-#                                             running_gptq=running_gptq)
-#
-#     return transformed_graph
-
 
 def get_finalized_graph(graph: Graph,
                         fqc: FrameworkQuantizationCapabilities,
@@ -116,39 +62,6 @@ def get_finalized_graph(graph: Graph,
 
     Returns: Graph object that represents the model, after applying all required modifications to it.
     """
-
-    ######################################
-    # Graph substitution (prepare graph)
-    ######################################
-    # graph = substitute(initial_graph, fw_impl.get_substitutions_prepare_graph())
-    # graph = None
-
-    # TODO: handle tb writer
-
-    # if tb_w is not None:
-    #     tb_w.add_graph(graph, 'after_graph_preparation')
-
-    #########################################
-    # Set prior info to nodes
-    ##########################################
-    # TODO: handle prior_info
-    # for node in graph.nodes:
-    #     node.prior_info = fw_impl.get_node_prior_info(node=node,
-    #                                                   graph=graph)
-
-    ##################################################
-    # Graph substitution (pre statistics collection)
-    ##################################################
-    # transformed_graph = substitute(graph, fw_impl.get_substitutions_pre_statistics_collection(quant_config))
-    # if quant_config.linear_collapsing:
-    #     transformed_graph = linear_collapsing_substitute(transformed_graph, fw_impl.get_linear_collapsing_substitution())
-    #     transformed_graph = linear_collapsing_substitute(transformed_graph, fw_impl.get_op2d_add_const_collapsing_substitution())
-    # if quant_config.residual_collapsing:
-    #     transformed_graph = substitute(transformed_graph, fw_impl.get_residual_collapsing_substitution())
-
-    # TODO: handle tb writer
-    # if tb_w is not None:
-    #     tb_w.add_graph(transformed_graph, 'pre_statistics_collection_substitutions')
 
     ######################################
     # Add quantization configurations
@@ -186,6 +99,7 @@ def get_finalized_graph(graph: Graph,
     return transformed_graph
 
 
+# todo: remove read model and move the reader and the corresponding substitutions to the new module
 def read_model_to_graph(in_model: Any,
                         representative_data_gen: Callable,
                         fqc: FrameworkQuantizationCapabilities,

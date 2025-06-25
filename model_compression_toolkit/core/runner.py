@@ -101,6 +101,7 @@ def core_runner(in_model: Any,
     graph = fw_graph_builder().build_graph(model=in_model,
                                            representative_dataset=representative_data_gen,
                                            fqc=fqc,
+                                           tensorboard_writer=tb_w,
                                            linear_collapsing=core_config.quantization_config.linear_collapsing,
                                            residual_collapsing=core_config.quantization_config.residual_collapsing,
                                            relu_bound_to_power_of_2=core_config.quantization_config.relu_bound_to_power_of_2)
