@@ -13,6 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 import numpy as np
+from model_compression_toolkit.core.graph_prep_runner import get_finalized_graph
 
 from model_compression_toolkit.core import DEFAULTCONFIG, CoreConfig, DebugConfig
 from model_compression_toolkit.core.common.mixed_precision.bit_width_setter import set_bit_widths
@@ -21,8 +22,8 @@ from model_compression_toolkit.core.common.model_collector import ModelCollector
 from model_compression_toolkit.core.common.quantization.quantization_params_generation.qparams_computation import \
     calculate_quantization_params
 from model_compression_toolkit.core.common.visualization.tensorboard_writer import init_tensorboard_writer
-from model_compression_toolkit.core.graph_prep_runner import graph_preparation_runner
 from model_compression_toolkit.core.quantization_prep_runner import quantization_preparation_runner
+from model_compression_toolkit.graph_builder.pytorch.pytorch_graph_builder import PytorchGraphBuilder
 
 from model_compression_toolkit.target_platform_capabilities.tpc_models.imx500_tpc.latest import generate_tpc, \
     get_op_quantization_configs
@@ -47,13 +48,30 @@ def prepare_graph_with_configs(in_model,
     fqc = attach2fw.attach(tpc, qc.custom_tpc_opset_to_layer)
 
     # Read Model
-    graph = graph_preparation_runner(in_model,
-                                     representative_data_gen=representative_dataset,
-                                     quantization_config=qc,
-                                     fw_impl=fw_impl,
-                                     fqc=fqc,
-                                     mixed_precision_enable=mixed_precision_enabled,
-                                     running_gptq=running_gptq)
+    # graph = graph_preparation_runner(in_model,
+    #                                  representative_data_gen=representative_dataset,
+    #                                  quantization_config=qc,
+    #                                  fw_impl=fw_impl,
+    #                                  fqc=fqc,
+    #                                  mixed_precision_enable=mixed_precision_enabled,
+    #                                  running_gptq=running_gptq)
+
+    # TODO: remove the necessary of instanciating the graph builder
+    graph = PytorchGraphBuilder().build_graph(model=in_model,
+                                              representative_dataset=representative_dataset,
+                                              fqc=fqc,
+                                              linear_collapsing=qc.linear_collapsing,
+                                              residual_collapsing=qc.residual_collapsing,
+                                              relu_bound_to_power_of_2=qc.relu_bound_to_power_of_2)
+
+    graph = get_finalized_graph(graph,
+                                fqc,
+                                qc,
+                                bit_width_config=None,
+                                tb_w=None,
+                                fw_impl=fw_impl,
+                                mixed_precision_enable=mixed_precision_enabled,
+                                running_gptq=running_gptq)
 
     return graph
 

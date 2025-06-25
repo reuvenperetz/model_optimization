@@ -16,7 +16,9 @@ class BaseGraphBuilder(ABC):
         graph = self._convert_model_to_graph(model, representative_dataset)
 
         # TODO: Temporary until it can be removed from the graph
-        graph.set_fqc(fqc)
+        # Some tests do not use the fqc, so we set only if it is passed.
+        if fqc:
+            graph.set_fqc(fqc)
 
         transformed_graph = self._transform_graph(graph,
                                                   linear_collapsing,
@@ -29,7 +31,8 @@ class BaseGraphBuilder(ABC):
         raise Exception
 
     @abstractmethod
-    def _transform_graph(self, graph: Graph,
+    def _transform_graph(self,
+                         graph: Graph,
                          linear_collapsing: bool = True,
                          residual_collapsing: bool = True,
                          relu_bound_to_power_of_2: bool = False) -> Graph:
