@@ -225,34 +225,34 @@ class FrameworkImplementation(ABC):
     #                               f'framework\'s get_substitutions_prepare_graph method.')  # pragma: no cover
 
     @abstractmethod
-    def get_substitutions_pre_statistics_collection(self, quant_config: QuantizationConfig) -> \
-            List[common.BaseSubstitution]:
-        """
+    # def get_substitutions_pre_statistics_collection(self, quant_config: QuantizationConfig) -> \
+    #         List[common.BaseSubstitution]:
+    #     """
+    #
+    #     Args:
+    #         quant_config: Quantization configuration.
+    #
+    #     Returns: A list of the framework substitutions used before we collect statistics.
+    #
+    #     """
+    #     raise NotImplementedError(f'{self.__class__.__name__} has to implement the '
+    #                          f'framework\'s get_substitutions_pre_statistics_collection method.')  # pragma: no cover
 
-        Args:
-            quant_config: Quantization configuration.
+    # @abstractmethod
+    # def get_linear_collapsing_substitution(self) -> common.BaseSubstitution:
+    #     """
+    #     Returns: linear collapsing substitution
+    #     """
+    #     raise NotImplementedError(f'{self.__class__.__name__} has to implement the '
+    #                          f'framework\'s get_linear_collapsing_substitution method.')  # pragma: no cover
 
-        Returns: A list of the framework substitutions used before we collect statistics.
-
-        """
-        raise NotImplementedError(f'{self.__class__.__name__} has to implement the '
-                             f'framework\'s get_substitutions_pre_statistics_collection method.')  # pragma: no cover
-
-    @abstractmethod
-    def get_linear_collapsing_substitution(self) -> common.BaseSubstitution:
-        """
-        Returns: linear collapsing substitution
-        """
-        raise NotImplementedError(f'{self.__class__.__name__} has to implement the '
-                             f'framework\'s get_linear_collapsing_substitution method.')  # pragma: no cover
-
-    @abstractmethod
-    def get_op2d_add_const_collapsing_substitution(self) -> common.BaseSubstitution:
-        """
-        Returns: conv2d add const collapsing substitution
-        """
-        raise NotImplementedError(f'{self.__class__.__name__} has to implement the '
-                             f'framework\'s get_op2d_add_const_collapsing_substitution method.')  # pragma: no cover
+    # @abstractmethod
+    # def get_op2d_add_const_collapsing_substitution(self) -> common.BaseSubstitution:
+    #     """
+    #     Returns: conv2d add const collapsing substitution
+    #     """
+    #     raise NotImplementedError(f'{self.__class__.__name__} has to implement the '
+    #                          f'framework\'s get_op2d_add_const_collapsing_substitution method.')  # pragma: no cover
 
     @abstractmethod
     def get_substitutions_statistics_correction(self, quant_config: QuantizationConfig) -> \
@@ -269,13 +269,13 @@ class FrameworkImplementation(ABC):
         raise NotImplementedError(f'{self.__class__.__name__} has to implement the '
                              f'framework\'s get_substitutions_statistics_correction method.')  # pragma: no cover
 
-    @abstractmethod
-    def get_residual_collapsing_substitution(self) -> List[common.BaseSubstitution]:
-        """
-        Returns: A list of the framework substitutions used for residual collapsing
-        """
-        raise NotImplementedError(f'{self.__class__.__name__} has to implement the '
-                             f'framework\'s get_residual_collapsing_substitution method.')  # pragma: no cover
+    # @abstractmethod
+    # def get_residual_collapsing_substitution(self) -> List[common.BaseSubstitution]:
+    #     """
+    #     Returns: A list of the framework substitutions used for residual collapsing
+    #     """
+    #     raise NotImplementedError(f'{self.__class__.__name__} has to implement the '
+    #                          f'framework\'s get_residual_collapsing_substitution method.')  # pragma: no cover
 
 
     @abstractmethod

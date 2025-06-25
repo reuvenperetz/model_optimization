@@ -1,3 +1,9 @@
+from model_compression_toolkit.core.pytorch.graph_substitutions.substitutions.residual_collapsing import \
+    pytorch_residual_collapsing
+
+from model_compression_toolkit.core.common.substitutions.linear_collapsing_substitution import \
+    linear_collapsing_substitute
+
 from model_compression_toolkit.core.pytorch.pytorch_node_prior_info import create_node_prior_info
 
 from model_compression_toolkit.core.common import Graph
@@ -71,6 +77,27 @@ def transform_pytorch_graph(graph: Graph,
                                    RemoveIdentity(),
                                    ConvtransposeDynamicPadding()]
     graph = substitute(graph, prepare_graph_substitutions)
+
+    # **************************************************
+
     for node in graph.nodes:
         node.prior_info = create_node_prior_info(node=node, graph=graph)
+
+    # **************************************************
+    substitutions_list = [pytorch_batchnorm_folding(),
+                          pytorch_batchnorm_forward_folding()]
+    if relu_bound_to_power_of_2:
+        substitutions_list.append(ReLUBoundToPowerOfTwo())
+
+    graph = substitute(graph, substitutions_list)
+    # **************************************************
+
+    if linear_collapsing:
+        graph = linear_collapsing_substitute(graph, pytorch_linear_collapsing())
+
+    if residual_collapsing:
+        graph = substitute(graph, [pytorch_residual_collapsing()])
+
+
+
     return graph
