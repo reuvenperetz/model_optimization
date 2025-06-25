@@ -14,11 +14,14 @@ class BaseGraphBuilder(ABC):
                     residual_collapsing: bool = True,
                     relu_bound_to_power_of_2: bool = False):
         graph = self._convert_model_to_graph(model, representative_dataset)
-        transformed_graph = self._transform_graph(graph, linear_collapsing, residual_collapsing, relu_bound_to_power_of_2)
 
         # TODO: Temporary until it can be removed from the graph
-        transformed_graph.fqc = fqc
+        graph.set_fqc(fqc)
 
+        transformed_graph = self._transform_graph(graph,
+                                                  linear_collapsing,
+                                                  residual_collapsing,
+                                                  relu_bound_to_power_of_2)
         return transformed_graph
 
     @abstractmethod
