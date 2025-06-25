@@ -8,13 +8,16 @@ from model_compression_toolkit.graph_builder.keras.transform_keras_graph import 
 
 class KerasGraphBuilder(BaseGraphBuilder):
     def convert_model_to_graph(self, model: Any, representative_dataset: Any = None) -> Graph:
+        assert representative_dataset is None, f'representative in keras is not needed'
         return convert_keras_model_to_graph(model)
 
     def transform_graph(self,
                         graph: Graph,
                         linear_collapsing: bool = True,
-                        residual_collapsing: bool = True
+                        residual_collapsing: bool = True,
+                        relu_bound_to_power_of_2: bool = False
                         ) -> Graph:
         return transform_keras_graph(graph,
                                      linear_collapsing,
-                                     residual_collapsing)
+                                     residual_collapsing,
+                                     relu_bound_to_power_of_2)
