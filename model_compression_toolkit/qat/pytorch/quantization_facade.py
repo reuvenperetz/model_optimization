@@ -16,6 +16,7 @@ from typing import Callable, Union
 from functools import partial
 
 from model_compression_toolkit.constants import PYTORCH
+from model_compression_toolkit.graph_builder.pytorch.pytorch_graph_builder import PytorchGraphBuilder
 from model_compression_toolkit.target_platform_capabilities.schema.mct_current_schema import TargetPlatformCapabilities
 from model_compression_toolkit.target_platform_capabilities.targetplatform2framework.attach2pytorch import \
     AttachTpcToPytorch
@@ -166,7 +167,8 @@ if FOUND_TORCH:
                                                   fw_impl=fw_impl,
                                                   fqc=framework_platform_capabilities,
                                                   target_resource_utilization=target_resource_utilization,
-                                                  tb_w=tb_w)
+                                                  tb_w=tb_w,
+                                                  fw_graph_builder=PytorchGraphBuilder)
 
         tg = ptq_runner(tg, representative_data_gen, core_config, fw_impl, tb_w)
 

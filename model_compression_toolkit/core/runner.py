@@ -44,14 +44,15 @@ from model_compression_toolkit.target_platform_capabilities.targetplatform2frame
     FrameworkQuantizationCapabilities
 
 
-def core_runner(graph: Graph,
+def core_runner(in_model: Any,
                 representative_data_gen: Callable,
                 core_config: CoreConfig,
                 fw_impl: FrameworkImplementation,
                 fqc: FrameworkQuantizationCapabilities,
                 target_resource_utilization: ResourceUtilization = None,
                 running_gptq: bool = False,
-                tb_w: TensorboardWriter = None):
+                tb_w: TensorboardWriter = None,
+                fw_graph_builder = None):
     """
     Quantize a trained model using post-training quantization.
     First, the model graph is optimized using several transformations (e.g. folding BatchNormalization to preceding
@@ -76,6 +77,7 @@ def core_runner(graph: Graph,
         An internal graph representation of the input model.
 
     """
+    assert fw_graph_builder is not None, f"fw graph builder can not be None"
 
     # Warn is representative dataset has batch-size == 1
     batch_data = next(iter(representative_data_gen()))
@@ -94,6 +96,15 @@ def core_runner(graph: Graph,
             Logger.warning("Using an experimental feature max-cut for activation memory utilization estimation.")
         core_config.mixed_precision_config.set_mixed_precision_enable()
         Logger.info('Mixed precision enabled.')
+
+    # TODO: remove the necessary of instanciating the graph builder
+    graph = fw_graph_builder().build_graph(model=in_model,
+                                           representative_dataset=representative_data_gen,
+                                           fqc=fqc,
+                                           linear_collapsing=core_config.quantization_config.linear_collapsing,
+                                           residual_collapsing=core_config.quantization_config.residual_collapsing,
+                                           relu_bound_to_power_of_2=core_config.quantization_config.relu_bound_to_power_of_2)
+
 
     graph = get_finalized_graph(graph,
                                 fqc,

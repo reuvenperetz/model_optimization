@@ -227,27 +227,20 @@ if FOUND_TORCH:
         # Attach tpc model to framework
         attach2pytorch = AttachTpcToPytorch()
         framework_quantization_capabilities = attach2pytorch.attach(target_platform_capabilities,
-                                                             core_config.quantization_config.custom_tpc_opset_to_layer)
-
-        # TODO: remove the necessary of instanciating the graph builder
-        graph = PytorchGraphBuilder().build_graph(model=model,
-                                                  representative_dataset=representative_data_gen,
-                                                  fqc=framework_quantization_capabilities,
-                                                  linear_collapsing=core_config.quantization_config.linear_collapsing,
-                                                  residual_collapsing=core_config.quantization_config.residual_collapsing,
-                                                  relu_bound_to_power_of_2=core_config.quantization_config.relu_bound_to_power_of_2)
+                                                                    core_config.quantization_config.custom_tpc_opset_to_layer)
 
         # ---------------------- #
         # Core Runner
         # ---------------------- #
-        graph, bit_widths_config, hessian_info_service, scheduling_info = core_runner(graph=graph,
+        graph, bit_widths_config, hessian_info_service, scheduling_info = core_runner(in_model=model,
                                                                                       representative_data_gen=representative_data_gen,
                                                                                       core_config=core_config,
                                                                                       fw_impl=fw_impl,
                                                                                       fqc=framework_quantization_capabilities,
                                                                                       target_resource_utilization=target_resource_utilization,
                                                                                       tb_w=tb_w,
-                                                                                      running_gptq=True)
+                                                                                      running_gptq=True,
+                                                                                      fw_graph_builder=PytorchGraphBuilder)
 
         float_graph = copy.deepcopy(graph)
 
